@@ -5,6 +5,14 @@ SET(UKIT TRACKING)
 SET(KIT_LIBS vtkHybrid vtkParallel)
 SET(KIT_EXTRA_LIBS)
 
+SET ( Kit_HDRS
+vtkTracker.h
+vtkTrackerTool.h
+vtkFakeTracker.h
+vtkTrackerBuffer.h
+vtkFrameToTimeConverter.h
+)
+
 SET ( Kit_SRCS
 vtkTracker.cxx
 vtkTrackerTool.cxx
@@ -19,6 +27,8 @@ ABSTRACT
 )
 
 IF (AIGS_USE_CERTUS)
+  SET ( Kit_HDRS ${Kit_HDRS}
+    vtkNDICertusTracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
 	vtkNDICertusTracker.cxx)
   FIND_PATH(NDIOAPI_INCLUDE_DIR ndopto.h)
@@ -30,6 +40,8 @@ IF (AIGS_USE_CERTUS)
 ENDIF (AIGS_USE_CERTUS)
 
 IF (AIGS_USE_NDI)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkNDITracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
 	vtkNDITracker.cxx)
   SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} vtkndicapi)
@@ -38,6 +50,8 @@ IF (AIGS_USE_NDI)
 ENDIF (AIGS_USE_NDI)
 
 IF (AIGS_USE_FLOCK)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkFlockTracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
         vtkFlockTracker.cxx)
   SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} vtkflock)
@@ -46,6 +60,8 @@ IF (AIGS_USE_FLOCK)
 ENDIF (AIGS_USE_FLOCK)
 
 IF (AIGS_USE_LOGITECH)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkLogitechTracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
         vtkLogitechTracker.cxx)
   SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} vtklogitech3d)
@@ -54,6 +70,8 @@ IF (AIGS_USE_LOGITECH)
 ENDIF (AIGS_USE_LOGITECH)
 
 IF (AIGS_USE_POLHEMUS)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkPolhemusTracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
         vtkPolhemusTracker.cxx)
   SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} vtkpolhemus)
@@ -62,6 +80,8 @@ IF (AIGS_USE_POLHEMUS)
 ENDIF (AIGS_USE_POLHEMUS)
 
 IF (AIGS_USE_MICRONTRACKER)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkMicronTracker.h)
   SET ( Tracking_SRCS ${Tracking_SRCS}
 	vtkMicronTracker.cxx)
   INCLUDE_DIRECTORIES(${VTKMICRONTRACKERFILES_SOURCE_DIR}

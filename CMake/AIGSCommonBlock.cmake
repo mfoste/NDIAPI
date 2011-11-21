@@ -26,7 +26,7 @@ ENDFOREACH( lib ${KIT_LIBS})
 #                       ${VTK_BINARY_DIR} "")
 
 #ADD_LIBRARY(vtk${KIT} ${Kit_SRCS} ${Kit_EXTRA_SRCS} ${KitInstantiator_SRCS})
-ADD_LIBRARY(vtk${KIT} ${Kit_SRCS} ${Kit_EXTRA_SRCS})
+ADD_LIBRARY(vtk${KIT} ${Kit_SRCS} ${Kit_HDRS} ${Kit_EXTRA_SRCS})
 
 # Do the TCL wrapping
 #
