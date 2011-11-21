@@ -211,6 +211,8 @@ int vtkNDITracker::Probe()
     if (this->Device)
       {
       this->SetVersion(ndiVER(this->Device,0));
+      // get the serial number.
+      this->ParseSerialNumber();
      
       ndiClose(this->Device);
       this->Device = 0;
@@ -284,6 +286,52 @@ char *vtkNDITracker::Command(const char *command)
   return this->CommandReply;
 }
 
+void vtkNDITracker::ParseSerialNumber()
+{
+  std::string reply = this->Version;
+  std::string serialNo;
+  int loc;
+
+  loc = reply.find("NDI S/N:");
+  if( loc != std::string::npos )
+  {
+    serialNo = reply.substr(loc+9, 8);    
+  }
+
+  if( reply.find("Aurora") != std::string::npos )
+  {
+    this->ParseFGSerialNumber(serialNo);
+  }
+  else
+  {
+    this->SetSerialNumber(serialNo.c_str());
+  }
+}
+
+void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
+{
+  std::string reply;
+  int loc;
+
+  // call ver for FG info. 
+  //ndiVER(this->Device,7);
+  this->Command("VER 7");
+  reply = this->CommandReply;
+  loc = reply.find("Aurora Field Generator S/N:");
+  if( loc != std::string::npos )
+  {
+    if(!reply.substr(loc+28,2).compare("FG")) // returns 0 if equal
+    {
+      serialNo = serialNo + "-" + reply.substr(loc+28, 11);    
+    }
+    else
+    {
+      serialNo = serialNo + "-" + reply.substr(loc+28, 8); 
+    }
+  }
+  this->SetSerialNumber(serialNo.c_str());
+}
+
 //----------------------------------------------------------------------------
 int vtkNDITracker::InternalStartTracking()
 {
@@ -303,6 +351,7 @@ int vtkNDITracker::InternalStartTracking()
     case 38400: baud = NDI_38400; break; 
     case 57600: baud = NDI_57600; break; 
     case 115200: baud = NDI_115200; break;
+    case 961200: baud = NDI_921600; break;
     default:
       vtkErrorMacro(<< "Illegal baud rate");
       return 0;
@@ -356,6 +405,8 @@ int vtkNDITracker::InternalStartTracking()
 
   // get information about the device
   this->SetVersion(ndiVER(this->Device,0));
+  // update the serial number.
+  this->ParseSerialNumber();
 
   for (tool = 0; tool < VTK_NDI_NTOOLS; tool++)
     {

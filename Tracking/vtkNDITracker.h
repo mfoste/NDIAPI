@@ -134,6 +134,10 @@ protected:
   // Set the version information.
   vtkSetStringMacro(Version);
 
+  // Description
+  void ParseSerialNumber();
+  void ParseFGSerialNumber(std::string scuSerialNo);
+
   // Description:
   // Start the tracking system.  The tracking system is brought from
   // its ground state into full tracking mode.  The device will

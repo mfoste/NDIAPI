@@ -95,6 +95,7 @@ vtkTracker::vtkTracker()
   this->ServerMode = 0;
   this->NetworkPort = 11111;
   this->RemoteAddress = NULL;
+  this->SerialNumber = NULL;
  
 }
 

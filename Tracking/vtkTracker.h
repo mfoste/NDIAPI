@@ -60,8 +60,22 @@ POSSIBILITY OF SUCH DAMAGES.
 #ifndef __vtkTracker_h
 #define __vtkTracker_h
 
+//#include <string>
+#include <sstream>
 #include "vtkObject.h"
 #include "vtkCriticalSection.h"
+
+/*************************************************************************
+ * Convenience function to handle string printing.
+ ************************************************************************/
+/*template <class T>
+inline std::string toString (const T& t)
+{
+std::stringstream ss;
+ss.precision(8);
+ss << t;
+return ss.str();
+}*/
 
 class vtkMatrix4x4;
 class vtkMultiThreader;
@@ -185,6 +199,11 @@ public:
   vtkSetStringMacro(RemoteAddress);
   vtkGetStringMacro(RemoteAddress);
 
+  //Description:
+  // Set the serial number associated with the tracking system.
+  vtkSetStringMacro(SerialNumber);
+  vtkGetStringMacro(SerialNumber);
+
   // Description:
   // Get the socket communicator that is used for communication
   // between the server and the client.
@@ -298,6 +317,7 @@ protected:
   vtkTrackerTool **Tools;
   int ReferenceTool;
   int Tracking;
+  char* SerialNumber;
   
   double UpdateTimeStamp;
   unsigned long LastUpdateTime;
