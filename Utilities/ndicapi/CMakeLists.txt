@@ -18,4 +18,8 @@ ENDIF (WIN32)
 ADD_LIBRARY(vtkndicapi ${common_SRCS})
 TARGET_LINK_LIBRARIES( vtkndicapi )
 
-INSTALL_TARGETS(/lib/vtk vtkndicapi)
+INSTALL(TARGETS vtkndicapi
+        RUNTIME DESTINATION bin 
+        LIBRARY DESTINATION lib 
+        ARCHIVE DESTINATION lib/static 
+        COMPONENT AIGS)
