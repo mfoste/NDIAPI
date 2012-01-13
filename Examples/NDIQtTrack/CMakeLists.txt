@@ -88,9 +88,6 @@ ELSEIF(UNIX)
 	INSTALL(TARGETS NDIQtTrack RUNTIME DESTINATION . COMPONENT Examples )
 ENDIF()
 
-# install the icon.
-INSTALL(FILES  "${NDIQtTrack_SOURCE_DIR}/Sphere2.ico" DESTINATION bin COMPONENT Examples)
-
 #Qt Libraries.
 FOREACH(LIB QtCore QtGui QtNetwork QtXml QtTest QtSql QtWebKit phonon)
 	IF(WIN32)

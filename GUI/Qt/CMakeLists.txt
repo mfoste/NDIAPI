@@ -51,6 +51,7 @@ link_directories(
 # widget source files.
 set( WIDGET_HDR_FILES 
 	vtkTrackerWidget.h
+	vtkTrackerSettingsStructures.h
     vtkTrackerWidget_global.h
     vtkTrackerSettingsDialog.h
 	vtkAuroraTrackerSettingsWidget.h

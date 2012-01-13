@@ -8,6 +8,7 @@
 #include "vtkFakeTracker.h"
 #include "vtkNDITracker.h"
 #include "vtkTrackerTool.h"
+#include "vtkTrackerSettingsStructures.h"
 #include "vtkTrackerSettingsDialog.h"
 #include "vtkTrackerWidgetXfrmCallback.h"
 #include "vtkTrackerWidget.h"
@@ -119,6 +120,7 @@ void vtkTrackerWidget::ConfigureTracker()
   {
   case FAKE_TRACKER:
     m_Tracker = vtkFakeTracker::New();
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getFakeTrackerSettings().updateFrequency;
     break;
   case NDI_AURORA:
     m_Tracker = vtkNDITracker::New();
