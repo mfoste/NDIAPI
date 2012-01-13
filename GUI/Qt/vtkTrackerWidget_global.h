@@ -1,0 +1,7 @@
+#include <QtCore/QtGlobal>
+
+ #ifdef VTKTRACKERWIDGET_LIBRARY
+  #define VTKTRACKERWIDGET_EXPORT Q_DECL_EXPORT
+ #else
+  #define VTKTRACKERWIDGET_EXPORT Q_DECL_IMPORT
+ #endif
