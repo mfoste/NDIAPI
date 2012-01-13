@@ -80,7 +80,21 @@ void NDIQtTrackGUI::OnTrackerConfigured(QString systemInfo)
 
 void NDIQtTrackGUI::OnTrackerStarted()
 {
-   // nothing to do, yet.
+   QString toolInfo;
+   // update the tool info.
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolSerialNumber());
+   this->m_GUI->port01DataLabel->setText( toolInfo );
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolSerialNumber());
+   this->m_GUI->port02DataLabel->setText( toolInfo );
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolSerialNumber());
+   this->m_GUI->port03DataLabel->setText( toolInfo );
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolSerialNumber());
+   this->m_GUI->port04DataLabel->setText( toolInfo );
+
 }
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status) 
