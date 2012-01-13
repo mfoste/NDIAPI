@@ -11,7 +11,7 @@ ENDIF(COMMAND cmake_policy)
 SET( CMAKE_BUILD_TYPE "RelWithDebInfo" )
 
 # find and setup Qt4 for this project
-FIND_PACKAGE(QT4 REQUIRED)
+FIND_PACKAGE(Qt REQUIRED)
 #Qt Includes:
 INCLUDE(${QT_USE_FILE})
 
