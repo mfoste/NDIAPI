@@ -48,11 +48,15 @@ link_directories(
 # By default only QtCore and QtGui are enabled
 #set( QT_USE_QTDESIGNER TRUE )
 
-# widget source files.
+# widget header files that do not need moc.
 set( WIDGET_HDR_FILES 
-	vtkTrackerWidget.h
 	vtkTrackerSettingsStructures.h
     vtkTrackerWidget_global.h
+)
+
+# widget header files that need moc.
+set( WIDGET_MOCHDR_FILES 
+	vtkTrackerWidget.h
     vtkTrackerSettingsDialog.h
 	vtkAuroraTrackerSettingsWidget.h
 	vtkFakeTrackerSettingsWidget.h
@@ -60,6 +64,7 @@ set( WIDGET_HDR_FILES
     ndXfrms.h
 )
 
+# widget source files.
 set( WIDGET_SRC_FILES 
 	vtkTrackerWidget.cxx
     vtkTrackerSettingsDialog.cxx
@@ -79,7 +84,7 @@ set( WIDGET_UI_FILES
 #SET_SOURCE_FILES_PROPERTIES(vtkTrackerWidgetPlugin.cxx PROPERTIES 
 #                            OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vtkTrackerWidget.cxx)
 
-QT4_WRAP_CPP( GEN_WIDGET_MOC_FILES	${WIDGET_HDR_FILES})
+QT4_WRAP_CPP( GEN_WIDGET_MOC_FILES	${WIDGET_MOCHDR_FILES})
 QT4_WRAP_UI( GEN_WIDGET_UI_FILES ${WIDGET_UI_FILES})
 QT4_WRAP_CPP( GEN_WIDGET_MOC_UI_FILES ${GEN_WIDGET_UI_FILES})
 
@@ -89,6 +94,7 @@ add_library( vtkTrackerWidget
     ${GEN_WIDGET_MOC_UI_FILES}
 	${GEN_WIDGET_MOC_FILES}
     ${WIDGET_HDR_FILES}
+	${WIDGET_MOCHDR_FILES}
 	${WIDGET_SRC_FILES}
     )
        
