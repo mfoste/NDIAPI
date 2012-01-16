@@ -29,6 +29,9 @@ vtkTrackerWidgetXfrmCallback::vtkTrackerWidgetXfrmCallback(vtkTrackerWidget *par
 {
   this->m_parent = parent;
   this->m_port = port;
+  this->m_nXfrms = 0;
+  for( int i =0; i < NUM_SAMPLES_FREQUENCY; i++ )
+    this->m_currTime[i] = 0.0;
 }
 
 vtkTrackerWidgetXfrmCallback::~vtkTrackerWidgetXfrmCallback()

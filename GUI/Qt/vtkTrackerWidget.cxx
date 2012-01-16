@@ -169,7 +169,7 @@ void vtkTrackerWidget::OnStartTracker()
 
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
-  m_Timer->start((int)(1000/this->m_TrackerUpdateFrequency));
+  m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));
   
   m_StartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(true);

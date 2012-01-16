@@ -160,19 +160,19 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
   switch(port){
   case 0:
     // Port 1
-    this->m_GUI->port01EffFreqLineEdit->setText(QString("%1").arg(freq));
+    this->m_GUI->port01EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
   case 1:
     // Port 2
-    this->m_GUI->port02EffFreqLineEdit->setText(QString("%1").arg(freq));
+    this->m_GUI->port02EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
   case 2:
     // Port 3
-    this->m_GUI->port03EffFreqLineEdit->setText(QString("%1").arg(freq));
+    this->m_GUI->port03EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
   case 3:
     // Port 4
-    this->m_GUI->port04EffFreqLineEdit->setText(QString("%1").arg(freq));
+    this->m_GUI->port04EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
   default:
     //do nothing for now.

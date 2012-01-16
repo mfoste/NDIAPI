@@ -162,19 +162,25 @@ void vtkTrackerTool::Update()
 {
   this->Buffer->Lock();
 
-  this->Flags = this->Buffer->GetFlags(0);
+  // only update this if the time stamp has changed.
+  if( this->Buffer->GetTimeStamp(0) > this->TimeStamp )
+  {
+    this->Flags = this->Buffer->GetFlags(0);
 
-  if ((this->Flags & (TR_MISSING | TR_OUT_OF_VIEW))  == 0) 
+    if ((this->Flags & (TR_MISSING | TR_OUT_OF_VIEW))  == 0) 
     {
-    this->Buffer->GetMatrix(this->TempMatrix, 0);
-    this->Transform->SetMatrix(this->TempMatrix);
+      this->Buffer->GetMatrix(this->TempMatrix, 0);
+      this->Transform->SetMatrix(this->TempMatrix);
     } 
 
-  this->TimeStamp = this->Buffer->GetTimeStamp(0);
-
+    this->TimeStamp = this->Buffer->GetTimeStamp(0);
+    this->Modified();
+  }
   this->Buffer->Unlock();
 
-  this->Modified();
+  // move the modified into the if structure above. 
+  // i.e. only mark as modified if we actually modify it.
+  //this->Modified();
 }
 
 //----------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 
 #include "vtkTrackerWidget.h"
 
-#define NUM_SAMPLES_FREQUENCY 50
+#define NUM_SAMPLES_FREQUENCY 100
 
 class vtkTrackerWidgetXfrmCallback : public vtkCommand
 {
