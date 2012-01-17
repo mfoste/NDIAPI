@@ -10,3 +10,7 @@ vtkFlockTracker - for the Flock of Birds (hasn't been updated in a while)
 vtkMicronTracker - for the Claron MicronTracker
 vtkLogitechTracker - for the old Logitech 3D Mouse
 vtkPolhemusTracker - for the Polhemus FasTrak (not functional)
+
+At Qt Widget and some example code have been added to this library in the
+GUI and Examples folders.  They are provided as examples primarily for
+NDI products.
