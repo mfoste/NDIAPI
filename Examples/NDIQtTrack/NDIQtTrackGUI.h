@@ -69,7 +69,7 @@ public slots:
   void OnTrackerConfigured( QString systemInfo );
   void OnTrackerStarted();
   void OnToolTransformUpdated(int port, QString status);
-  void OnToolTransformUpdated(int port, QuatTransformation xfrm );
+  void OnToolTransformUpdated(int port, ndQuatTransformation xfrm );
   void OnToolEffectiveFrequencyUpdated(int port, double freq);
   void OnToolQualityUpdated(int port, double freq);
   
@@ -83,15 +83,15 @@ protected:
 
 private:
   void CreateActions();
-  QString GetXfrmString(QuatTransformation xfrm);
+  QString GetXfrmString(ndQuatTransformation xfrm);
 
   // mutex lock for threading.
   QMutex *m_mutex;
 
-  QuatTransformation m_Port01Xfrm;
-  QuatTransformation m_Port02Xfrm;
-  QuatTransformation m_Port03Xfrm;
-  QuatTransformation m_Port04Xfrm;
+  ndQuatTransformation m_Port01Xfrm;
+  ndQuatTransformation m_Port02Xfrm;
+  ndQuatTransformation m_Port03Xfrm;
+  ndQuatTransformation m_Port04Xfrm;
 
 };
 #endif

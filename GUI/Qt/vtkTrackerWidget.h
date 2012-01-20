@@ -60,8 +60,8 @@ public:
 
   inline vtkTracker* getTracker() {return m_Tracker;}
   void UpdateToolTransform(int port, QString status);
-  void UpdateToolTransform(int port, QuatTransformation xfrm);
-  void UpdateToolTransform(int port, QuatTransformation xfrm, double effFreq, double quality);
+  void UpdateToolTransform(int port, ndQuatTransformation xfrm);
+  void UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality);
 
 public slots:
   virtual void OnConfigureTracker();
@@ -75,7 +75,7 @@ signals:
   void TrackerStarted();
   void TrackerStopped();
   void ToolTransformUpdated(int port, QString status);
-  void ToolTransformUpdated(int port, QuatTransformation xfrm);
+  void ToolTransformUpdated(int port, ndQuatTransformation xfrm);
   void ToolEffectiveFrequencyUpdated(int port, double freq);
   void ToolQualityNumberUpdated(int port, double quality);
 
@@ -103,7 +103,7 @@ private:
   vtkTrackerSettingsDialog *m_TrackerSettingsDialog;
 
   // keep track of the tools.
-  std::vector < QuatTransformation > m_xfrms;
+  std::vector < ndQuatTransformation > m_xfrms;
   std::vector < double > m_effectiveFrequencies;
   std::vector < double > m_quality;
   std::vector < vtkTrackerWidgetXfrmCallback* > m_xfrmCallbacks;

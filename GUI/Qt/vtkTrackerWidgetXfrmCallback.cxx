@@ -75,7 +75,7 @@ vtkTrackerWidgetXfrmCallback::~vtkTrackerWidgetXfrmCallback()
 
 void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long eventId, void *vtkNotUsed(callData))
 {
-  QuatTransformation xfrm;
+  ndQuatTransformation xfrm;
   if( vtkCommand::ModifiedEvent == eventId )
   {
     vtkTrackerTool *tool = static_cast<vtkTrackerTool*>(caller);
@@ -134,7 +134,7 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       xfrm.translation.z = pos[2];
 
       // send out.
-      m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, BAD_FLOAT);
+      m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, ND_BAD_FLOAT);
     }  
   }
 }

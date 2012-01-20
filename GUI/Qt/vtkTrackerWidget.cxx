@@ -224,17 +224,17 @@ void vtkTrackerWidget::OnStopTracker()
 }
 void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
 {
-  SetXfrmMissing(&this->m_xfrms[port]);
+  ndSetXfrmMissing(&this->m_xfrms[port]);
   emit ToolTransformUpdated(port, status);
 }
 
-void vtkTrackerWidget::UpdateToolTransform(int port, QuatTransformation xfrm)
+void vtkTrackerWidget::UpdateToolTransform(int port, ndQuatTransformation xfrm)
 {
-  CopyTransform(&xfrm, &this->m_xfrms[port]);
+  ndCopyTransform(&xfrm, &this->m_xfrms[port]);
   emit ToolTransformUpdated(port, xfrm);
 }
 
-void vtkTrackerWidget::UpdateToolTransform(int port, QuatTransformation xfrm, double effFreq, double quality)
+void vtkTrackerWidget::UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality)
 {
   this->UpdateToolTransform(port, xfrm);
   this->m_effectiveFrequencies[port] = effFreq;

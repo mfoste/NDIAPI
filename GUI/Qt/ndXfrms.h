@@ -37,37 +37,37 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "vtkTrackerWidget_global.h"
 
-#define BAD_FLOAT    (float)-3.697314E28
-#define MAX_NEGATIVE (float)-3.0E28
+#define ND_BAD_FLOAT    (float)-3.697314E28
+#define ND_MAX_NEGATIVE (float)-3.0E28
 
-#define isValidFloat( x )      ( x > MAX_NEGATIVE )
+#define isValidFloat( x )      ( x > ND_MAX_NEGATIVE )
 
-typedef struct Position3dStruct
+typedef struct ndPosition3dStruct
 {
     float   x;
     float   y;
     float   z;
-} Position3d;
+} ndPosition3d;
 
-typedef struct QuatRotationStruct
+typedef struct ndQuatRotationStruct
 {
     float   q0;
     float   qx;
     float   qy;
     float   qz;
-} QuatRotation;
+} ndQuatRotation;
 
-typedef struct QuatTransformationStruct
+typedef struct ndQuatTransformationStruct
 {
-    QuatRotation     rotation;
-    Position3d       translation;
-} QuatTransformation;
+    ndQuatRotation     rotation;
+    ndPosition3d       translation;
+} ndQuatTransformation;
 
-void VTKTRACKERWIDGET_EXPORT SetXfrmMissing( QuatTransformation *xfrm);
-int VTKTRACKERWIDGET_EXPORT IsQuatRotationMissing( QuatRotation *rotation);
-int VTKTRACKERWIDGET_EXPORT IsPosition3dMissing( Position3d *position);
-int VTKTRACKERWIDGET_EXPORT IsXfrmMissing( QuatTransformation *xfrm);
-void VTKTRACKERWIDGET_EXPORT CopyTransform( QuatTransformation *fromXfrm, 
-                   QuatTransformation *toXfrm);
+void VTKTRACKERWIDGET_EXPORT ndSetXfrmMissing( ndQuatTransformation *xfrm);
+int VTKTRACKERWIDGET_EXPORT ndIsQuatRotationMissing( ndQuatRotation *rotation);
+int VTKTRACKERWIDGET_EXPORT ndIsPosition3dMissing( ndPosition3d *position);
+int VTKTRACKERWIDGET_EXPORT ndIsXfrmMissing( ndQuatTransformation *xfrm);
+void VTKTRACKERWIDGET_EXPORT ndCopyTransform( ndQuatTransformation *fromXfrm, 
+                   ndQuatTransformation *toXfrm);
 
 #endif

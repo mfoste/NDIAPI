@@ -84,7 +84,7 @@ void NDIQtTrackGUI::CreateActions()
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerStarted()), this, SLOT(OnTrackerStarted()) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,QString)), this, SLOT(OnToolTransformUpdated(int,QString)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,QuatTransformation)), this, SLOT(OnToolTransformUpdated(int,QuatTransformation)) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,ndQuatTransformation)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,double)) );
 }
 
@@ -168,22 +168,22 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status)
   case 0:
     // Port 1
     this->m_GUI->port01XfrmLabel->setText( status );
-    SetXfrmMissing(&this->m_Port01Xfrm);
+    ndSetXfrmMissing(&this->m_Port01Xfrm);
     break;
   case 1:
     // Port 2
     this->m_GUI->port02XfrmLabel->setText( status );
-    SetXfrmMissing(&this->m_Port02Xfrm);
+    ndSetXfrmMissing(&this->m_Port02Xfrm);
     break;
   case 2:
     // Port 3
     this->m_GUI->port03XfrmLabel->setText(status);
-    SetXfrmMissing(&this->m_Port03Xfrm);
+    ndSetXfrmMissing(&this->m_Port03Xfrm);
     break;
   case 3:
     // Port 4
     this->m_GUI->port04XfrmLabel->setText(status);
-    SetXfrmMissing(&this->m_Port04Xfrm);
+    ndSetXfrmMissing(&this->m_Port04Xfrm);
     break;
   default:
     //do nothing for now.
@@ -191,28 +191,28 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status)
   }
 }
 
-void NDIQtTrackGUI::OnToolTransformUpdated(int port, QuatTransformation xfrm)
+void NDIQtTrackGUI::OnToolTransformUpdated(int port, ndQuatTransformation xfrm)
 {
   switch(port){
   case 0:
     // Port 1
     this->m_GUI->port01XfrmLabel->setText( this->GetXfrmString(xfrm) );
-    CopyTransform(&xfrm, &this->m_Port01Xfrm);
+    ndCopyTransform(&xfrm, &this->m_Port01Xfrm);
     break;
   case 1:
     // Port 2
     this->m_GUI->port02XfrmLabel->setText( this->GetXfrmString(xfrm) );
-    CopyTransform(&xfrm, &this->m_Port02Xfrm);
+    ndCopyTransform(&xfrm, &this->m_Port02Xfrm);
     break;
   case 2:
     // Port 3
     this->m_GUI->port03XfrmLabel->setText(this->GetXfrmString(xfrm));
-    CopyTransform(&xfrm, &this->m_Port03Xfrm);
+    ndCopyTransform(&xfrm, &this->m_Port03Xfrm);
     break;
   case 3:
     // Port 4
     this->m_GUI->port04XfrmLabel->setText(this->GetXfrmString(xfrm));
-    CopyTransform(&xfrm, &this->m_Port04Xfrm);
+    ndCopyTransform(&xfrm, &this->m_Port04Xfrm);
     break;
   default:
     //do nothing for now.
@@ -250,11 +250,11 @@ void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
   // to implement.
 }
 
-QString NDIQtTrackGUI::GetXfrmString(QuatTransformation xfrm)
+QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)
 {
   QString xfrmString;
 
-  if( !IsXfrmMissing( &xfrm ) )
+  if( !ndIsXfrmMissing( &xfrm ) )
   {
   xfrmString.sprintf("%+ 1.6f %+ 1.6f %+ 1.6f %+ 1.6f %+ 6.4f  %+ 6.4f  %+ 6.4f", 
     xfrm.rotation.q0, xfrm.rotation.qx, xfrm.rotation.qy, xfrm.rotation.qz, 

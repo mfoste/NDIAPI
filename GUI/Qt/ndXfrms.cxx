@@ -35,18 +35,18 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "ndXfrms.h"
 
-void SetXfrmMissing(QuatTransformation *xfrm)
+void ndSetXfrmMissing(ndQuatTransformation *xfrm)
 {
-  xfrm->rotation.q0 = BAD_FLOAT;
-  xfrm->rotation.qx = BAD_FLOAT;
-  xfrm->rotation.qy = BAD_FLOAT;
-  xfrm->rotation.qz = BAD_FLOAT;
-  xfrm->translation.x = BAD_FLOAT;
-  xfrm->translation.y = BAD_FLOAT;
-  xfrm->translation.z = BAD_FLOAT;
+  xfrm->rotation.q0 = ND_BAD_FLOAT;
+  xfrm->rotation.qx = ND_BAD_FLOAT;
+  xfrm->rotation.qy = ND_BAD_FLOAT;
+  xfrm->rotation.qz = ND_BAD_FLOAT;
+  xfrm->translation.x = ND_BAD_FLOAT;
+  xfrm->translation.y = ND_BAD_FLOAT;
+  xfrm->translation.z = ND_BAD_FLOAT;
 }
 
-int IsQuatRotationMissing( QuatRotation *rotation)
+int ndIsQuatRotationMissing( ndQuatRotation *rotation)
 {
   if( !isValidFloat(rotation->q0) || 
     !isValidFloat(rotation->qx) || 
@@ -59,7 +59,7 @@ int IsQuatRotationMissing( QuatRotation *rotation)
   return 0;
 }
 
-int IsPosition3dMissing( Position3d *position)
+int ndIsPosition3dMissing( ndPosition3d *position)
 {
   if( !isValidFloat( position->x ) ||
     !isValidFloat( position->y ) ||
@@ -71,18 +71,18 @@ int IsPosition3dMissing( Position3d *position)
   return 0;
 }
 
-int IsXfrmMissing(QuatTransformation *xfrm)
+int ndIsXfrmMissing(ndQuatTransformation *xfrm)
 {
-  if( IsQuatRotationMissing( &xfrm->rotation ) )
+  if( ndIsQuatRotationMissing( &xfrm->rotation ) )
     return 1;
 
-  if( IsPosition3dMissing(&xfrm->translation) ) 
+  if( ndIsPosition3dMissing(&xfrm->translation) ) 
     return 1;
 
   return 0;
 }
 
-void CopyTransform(QuatTransformation *fromXfrm, QuatTransformation *toXfrm)
+void ndCopyTransform(ndQuatTransformation *fromXfrm, ndQuatTransformation *toXfrm)
 {
   toXfrm->rotation.q0 = fromXfrm->rotation.q0;
   toXfrm->rotation.qx = fromXfrm->rotation.qx;

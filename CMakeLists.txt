@@ -91,7 +91,8 @@ IF (AIGS_USE_TRACKING)
   OPTION (AIGS_USE_MICRONTRACKER "Provide support for the Claron MicronTracker" OFF)
 
   SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS}
-      ${AIGS_SOURCE_DIR}/Tracking)
+      ${AIGS_SOURCE_DIR}/Tracking
+	  ${AIGS_SOURCE_DIR}/GUI/Qt)
   ADD_SUBDIRECTORY(Utilities)
   ADD_SUBDIRECTORY(Tracking)
 
