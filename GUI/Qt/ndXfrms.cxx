@@ -48,10 +48,10 @@ void ndSetXfrmMissing(ndQuatTransformation *xfrm)
 
 int ndIsQuatRotationMissing( ndQuatRotation *rotation)
 {
-  if( !isValidFloat(rotation->q0) || 
-    !isValidFloat(rotation->qx) || 
-    !isValidFloat(rotation->qy) || 
-    !isValidFloat(rotation->qz) )
+  if( !ndIsValidFloat(rotation->q0) || 
+    !ndIsValidFloat(rotation->qx) || 
+    !ndIsValidFloat(rotation->qy) || 
+    !ndIsValidFloat(rotation->qz) )
   {
     return 1;
   }
@@ -61,9 +61,9 @@ int ndIsQuatRotationMissing( ndQuatRotation *rotation)
 
 int ndIsPosition3dMissing( ndPosition3d *position)
 {
-  if( !isValidFloat( position->x ) ||
-    !isValidFloat( position->y ) ||
-    !isValidFloat( position->z ) )
+  if( !ndIsValidFloat( position->x ) ||
+    !ndIsValidFloat( position->y ) ||
+    !ndIsValidFloat( position->z ) )
   {
     return 1;
   }

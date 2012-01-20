@@ -40,7 +40,7 @@ or property, arising from the Sample Code or any use thereof.
 #define ND_BAD_FLOAT    (float)-3.697314E28
 #define ND_MAX_NEGATIVE (float)-3.0E28
 
-#define isValidFloat( x )      ( x > ND_MAX_NEGATIVE )
+#define ndIsValidFloat( x )      ( x > ND_MAX_NEGATIVE )
 
 typedef struct ndPosition3dStruct
 {
