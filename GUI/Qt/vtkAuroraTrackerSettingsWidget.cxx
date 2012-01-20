@@ -43,6 +43,7 @@ vtkAuroraTrackerSettingsWidget::vtkAuroraTrackerSettingsWidget( QWidget *parent,
   this->m_Settings = settings;
   // set up the GUI.
   m_Widget.setupUi(this);
+  this->CreateActions();
 
   // initialize the from file list.
   for(int i=0; i < 4; i++)
