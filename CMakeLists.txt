@@ -83,16 +83,17 @@ INCLUDE(${AIGS_SOURCE_DIR}/CMake/AIGSThirdParty.cmake)
 # Tracking
 OPTION (AIGS_USE_TRACKING "Build the Tracking module" ON)
 IF (AIGS_USE_TRACKING)
+  SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} ${AIGS_SOURCE_DIR}/Tracking)
   OPTION (AIGS_USE_NDI "Provide support for the NDI POLARIS and AURORA" ON)
+  IF( AIGS_USE_NDI )
+	SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} ${AIGS_SOURCE_DIR}/Utilities/ndicapi)
+  ENDIF( AIGS_USE_NDI )
   OPTION (AIGS_USE_CERTUS "Provide support for the NDI Certus" OFF)
   OPTION (AIGS_USE_FLOCK "Provide support for the Ascension Flock of Birds" ON)
   OPTION (AIGS_USE_LOGITECH "Provide support for the Logitech 3D mouse" OFF)
   OPTION (AIGS_USE_POLHEMUS "Provide support for the Polhemus FasTrak" OFF)
   OPTION (AIGS_USE_MICRONTRACKER "Provide support for the Claron MicronTracker" OFF)
-
-  SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS}
-      ${AIGS_SOURCE_DIR}/Tracking
-	  ${AIGS_SOURCE_DIR}/GUI/Qt)
+  
   ADD_SUBDIRECTORY(Utilities)
   ADD_SUBDIRECTORY(Tracking)
 
@@ -123,7 +124,11 @@ ENDIF (BUILD_EXAMPLES)
 # Build GUI.
 OPTION(AIGS_BUILD_GUI "Build the GUI" OFF)
 IF (AIGS_BUILD_GUI)
+  OPTION( AIGS_BUILD_QT_GUI "Build the Qt GUI components" OFF )
   ADD_SUBDIRECTORY(GUI)
+  IF(AIGS_BUILD_QT_GUI)
+    SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} ${AIGS_SOURCE_DIR}/GUI/Qt)
+  ENDIF(AIGS_BUILD_QT_GUI)
 ENDIF (AIGS_BUILD_GUI)
 
 # Add aigs.py file.  On Win32, this has to go into all config dirs
