@@ -120,6 +120,7 @@ public:
   int IsMissing()   {return ((this->Flags & TR_MISSING) != 0); };
   int IsOutOfView() {return ((this->Flags & TR_OUT_OF_VIEW) != 0); };
   int IsOutOfVolume() {return ((this->Flags & TR_OUT_OF_VOLUME) != 0); };
+  int IsBrokenSensor() {return ((this->Flags & TR_BROKEN_SENSOR) != 0); };
   int IsSwitch1On() {return ((this->Flags & TR_SWITCH1_IS_ON) != 0); };
   int IsSwitch2On() {return ((this->Flags & TR_SWITCH2_IS_ON) != 0); };
   int IsSwitch3On() {return ((this->Flags & TR_SWITCH3_IS_ON) != 0); };

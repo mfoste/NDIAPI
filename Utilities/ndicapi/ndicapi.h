@@ -1705,6 +1705,7 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define  NDI_ENABLED             0x20
 #define  NDI_OUT_OF_VOLUME       0x40 /* only for ndiGetGXPortStatus() */
 #define  NDI_PARTIALLY_IN_VOLUME 0x80 /* only for ndiGetGXPortStatus() */ 
+#define  NDI_BROKEN_SENSOR       0x100
 #define  NDI_CURRENT_DETECT      0x80 /* only for ndiGetPSTATPortStatus() */
 /*\}*/
 

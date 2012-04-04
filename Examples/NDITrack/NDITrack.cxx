@@ -89,7 +89,7 @@ public:
       {
         this->m_effectiveFrequency = -1.0;
       }
-      if( !tool->IsMissing() && !tool->IsOutOfView() && !tool->IsOutOfVolume() )
+      if( !tool->IsMissing() && !tool->IsOutOfView() && !tool->IsOutOfVolume() && !tool->IsBrokenSensor() )
       {
       double pos[3], quat[4];
       tool->GetTransform()->GetOrientationWXYZ(quat);
@@ -101,6 +101,13 @@ public:
         << this->m_effectiveFrequency << ". Xfrm: "
         << quat[0] << "," << quat[1] << "," << quat[2] << "," << quat[3] << ","
         << pos[0] << "," << pos[1] << "," << pos[2] << std::endl;
+      }
+      else if( tool->IsBrokenSensor() )
+      {
+        std::cout.setf(std::ios_base::fixed);
+        std::cout << this->m_nXfrms << ". " << tool->GetToolPartNumber()
+        << " updated (t = " << tool->GetTimeStamp() << ").  Effective frequency: "
+        << this->m_effectiveFrequency << ". Xfrm: Broken Sensor." << std::endl;
       }
       else
       {

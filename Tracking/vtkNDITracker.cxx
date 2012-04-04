@@ -613,6 +613,7 @@ void vtkNDITracker::InternalUpdate()
       {
       if (absent[tool]) { flags |= TR_OUT_OF_VIEW;  }
       if (port_status & NDI_OUT_OF_VOLUME){ flags |= TR_OUT_OF_VOLUME; }
+      if (port_status & NDI_BROKEN_SENSOR){ flags |= TR_BROKEN_SENSOR; }
       if (port_status & NDI_SWITCH_1_ON)  { flags |= TR_SWITCH1_IS_ON; }
       if (port_status & NDI_SWITCH_2_ON)  { flags |= TR_SWITCH2_IS_ON; }
       if (port_status & NDI_SWITCH_3_ON)  { flags |= TR_SWITCH3_IS_ON; }
