@@ -351,7 +351,7 @@ int vtkNDITracker::InternalStartTracking()
     case 38400: baud = NDI_38400; break; 
     case 57600: baud = NDI_57600; break; 
     case 115200: baud = NDI_115200; break;
-    case 961200: baud = NDI_921600; break;
+    case 921600: baud = NDI_921600; break;
     default:
       vtkErrorMacro(<< "Illegal baud rate");
       return 0;
