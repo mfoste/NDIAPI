@@ -66,6 +66,7 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
 
   m_StartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setEnabled(false);
 }
 
 vtkTrackerWidget::~vtkTrackerWidget()
@@ -95,6 +96,11 @@ void vtkTrackerWidget::setupUi()
   this->m_ConfigureTrackerButton->setText("Configure Tracker");
   this->m_ConfigureTrackerButton->setMaximumWidth(110);
 
+  this->m_VolumeSelectionComboBox = new QComboBox(this);
+  //this->m_ConfigureTrackerButton->setMaximumWidth(110);
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  //this->m_VolumeSelectionComboBox->setVisible(false);
+
   this->m_StartTrackingButton = new QPushButton(this);
   this->m_StartTrackingButton->setText("Start Tracking");
   this->m_StartTrackingButton->setMaximumWidth(110);
@@ -107,7 +113,9 @@ void vtkTrackerWidget::setupUi()
 void vtkTrackerWidget::setupUiLayout()
 {
   QVBoxLayout *mainLayout = new QVBoxLayout;
+
   mainLayout->addWidget(this->m_ConfigureTrackerButton);
+  mainLayout->addWidget(this->m_VolumeSelectionComboBox);
   mainLayout->addWidget(this->m_StartTrackingButton);
   mainLayout->addWidget(this->m_StopTrackingButton);
 
@@ -119,6 +127,7 @@ void vtkTrackerWidget::CreateActions()
 {
   connect(m_ConfigureTrackerButton, SIGNAL(clicked()), this, SLOT(OnConfigureTracker()));
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
+  connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_Timer, SIGNAL(timeout()), this, SLOT(UpdateData()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
@@ -138,6 +147,7 @@ void vtkTrackerWidget::OnConfigureTrackerAccepted()
 void vtkTrackerWidget::ConfigureTracker()
 {
   QString errorString;
+  int nVolumes;
   
   // if a tracker exists, delete it.
   if( m_Tracker )
@@ -193,21 +203,45 @@ void vtkTrackerWidget::ConfigureTracker()
     this->PopUpError("The tracking system you specified is not attached. Please check your connections and retry." );
     return;
   }
+
+  if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA )
+  {
+    // update the volume information.
+    this->m_VolumeSelectionComboBox->setEnabled(true);
+    this->m_VolumeSelectionComboBox->setVisible(true);
+    this->m_VolumeSelectionComboBox->clear();
+    nVolumes = dynamic_cast<vtkNDITracker*>(m_Tracker)->GetNumTrackingVolumes();
+    for( int i=0; i < nVolumes; i++ )
+    {
+      this->m_VolumeSelectionComboBox->insertItem(i,
+        QString::fromStdString(dynamic_cast<vtkNDITracker*>(m_Tracker)->GetTrackingVolumeShapeType(i)));
+    }
+  }
   
   m_StartTrackingButton->setEnabled(true);
   emit TrackerConfigured(QString(m_Tracker->GetSerialNumber()));
 }
 
+void vtkTrackerWidget::OnVolumeSelected(int volume)
+{
+  // TODO: make this work with Polaris as well.
+  if( this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA )
+  {
+    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetVolume(volume);
+  }
+}
+
 void vtkTrackerWidget::OnStartTracker()
 {
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  m_StartTrackingButton->setEnabled(false);
+  m_StopTrackingButton->setEnabled(true);
+
   m_Tracker->StartTracking();
 
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
   m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));
-  
-  m_StartTrackingButton->setEnabled(false);
-  m_StopTrackingButton->setEnabled(true);
   
   emit TrackerStarted();
 }
@@ -219,6 +253,7 @@ void vtkTrackerWidget::OnStopTracker()
 
   m_StartTrackingButton->setEnabled(true);
   m_StopTrackingButton->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setEnabled(true);
 
   emit TrackerStopped();
 }

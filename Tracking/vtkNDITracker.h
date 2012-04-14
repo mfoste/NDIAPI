@@ -105,7 +105,23 @@ public:
   vtkGetStringMacro(SerialDevice);
 
   // Description:
-  // Set the desired baud rate.  Default: 9600.  
+  // Get number of available volumes.
+  vtkGetMacro(NumTrackingVolumes, int);
+
+  // Description:
+  // Return the shape type name for the given volume.
+  std::string GetTrackingVolumeShapeType(int volume);
+
+  // Description:
+  // Return a pointer to the array containing the shape parameters.
+  double* GetTrackingVolumeShapeParameters(int volume);
+
+  // Description:
+  // Set the volume.
+  int SetVolume(int volume);
+
+  // Description:
+  // Set the desired baud rate.  Default: 9600.  TODO: change this to auto-detect.
   vtkSetMacro(BaudRate, int);
   vtkGetMacro(BaudRate, int);
 
@@ -134,7 +150,8 @@ protected:
   // Set the version information.
   vtkSetStringMacro(Version);
 
-  // Description
+  // Description:
+  // Parse the serial number.
   void ParseSerialNumber();
   void ParseFGSerialNumber(std::string scuSerialNo);
 
@@ -188,6 +205,10 @@ protected:
 
   vtkMatrix4x4 *SendMatrix;
   int SerialPort; 
+  int NumTrackingVolumes;
+  int TrackingVolumeShapeTypes[NDI_MAX_VOLUMES];
+  double TrackingVolumeParameters[NDI_MAX_VOLUMES][10];
+  int Volume;
   int BaudRate;
   int IsDeviceTracking;
 

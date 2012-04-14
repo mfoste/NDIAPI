@@ -893,11 +893,16 @@ int ndiGetPHINFAccessories(ndicapi *pol);
 
   \return  see NDI documentation for more information:
   - low bits:
-    - NDI_950NM            0x00
-    - NDI_850NM            0x01
+    - *OBSOLETE* NDI_950NM            0x00
+    - *OBSOLETE* NDI_850NM            0x01
+    - NDI_9X0NM            0x00
+    - NDI_880NM            0x01
+    - NDI_930NM            0x02
+    - NDI_870NM            0x04
   - high bits:
     - NDI_NDI_ACTIVE       0x08
     - NDI_NDI_CERAMIC      0x10
+    - NDI_ACTIVE_ANY       0x18
     - NDI_PASSIVE_ANY      0x20
     - NDI_PASSIVE_SPHERE   0x28
     - NDI_PASSIVE_DISC     0x30
@@ -1403,9 +1408,180 @@ int ndiGetPSTATAccessories(ndicapi *pol, int port);
 int ndiGetPSTATMarkerType(ndicapi *pol, int port);
 
 /*! \ingroup GetMethods
+  Get the number of tracking volumes available.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of volumes.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_VOLUME_INFO (0x03) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberVolumes(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Get the given volume paramters.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of volumes.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_VOLUME_INFO (0x03) bit set in the reply mode.
+*/
+int ndiGetSFLISTVolumeParameters(ndicapi *pol, int volume, int *shapetype, double parms[10]);
+
+/*! \ingroup GetMethods
+  Return whether active tool ports are available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether active tools are available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTActivePortsAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether passive tool ports are available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether passive tools are available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTPassivePortsAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether multiple volumes are supported.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether multiple volumes are supported.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTMultipleVolumesSupported(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether tool in port current sensing is available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether passive tools are available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTToolInPortAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether active wireless tool ports are available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether active wireless tool ports are available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTActiveWirelessPortsAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether magnetic tool ports are available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether magnetic tool ports are available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTMagneticPortsAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether field generator is available.
+
+  \param pol       valid NDI device handle
+
+  \return an int boolean whether field generator is available.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_FEATURES_SUMMARY (0x00) bit set in the reply mode.
+*/
+int ndiGetSFLISTMagneticFGAvailable(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether number of active tool ports.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of active tool ports.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_NUMBER_ACTIVE_PORTS (0x01) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberActivePorts(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether number of passive tool ports.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of passive tool ports.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_NUMBER_WIRELESS_PORTS (0x02) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberWirelessPorts(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether number of active tool ports with tool in port current sensing.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of active tool ports with tool in port current sensing.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_NUMBER_WIRED_TIP_TOOLS (0x04) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberTIPPorts(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether number of active wireless tool ports.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of active wireless tool ports.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_NUMBER_ACTIVE_WIRELESS_TOOLS (0x05) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberActiveWirelessPorts(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Return whether number of magnetic tool ports.
+
+  \param pol       valid NDI device handle
+
+  \return an int with the number of magnetic tool ports.
+
+  <p> This information is only updated when SFLIST command is sent
+  with the NDI_NUMBER_MAGNETIC_PORTS (0x10) bit set in the reply mode.
+*/
+int ndiGetSFLISTNumberMagneticPorts(ndicapi *pol);
+
+/*! \ingroup GetMethods
   Get the status of the control processor.
 
   \param pol       valid NDI device handle
+  \param volume    specific volume to get parms, zero based.
+  \param shapetype shape type for the 
+  \param parms     double array containing the 10 parm values.
 
   \return an int with the following bit definitions for errors:
   - NDI_EPROM_CODE_CHECKSUM     0x01
@@ -1768,14 +1944,21 @@ void *ndiHexDecode(void *data, const char *cp, int n);
   
 /* ndiGetPSTATMarkerType() return value, the first 3 bits */
 /*\{*/
+/* these are no longer valid
 #define NDI_950NM            0x00
 #define NDI_850NM            0x01
+obsolete*/
+#define NDI_9X0NM     0x00
+#define NDI_880NM     0x01
+#define NDI_930NM     0x02
+#define NDI_870NM     0x04
 /*\}*/
 
 /* ndiGetPSTATMarkerType() return value, the last 5 bits */
 /*\{*/
 #define NDI_NDI_ACTIVE       0x08
 #define NDI_NDI_CERAMIC      0x10
+#define NDI_ACTIVE_ANY       0x18
 #define NDI_PASSIVE_ANY      0x20
 #define NDI_PASSIVE_SPHERE   0x28
 #define NDI_PASSIVE_DISC     0x30
@@ -1837,6 +2020,40 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define  NDI_LEFT   0            /* left sensor */
 #define  NDI_RIGHT  1            /* right sensor */
 /*\}*/
+
+/* ndiSFLIST() reply mode bits */
+#define NDI_FEATURES_SUMMARY              0x00
+#define NDI_NUMBER_ACTIVE_PORTS           0x01  //Polaris only.
+#define NDI_NUMBER_WIRELESS_PORTS         0x02  //Polaris only.
+#define NDI_VOLUME_INFO                   0x03
+#define NDI_NUMBER_WIRED_TIP_TOOLS        0x04  //Polaris only.
+#define NDI_NUMBER_ACTIVE_WIRELESS_TOOLS  0x05  //Polaris only.
+#define NDI_NUMBER_MAGNETIC_PORTS         0x10  // Aurora only.
+
+/* ndiSFLIST() reply option 00 components */
+#define NDI_ACTIVE_TOOLS_AVAILABLE            0x00000001 // bit 0
+#define NDI_PASSIVE_TOOLS_AVAILABLE           0x00000002 // bit 1
+#define NDI_MULTIPLE_VOLUMES_SUPPORTED        0x00000004 // bit 2
+#define NDI_TOOL_IN_PORT_AVAILABLE            0x00000008 // bit 3
+#define NDI_ACTIVE_WIRELESS_TOOLS_AVAILABLE   0x00000010 // bit 4
+#define NDI_MAGNETIC_PORTS_AVAILABLE          0x00010000 // bit 16
+#define NDI_MAGNETIC_FG_AVAILABLE             0x00080000 // bit 19
+
+/* ndiSFLIST() reply option 03 components */
+#define NDI_MAX_VOLUMES 4
+#define NDI_MAGNETIC_METAL_NO_INFO        0x0
+#define NDI_MAGNETIC_METAL_RESISTANT      0x1
+#define NDI_MAGNETIC_METAL_NOT_RESISTANT  0x2
+
+/* ndiSFLIST() volume types - Polaris */
+#define NDI_P4_STANDARD_VOLUME            0x0
+#define NDI_P4_PYRAMID_VOLUME             0x4
+#define NDI_SPECTRA_PYRAMID_VOLUME        0x5
+#define NDI_VICRA_VOLUME                  0x7
+
+/* ndiSFLIST() volume types - Aurora */
+#define NDI_AURORA_CUBE_VOLUME            0x9
+#define NDI_AURORA_DOME_VOLUME            0xA
 
 #ifdef __cplusplus
 }

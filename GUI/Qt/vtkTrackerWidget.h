@@ -40,6 +40,7 @@ or property, arising from the Sample Code or any use thereof.
 
 #include <QWidget>
 #include <QPushButton>
+#include <QComboBox>
 #include <QVBoxLayout>
 
 #include "ndXfrms.h"
@@ -66,6 +67,7 @@ public:
 public slots:
   virtual void OnConfigureTracker();
   virtual void OnConfigureTrackerAccepted();
+  virtual void OnVolumeSelected(int volume);
   virtual void OnStartTracker();
   virtual void OnStopTracker();
   virtual void UpdateData();
@@ -93,6 +95,7 @@ private:
   // GUI variables.
   //Ui::vtkTrackerWidget m_GUI;
   QPushButton *m_ConfigureTrackerButton;
+  QComboBox   *m_VolumeSelectionComboBox;
   QPushButton *m_StartTrackingButton;
   QPushButton *m_StopTrackingButton;
   //QVBoxLayout *m_VerticalLayout;

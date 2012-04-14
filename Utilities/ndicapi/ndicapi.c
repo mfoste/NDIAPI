@@ -65,6 +65,7 @@ POSSIBILITY OF SUCH DAMAGES.
 /* be simultaneously occupied)                                    */
 #define NDI_MAX_HANDLES 24
 
+
 struct ndicapi {
 
   /* low-level communication information */
@@ -174,6 +175,38 @@ struct ndicapi {
   int tx_npassive_stray;
   char tx_passive_stray_oov[14];
   char tx_passive_stray[1052];
+
+  /* SFLIST command reply data - reply option 00 */
+  int sflist_active_tools_available;
+  int sflist_passive_tools_available;
+  int sflist_multiple_volumes_supported;
+  int sflist_tool_in_port_available;
+  int sflist_active_wireless_tools_available;
+  int sflist_magnetic_ports_available;
+  int sflist_magnetic_fg_available;
+
+  /* SFLIST command reply data - reply option 01 */
+  int sflist_number_active_tools;
+
+  /* SFLIST command reply data - reply option 02 */
+  int sflist_number_wireless_tools;
+
+  /* SFLIST command reply data - reply option 03 */
+  int sflist_nvolumes;
+  int sflist_volume_shapetype[NDI_MAX_VOLUMES];
+  char sflist_volume_shapeparms[NDI_MAX_VOLUMES][70];
+  int sflist_volume_number_wavelengths[NDI_MAX_VOLUMES];
+  char sflist_volume_wavelengths[NDI_MAX_VOLUMES][4]; // assume max 4 wavelengths -- I think it is actually 2.
+  int sflist_metal_resistant;
+
+  /* SFLIST command reply data - reply option 04 */
+  int sflist_number_wired_tip_tools;
+
+  /* SFLIST command reply data - reply option 05 */
+  int sflist_number_active_wireless_tools;
+
+  /* SFLIST command reply data - reply option 10 */
+  int sflist_number_magnetic_ports;
 };
 
 /*---------------------------------------------------------------------
@@ -785,6 +818,7 @@ static void ndi_IRCHK_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PSTAT_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_SSTAT_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PHRQ_helper(ndicapi *pol, const char *cp, const char *crp);
+static void ndi_SFLIST_helper(ndicapi *pol, const char *cp, const char *crp);
 
 /*---------------------------------------------------------------------*/
 char *ndiCommand(ndicapi *pol, const char *format, ...)
@@ -1048,6 +1082,9 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
   }
   else if (cp[0] == 'P' && nc == 5 && strncmp(cp, "PSTAT", nc) == 0) {
     ndi_PSTAT_helper(pol, cp, crp);
+  }
+  else if (cp[0] == 'S' && nc == 6 && strncmp(cp, "SFLIST", nc) == 0) {
+    ndi_SFLIST_helper(pol, cp, crp);
   }
   else if (cp[0] == 'S' && nc == 5 && strncmp(cp, "SSTAT", nc) == 0) {
     ndi_SSTAT_helper(pol, cp, crp);
@@ -1759,6 +1796,114 @@ int ndiGetPSTATMarkerType(ndicapi *pol, int port)
   }
 
   return (int)ndiHexToUnsignedLong(dp, 2);
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberVolumes(ndicapi *pol)
+{
+  return pol->sflist_nvolumes;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTVolumeParameters(ndicapi *pol, int volume, int *shapetype, double parms[10])
+{
+  char *dp;
+
+  if( volume >= pol->sflist_nvolumes )
+  {
+    return NDI_FEATURES;
+  }
+  
+  /* update the shape type first */
+  *shapetype = pol->sflist_volume_shapetype[volume];
+
+  /* copy over the parms */
+  dp = pol->sflist_volume_shapeparms[volume];
+
+  parms[0] = ndiSignedToLong(&dp[0], 7)*0.01;
+  parms[1] = ndiSignedToLong(&dp[7], 7)*0.01;
+  parms[2] = ndiSignedToLong(&dp[14], 7)*0.01;
+  parms[3] = ndiSignedToLong(&dp[21], 7)*0.01;
+  parms[4] = ndiSignedToLong(&dp[28], 7)*0.01;
+  parms[5] = ndiSignedToLong(&dp[35], 7)*0.01;
+  parms[6] = ndiSignedToLong(&dp[42], 7)*0.01;
+  parms[7] = ndiSignedToLong(&dp[49], 7)*0.01;
+  parms[8] = ndiSignedToLong(&dp[56], 7)*0.01;
+  parms[9] = ndiSignedToLong(&dp[63], 7)*0.01;
+
+  return NDI_OKAY;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTActivePortsAvailable(ndicapi *pol)
+{
+  return pol->sflist_active_tools_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTPassivePortsAvailable(ndicapi *pol)
+{
+  return pol->sflist_passive_tools_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTMultipleVolumesSupported(ndicapi *pol)
+{
+  return pol->sflist_multiple_volumes_supported;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTToolInPortAvailable(ndicapi *pol)
+{
+  return pol->sflist_tool_in_port_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTActiveWirelessPortsAvailable(ndicapi *pol)
+{
+  return pol->sflist_active_wireless_tools_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTMagneticPortsAvailable(ndicapi *pol)
+{
+  return pol->sflist_magnetic_ports_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTMagneticFGAvailable(ndicapi *pol)
+{
+  return pol->sflist_magnetic_fg_available;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberActivePorts(ndicapi *pol)
+{
+  return pol->sflist_number_active_tools;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberWirelessPorts(ndicapi *pol)
+{
+  return pol->sflist_number_wireless_tools;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberTIPPorts(ndicapi *pol)
+{
+  return pol->sflist_number_wired_tip_tools;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberActiveWirelessPorts(ndicapi *pol)
+{
+  return pol->sflist_number_active_wireless_tools;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetSFLISTNumberMagneticPorts(ndicapi *pol)
+{
+  return pol->sflist_number_magnetic_ports;
 }
 
 /*---------------------------------------------------------------------*/
@@ -2682,6 +2827,125 @@ static void ndi_COMM_helper(ndicapi *pol, const char *cp, const char *crp)
 static void ndi_INIT_helper(ndicapi *pol, const char *cp, const char *crp)
 {
   ndiSerialSleep(pol->serial_device, 100);
+}
+
+/*---------------------------------------------------------------------
+  Process the SFLIST parms.
+*/
+static void ndi_SFLIST_helper(ndicapi *pol, const char *cp, const char *crp)
+{
+  char mode[3] = {"00"}; /* the default reply mode */
+  char *dp;
+  int i, j;
+  int features, nVolumes, shapeType, nWaveLengths;
+
+  /* if the TX command had a reply mode, read it */
+  if ((cp[6] == ':' && cp[9] != '\r') || (cp[6] == ' ' && cp[7] != '\r')) { 
+    mode[0] = cp[7];
+    mode[1] = cp[8];
+  }
+
+  /* different parsing tasks for each reply mode. */
+  /* mode 00: */
+  if( mode[0] == '0' && mode[1] == '0' )
+  {
+    features = (int)ndiHexToUnsignedLong(crp, 8);
+    for(j=0; j < 8 && *crp >= ' '; j++) {
+      crp++;
+    }
+    pol->sflist_active_tools_available = features & NDI_ACTIVE_TOOLS_AVAILABLE;
+    pol->sflist_passive_tools_available = features & NDI_PASSIVE_TOOLS_AVAILABLE;
+    pol->sflist_multiple_volumes_supported = features & NDI_MULTIPLE_VOLUMES_SUPPORTED;
+    pol->sflist_tool_in_port_available = features & NDI_TOOL_IN_PORT_AVAILABLE;
+    pol->sflist_active_wireless_tools_available = features & NDI_ACTIVE_WIRELESS_TOOLS_AVAILABLE;
+    pol->sflist_magnetic_ports_available = features & NDI_MAGNETIC_PORTS_AVAILABLE;
+    pol->sflist_magnetic_fg_available = features & NDI_MAGNETIC_FG_AVAILABLE;
+  }
+  /* mode 01: */
+  else if( mode[0] == '0' && mode[1] == '1' )
+  {
+    pol->sflist_number_active_tools = (int)ndiHexToUnsignedLong(crp,1);
+    crp++;
+  }
+  /* mode 02: */
+  else if( mode[0] == '0' && mode[1] == '2' )
+  {
+    pol->sflist_number_wireless_tools = (int)ndiHexToUnsignedLong(crp,1);
+    crp++;
+  }
+  /* mode 03: */
+  else if( mode[0] == '0' && mode[1] == '3' )
+  {
+    /* number of volumes */
+    nVolumes = (int)ndiHexToUnsignedLong(crp,1);
+    pol->sflist_nvolumes = nVolumes;
+    for(j=0; j < 1 && *crp >= ' '; j++) {
+      crp++;
+    }
+
+    /* volume parameters */
+    for( i=0; i<nVolumes; i++)
+    {
+      /* shape type */
+      shapeType = (int)ndiHexToUnsignedLong(crp, 1);
+      pol->sflist_volume_shapetype[i] = shapeType;
+      for(j=0; j < 1 && *crp >= ' '; j++) {
+      crp++;
+    }
+
+      /* shape parms */
+      dp = pol->sflist_volume_shapeparms[i];
+      for (j=0; j < 70 && *crp >= ' '; j++)
+      {
+        *dp++ = *crp++;
+      }
+
+      if( (shapeType & NDI_AURORA_CUBE_VOLUME) || (shapeType & NDI_AURORA_DOME_VOLUME) )
+      {
+        /* skip the reserved character */
+        crp++;
+        /* get the metal resistance value */
+        pol->sflist_metal_resistant = (int)ndiHexToUnsignedLong(crp, 1);
+        crp++;
+      }
+      else /* Polaris Volumes */
+      {
+        /* check number of wave lengths */
+        nWaveLengths = (int)ndiHexToUnsignedLong(crp,1);
+        pol->sflist_volume_number_wavelengths[i] = nWaveLengths;
+        crp++;
+        /* get supported wave lengths */
+        dp = pol->sflist_volume_wavelengths[i];
+        for( j=0; j < nWaveLengths && *crp >= ' '; j++)
+        {
+          *dp++ = *crp++;
+        }
+      }
+      /* eat the trailing newline */
+      if (*crp == '\n') {
+        crp++;
+      }
+    }
+  }
+  /* mode 04: */
+  else if( mode[0] == '0' && mode[1] == '4' )
+  {
+    pol->sflist_number_wired_tip_tools = (int)ndiHexToUnsignedLong(crp,1);
+    crp++;
+  }
+  /* mode 05: */
+  else if( mode[0] == '0' && mode[1] == '5' )
+  {
+    pol->sflist_number_active_wireless_tools = (int)ndiHexToUnsignedLong(crp,1);
+    crp++;
+  }
+  /* mode 10: */
+  else if( mode[0] == '1' && mode[1] == '0' )
+  {
+    pol->sflist_number_magnetic_ports = (int)ndiHexToUnsignedLong(crp,2);
+    crp++;
+    crp++;
+  }
 }
 
 /*---------------------------------------------------------------------

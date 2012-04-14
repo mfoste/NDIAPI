@@ -50,6 +50,20 @@ EXPORTS ndiDeviceName
         ndiGetPSTATPartNumber
         ndiGetPSTATAccessories
         ndiGetPSTATMarkerType
+		ndiGetSFLISTNumberVolumes
+		ndiGetSFLISTVolumeParameters
+		ndiGetSFLISTActivePortsAvailable
+		ndiGetSFLISTPassivePortsAvailable
+		ndiGetSFLISTMultipleVolumesSupported
+		ndiGetSFLISTToolInPortAvailable
+		ndiGetSFLISTActiveWirelessPortsAvailable
+		ndiGetSFLISTMagneticPortsAvailable
+		ndiGetSFLISTMagneticFGAvailable
+		ndiGetSFLISTNumberActivePorts
+		ndiGetSFLISTNumberWirelessPorts
+		ndiGetSFLISTNumberTIPPorts
+		ndiGetSFLISTNumberActiveWirelessPorts
+		ndiGetSFLISTNumberMagneticPorts
         ndiGetSSTATControl
         ndiGetSSTATSensors
         ndiGetSSTATTIU
