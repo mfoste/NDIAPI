@@ -367,35 +367,38 @@ void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
 std::string vtkNDITracker::GetTrackingVolumeShapeType(int volume)
 {
   int shapeType;
-  std::string shapeName;
+  std::ostringstream shapeName;
+  //std::string shapeName;
+
+  shapeName << volume+1;
 
   shapeType = this->TrackingVolumeShapeTypes[volume];
 
   if( shapeType == NDI_P4_STANDARD_VOLUME )
   {
-    shapeName = "Polaris Standard Volume";
+    shapeName << ": Polaris Standard Volume";
   }
   else if( shapeType == NDI_P4_PYRAMID_VOLUME )
   {
-    shapeName = "Polaris Pyramid Volume";
+    shapeName << ": Polaris Pyramid Volume";
   }
   else if( shapeType == NDI_SPECTRA_PYRAMID_VOLUME )
   {
-    shapeName = "Polaris Spectra Pyramid Volume";
+    shapeName << ": Polaris Spectra Pyramid Volume";
   }
   else if( shapeType == NDI_VICRA_VOLUME )
   {
-    shapeName = "Polaris Vicra Volume";
+    shapeName <<  ": Polaris Vicra Volume";
   }
   else if( shapeType == NDI_AURORA_CUBE_VOLUME )
   {
-    shapeName = "Aurora Cube Volume";
+    shapeName << ": Aurora Cube Volume";
   }
   else if( shapeType == NDI_AURORA_DOME_VOLUME )
   {
-    shapeName = "Aurora Dome Volume";
+    shapeName << ": Aurora Dome Volume";
   }
-  return shapeName;
+  return shapeName.str();
 }
 
 //----------------------------------------------------------------------------
