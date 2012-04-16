@@ -67,6 +67,7 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
   m_StartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(false);
   this->m_VolumeSelectionComboBox->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
 }
 
 vtkTrackerWidget::~vtkTrackerWidget()
@@ -166,6 +167,7 @@ void vtkTrackerWidget::ConfigureTracker()
   case FAKE_TRACKER:
     m_Tracker = vtkFakeTracker::New();
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getFakeTrackerSettings().updateFrequency;
+    this->m_VolumeSelectionComboBox->setVisible(false);
     break;
   case NDI_AURORA:
     m_Tracker = vtkNDITracker::New();
