@@ -320,14 +320,22 @@ char *vtkNDITracker::Command(const char *command)
 void vtkNDITracker::ParseSerialNumber()
 {
   std::string reply = this->Version;
+  std::ostringstream strStream;
   std::string serialNo;
   int loc;
 
   loc = reply.find("NDI S/N:");
   if( loc != std::string::npos )
   {
-    serialNo = reply.substr(loc+9, 8);    
+    for(int i=0; i<8; i++)
+    {
+      if(reply[loc+9+i] == ' ' || reply[loc+9+i] == '\n' )
+        break;
+      strStream << reply[loc+9+i];
+      //serialNo = reply.substr(loc+9, 8);    
+    }
   }
+  serialNo = strStream.str();
 
   if( reply.find("Aurora") != std::string::npos )
   {
@@ -342,7 +350,8 @@ void vtkNDITracker::ParseSerialNumber()
 void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
 {
   std::string reply;
-  int loc;
+  std::ostringstream strStream;
+  int loc, serialNumLength=0;
 
   // call ver for FG info. 
   //ndiVER(this->Device,7);
@@ -351,15 +360,24 @@ void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
   loc = reply.find("Aurora Field Generator S/N:");
   if( loc != std::string::npos )
   {
+    strStream << serialNo << "-";
     if(!reply.substr(loc+28,2).compare("FG")) // returns 0 if equal
-    {
-      serialNo = serialNo + "-" + reply.substr(loc+28, 11);    
+    {     
+      serialNumLength=11;
     }
     else
     {
-      serialNo = serialNo + "-" + reply.substr(loc+28, 8); 
+      serialNumLength=8;
     }
+    for(int i=0; i<serialNumLength; i++)
+      {
+        if(reply[loc+28+i] == ' ' || reply[loc+28+i] == '\n' )
+          break;
+        strStream << reply[loc+28+i];
+      }
+      //serialNo = serialNo + "-" + reply.substr(loc+28, serialNumLength);
   }
+  serialNo = strStream.str();
   this->SetSerialNumber(serialNo.c_str());
 }
 
