@@ -61,6 +61,17 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <string.h>
 #include "vtkCharArray.h"
 
+#include "vtkCellArray.h"
+#include "vtkPoints.h"
+#include "vtkSphere.h"
+#include "vtkTransformPolyDataFilter.h"
+#include "vtkClipPolyData.h"
+#include "vtkImplicitDataSet.h"
+#include "vtkAppendPolyData.h"
+#include "vtkElevationFilter.h"
+#include "vtkCubeSource.h"
+
+
 //----------------------------------------------------------------------------
 vtkNDITracker* vtkNDITracker::New()
 {
@@ -98,6 +109,10 @@ vtkNDITracker::vtkNDITracker()
   // for accurate timing
   this->Timer = vtkFrameToTimeConverter::New();
   this->Timer->SetNominalFrequency(60.0);
+
+  this->Volume = 0;
+  this->VolumePolyData = NULL;
+
 }
 
 //----------------------------------------------------------------------------
@@ -441,6 +456,182 @@ int vtkNDITracker::SetVolume(int v)
   return 1;
 }
 
+vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
+	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+
+	int D1 = this->TrackingVolumeParameters[this->Volume][0];
+	int D2 = this->TrackingVolumeParameters[this->Volume][1];
+	int D3 = this->TrackingVolumeParameters[this->Volume][2];
+	int D4 = this->TrackingVolumeParameters[this->Volume][3];
+	int D5 = this->TrackingVolumeParameters[this->Volume][4];
+	int D6 = this->TrackingVolumeParameters[this->Volume][5];
+
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	//vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); <-- solid surface
+	vtkSmartPointer<vtkCellArray> polyline = vtkSmartPointer<vtkCellArray>::New();
+		
+	if (TrackingVolumeShapeTypes[this->Volume] == 0x0a) { // Aurora CUBE
+		/*
+		D1 = Minimum x value
+		D2 = Maximum x value
+		D3 = Minimum y value
+		D4 = Maximum y value
+		D5 = Minimum z value
+		D6 = Maximum z value
+		*/
+		D1 *=-1;
+		D6 *=-1;
+
+		points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
+		points->InsertNextPoint(D1,D3,D6); // Point 1 (D1, D3, D6)
+		points->InsertNextPoint(D2,D3,D6); // Point 2 (D2, D3, D6)
+		points->InsertNextPoint(D2,D4,D6); // Point 3 (D2, D4, D6)
+		points->InsertNextPoint(D1,D4,D5); // Point 4 (D1, D4, D5)
+		points->InsertNextPoint(D1,D3,D5); // Point 5 (D1, D3, D5)
+		points->InsertNextPoint(D2,D3,D5); // Point 6 (D2, D3, D5)
+		points->InsertNextPoint(D2,D4,D5); // Point 7 (D2, D4, D5)
+
+		// Close Z plane
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(0);
+		polyline->InsertCellPoint(1);
+		polyline->InsertCellPoint(2);
+		polyline->InsertCellPoint(3);
+		polyline->InsertCellPoint(0);
+		
+		polyline->InsertNextCell(5);
+		// Far Z plane
+		polyline->InsertCellPoint(4);
+		polyline->InsertCellPoint(5);
+		polyline->InsertCellPoint(6);
+		polyline->InsertCellPoint(7);
+		polyline->InsertCellPoint(4);
+
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(0);
+		polyline->InsertCellPoint(1);
+		polyline->InsertCellPoint(5);
+		polyline->InsertCellPoint(4);
+		polyline->InsertCellPoint(0); 
+		
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(7);
+		polyline->InsertCellPoint(3);
+		polyline->InsertCellPoint(2);
+		polyline->InsertCellPoint(6);
+		polyline->InsertCellPoint(7);
+
+		polyData->SetPoints(points);
+		polyData->SetLines(polyline);
+
+		this->VolumePolyData = polyData;
+		return this->VolumePolyData;
+
+	} else if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora Dome
+		/* 
+		D1 = Offset from Field Generator
+		D2 = Cylinder radius along x-axis
+		D3 = Minimum dome radius
+		D4 = Maximum dome radius
+		D5 = Cylinder radius along y-axis 
+			Note: If D5 is equal to 0, the y-axis radius is equal to the x-axis radius (circular cylinder)
+		D6 = Maximum offset from Field Generator
+			Note: If D6 is equal to 0, the maximum offset is equal to D4 (the maximum dome radius)
+		*/
+
+		D1=50;
+		D2=480;
+		D3=50;
+		D4=660;
+		D5=0;
+		D6=0;
+
+		D5 = D5 == 0? D2 : D5; // see D5 note
+		D6 = D6 == 0? D4 : D6; // see D6 note
+
+		D1 *=-1;
+		D6 *=-1;
+
+		double majorAxis = D2 >= D5 ? D2 : D5;
+		double minorAxis = D2 < D5 ? D2 : D5;
+
+		double foci = std::sqrt((majorAxis*majorAxis)-(minorAxis*minorAxis));
+
+		double inc =0;
+		int bottomCount = 0;
+
+		double spacingInc = 15.0;
+
+
+		// Bottom Elipse
+		while (inc <= (2*vtkMath::Pi())) {
+			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
+			inc=inc+(vtkMath::Pi()/spacingInc);
+			bottomCount++;
+		}
+
+		polyline->InsertNextCell(bottomCount+1);
+		for (unsigned int i = 0; i < bottomCount; i++) {
+			polyline->InsertCellPoint(i);
+		}
+		polyline->InsertCellPoint(0);
+		
+		// Top Elipse
+		int topCount = 0;
+		inc =0;
+		while (inc <= (2*vtkMath::Pi())) {
+			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D6);
+			inc=inc+(vtkMath::Pi()/spacingInc);
+			topCount++;
+		}
+
+		polyline->InsertNextCell(topCount+1);
+		for (unsigned int i  = 0; i < topCount; i++) {
+			polyline->InsertCellPoint(i+bottomCount);
+		}
+		polyline->InsertCellPoint(bottomCount);
+		
+		// connect top and bottom Elipse
+		for (unsigned int i  = 0; i < topCount; i++) {
+			polyline->InsertNextCell(2);
+			polyline->InsertCellPoint(i);
+			polyline->InsertCellPoint(i+topCount);
+		}
+
+		int totalPoints = bottomCount+topCount;
+
+		// draw top dome.
+
+		vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
+		sphere->SetRadius(D4);
+		//sphere->SetThetaResolution(25);
+		//sphere->SetPhiResolution(25);
+	
+	
+		polyData->SetPoints(points);
+		polyData->SetPolys(polyline);
+		polyData->SetLines(polyline);
+
+		vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
+		clipper->SetInput(polyData);
+		clipper->SetClipFunction(sphere);
+		clipper->SetValue(0);
+		clipper->Update();
+
+
+
+		vtkSmartPointer<vtkAppendPolyData> append = vtkSmartPointer<vtkAppendPolyData>::New();
+		//append->AddInput(cube->GetOutput());
+
+		append->AddInput(clipper->GetOutput());
+		this->VolumePolyData = append->GetOutput();
+
+		return this->VolumePolyData;
+
+	}
+
+	return NULL;
+}
 //----------------------------------------------------------------------------
 int vtkNDITracker::InternalStartTracking()
 {

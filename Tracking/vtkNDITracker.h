@@ -60,6 +60,9 @@ POSSIBILITY OF SUCH DAMAGES.
 #include "vtkTracker.h"
 #include "ndicapi.h"
 
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
+
 class vtkFrameToTimeConverter;
 
 // the number of tools the polaris can handle
@@ -115,6 +118,8 @@ public:
   // Description:
   // Return a pointer to the array containing the shape parameters.
   double* GetTrackingVolumeShapeParameters(int volume);
+
+  vtkSmartPointer<vtkPolyData> GeneratePolydataVolume();
 
   // Description:
   // Set the volume.
@@ -209,6 +214,7 @@ protected:
   int TrackingVolumeShapeTypes[NDI_MAX_VOLUMES];
   double TrackingVolumeParameters[NDI_MAX_VOLUMES][10];
   int Volume;
+  vtkSmartPointer<vtkPolyData> VolumePolyData;
   int BaudRate;
   int IsDeviceTracking;
 
