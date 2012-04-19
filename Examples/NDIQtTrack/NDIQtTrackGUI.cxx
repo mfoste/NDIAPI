@@ -146,19 +146,34 @@ void NDIQtTrackGUI::OnTrackerConfigured(QString systemInfo)
 void NDIQtTrackGUI::OnTrackerStarted()
 {
    QString toolInfo;
-   // update the tool info.
+   // update the tool info - port 1.
    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolPartNumber())
       + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolSerialNumber());
    this->m_GUI->port01DataLabel->setText( toolInfo );
+   // update the tool info - port 2.
    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolPartNumber())
       + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolSerialNumber());
    this->m_GUI->port02DataLabel->setText( toolInfo );
+   // update the tool info - port 3.
    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolPartNumber())
       + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolSerialNumber());
    this->m_GUI->port03DataLabel->setText( toolInfo );
+   // update the tool info - port 4/A.
    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolPartNumber())
       + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolSerialNumber());
    this->m_GUI->port04DataLabel->setText( toolInfo );
+   // update the tool info - port 5/B.
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(4)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(4)->GetToolSerialNumber());
+   this->m_GUI->port05DataLabel->setText( toolInfo );
+   // update the tool info - port 6/C.
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(5)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(5)->GetToolSerialNumber());
+   this->m_GUI->port06DataLabel->setText( toolInfo );
+   // update the tool info - port 7/D.
+   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(6)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(6)->GetToolSerialNumber());
+   this->m_GUI->port07DataLabel->setText( toolInfo );
 
 }
 
@@ -239,6 +254,18 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
     // Port 4
     this->m_GUI->port04EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
+  case 4:
+    // Port 5
+    this->m_GUI->port05EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 5:
+    // Port 6
+    this->m_GUI->port06EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 6:
+    // Port 7
+    this->m_GUI->port07EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
   default:
     //do nothing for now.
     break;
@@ -256,7 +283,7 @@ QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)
 
   if( !ndIsXfrmMissing( &xfrm ) )
   {
-  xfrmString.sprintf("%+ 1.6f %+ 1.6f %+ 1.6f %+ 1.6f %+ 6.4f  %+ 6.4f  %+ 6.4f", 
+  xfrmString.sprintf("%+ 1.6f %+ 1.6f %+ 1.6f %+ 1.6f %+ 6.2f  %+ 6.2f  %+ 6.2f", 
     xfrm.rotation.q0, xfrm.rotation.qx, xfrm.rotation.qy, xfrm.rotation.qz, 
     xfrm.translation.x, xfrm.translation.y, xfrm.translation.z);
   }

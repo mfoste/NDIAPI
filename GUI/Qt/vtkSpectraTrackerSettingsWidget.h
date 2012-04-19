@@ -32,47 +32,49 @@ NDI be liable for any claims, losses, damages, judgments, costs, awards, expense
 liabilities of any kind whatsoever arising directly or indirectly from any injury to person
 or property, arising from the Sample Code or any use thereof.
 */
+#ifndef __vtkSpectraTrackerSettingsWidget_h
+#define __vtkSpectraTrackerSettingsWidget_h
 
-#ifndef __vtkTrackerSettingsStructures_h
-#define __vtkTrackerSettingsStructures_h
+//#include "vtkTrackerWidget_global.h"
 
-/* ============================================================================
+#include <QWidget>
+#include <qsettings.h>
 
-  File: vtkTrackerSettingsStructures.h
-  Author: Andrew Wiles <awiles@ndigital.com>
-  Language: C++
-  Description: 
-    Various structures are declared here to be used to collect the settings
-    for the various tracking systems used with the Qt GUI.
+#include "vtkTrackerSettingsStructures.h"
 
-============================================================================ */
+#include "ui_SpectraTrackerSettingsWidget.h"
 
-// tracker system type enumerators.
-enum TRACKER_SYSTEM_TYPES
+class vtkSpectraTrackerSettingsWidget : public QWidget
 {
-  FAKE_TRACKER = 0,
-  NDI_AURORA,
-  NDI_SPECTRA = 3
+  Q_OBJECT
+
+public:
+  vtkSpectraTrackerSettingsWidget( QWidget *parent, QSettings *settings);
+  vtkSpectraTrackerSettingsWidget( QWidget *parent);
+  ~vtkSpectraTrackerSettingsWidget();
+
+  inline Ui::SpectraTrackerSettingsWidget getWidget() {return m_Widget;}
+
+  inline void SetSettings(QSettings *settings) {m_Settings = settings;}
+  inline ndiSpectraSettings GetSpectraSettings() {return this->m_SpectraSettings;}
+  void ReadTrackerSettings();
+  void WriteTrackerSettings();
+
+public slots:
+  virtual void OnLoadRomFile();
+  
+private:
+  // some helper functions.
+  void CreateActions();
+
+  // this.
+  QWidget *m_Parent;
+  // member variables.
+  Ui::SpectraTrackerSettingsWidget m_Widget;
+
+  //settings
+  QSettings *m_Settings;
+  ndiSpectraSettings m_SpectraSettings;
 };
 
-// fake tracker
-struct vtkFakeTrackerSettings
-{
-  double updateFrequency;
-};
-
-// NDI Aurora tracker settings.
-struct ndiAuroraSettings
-{
-  QStringList romFiles;
-  double updateFrequency;
-};
-
-// NDI Spectra tracker settings.
-struct ndiSpectraSettings
-{
-  QStringList romFiles; // wired 0-2, wireless 3-17
-  double updateFrequency;
-};
-
-#endif
+#endif //__vtkSpectraTrackerSettingsWidget_h

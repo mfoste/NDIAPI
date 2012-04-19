@@ -88,7 +88,7 @@ vtkTrackerWidget::~vtkTrackerWidget()
 
 QSize vtkTrackerWidget::sizeHint() const
 {
-  return QSize( 130, 110 );
+  return QSize(170, 110);
 }
 
 void vtkTrackerWidget::setupUi()
@@ -183,6 +183,20 @@ void vtkTrackerWidget::ConfigureTracker()
       }
     }
     break;
+  case NDI_SPECTRA:
+    m_Tracker = vtkNDITracker::New();
+    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200);
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraSettings().updateFrequency;
+    // load virtual roms if needed.
+    for(int i = 0; i < 12; i++ )
+    {
+      if( !this->m_TrackerSettingsDialog->getSpectraSettings().romFiles[i].isEmpty() )
+      {
+        dynamic_cast<vtkNDITracker*>(m_Tracker)->LoadVirtualSROM(i, 
+          this->m_TrackerSettingsDialog->getSpectraSettings().romFiles[i].toLatin1());
+      }
+    }
+    break;
   default:
     this->PopUpError("Invalid tracker system type given.  Check your tracker settings.");
     return;
@@ -206,7 +220,8 @@ void vtkTrackerWidget::ConfigureTracker()
     return;
   }
 
-  if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA )
+  if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+    || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
   {
     // update the volume information.
     this->m_VolumeSelectionComboBox->setEnabled(true);

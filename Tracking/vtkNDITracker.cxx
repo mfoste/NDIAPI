@@ -84,6 +84,7 @@ vtkNDITracker::vtkNDITracker()
   this->IsDeviceTracking = 0;
   this->SerialPort = -1; // default is to probe
   this->SerialDevice = 0;
+  this->Volume = 0;
   this->NumTrackingVolumes = 0;
   this->BaudRate = 9600;
   this->SetNumberOfTools(VTK_NDI_NTOOLS);
@@ -415,6 +416,10 @@ std::string vtkNDITracker::GetTrackingVolumeShapeType(int volume)
   else if( shapeType == NDI_AURORA_DOME_VOLUME )
   {
     shapeName << ": Aurora Dome Volume";
+  }
+  else
+  {
+    shapeName << ": Unknown Volume - " << shapeType;
   }
   return shapeName.str();
 }
@@ -922,10 +927,11 @@ void vtkNDITracker::EnableToolPorts()
   // reset our information about the tool ports
   for (tool = 0; tool < VTK_NDI_NTOOLS; tool++)
   {
+    /* Unnecessary:
     if (tool < 3)
     { // only reset port handle for wired tools
       this->PortHandle[tool] = 0;
-    }
+    }*/
     this->PortEnabled[tool] = 0;
   }
 
@@ -940,12 +946,16 @@ void vtkNDITracker::EnableToolPorts()
     }    
   }
   // free ports that are waiting to be freed
+  // create a list of port handles that need to be freed.
   ndiCommand(this->Device,"PHSR:01");
+  // loop through that list and free the ports needing to be freed.
   ntools = ndiGetPHSRNumberOfHandles(this->Device);
   for (tool = 0; tool < ntools; tool++)
   {
     ph = ndiGetPHSRHandle(this->Device,tool);
+    // ADW: is the next line neccessary?:
     port = this->GetToolFromHandle(ph);
+    // free the port.
     ndiCommand(this->Device,"PHF:%02X",ph);
     //fprintf(stderr,"PHF:%02X\n",ph);
     errnum = ndiGetError(this->Device);
@@ -958,7 +968,9 @@ void vtkNDITracker::EnableToolPorts()
   // initialize ports waiting to be initialized
   do // repeat as necessary (in case multi-channel tools are used) 
   {
+    // create a list of port handles that need to be initialized.
     ndiCommand(this->Device,"PHSR:02");
+    // loop through that list and initialiee the ports not initialized.
     ntools = ndiGetPHSRNumberOfHandles(this->Device);
     for (tool = 0; tool < ntools; tool++)
     {
@@ -971,10 +983,12 @@ void vtkNDITracker::EnableToolPorts()
         vtkErrorMacro(<< ndiErrorString(errnum));
       }
     }
-  }
-  while (ntools > 0 && errnum == 0);
+  } while (ntools > 0 && errnum == 0);
+
   // enable initialized tools
+  // create a list of port handles that need to be enabled.
   ndiCommand(this->Device,"PHSR:03");
+  // loop through that list to enable those port handles.
   ntools = ndiGetPHSRNumberOfHandles(this->Device);
   for (tool = 0; tool < ntools; tool++)
   {
