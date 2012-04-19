@@ -64,12 +64,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkSphere.h"
-#include "vtkTransformPolyDataFilter.h"
 #include "vtkClipPolyData.h"
-#include "vtkImplicitDataSet.h"
-#include "vtkAppendPolyData.h"
-#include "vtkElevationFilter.h"
-#include "vtkCubeSource.h"
 
 
 //----------------------------------------------------------------------------
@@ -456,7 +451,8 @@ int vtkNDITracker::SetVolume(int v)
   return 1;
 }
 
-vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
+vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSurface) {
+
 	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 
 	int D1 = this->TrackingVolumeParameters[this->Volume][0];
@@ -467,10 +463,10 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 	int D6 = this->TrackingVolumeParameters[this->Volume][5];
 
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-	//vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); <-- solid surface
+	vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); //<-- solid surface
 	vtkSmartPointer<vtkCellArray> polyline = vtkSmartPointer<vtkCellArray>::New();
 		
-	if (TrackingVolumeShapeTypes[this->Volume] == 0x0a) { // Aurora CUBE
+	if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora CUBE
 		/*
 		D1 = Minimum x value
 		D2 = Maximum x value
@@ -479,7 +475,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 		D5 = Minimum z value
 		D6 = Maximum z value
 		*/
-		D1 *=-1;
+		D5 *=-1;
 		D6 *=-1;
 
 		points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
@@ -499,14 +495,15 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 		polyline->InsertCellPoint(3);
 		polyline->InsertCellPoint(0);
 		
-		polyline->InsertNextCell(5);
 		// Far Z plane
+		polyline->InsertNextCell(5);
 		polyline->InsertCellPoint(4);
 		polyline->InsertCellPoint(5);
 		polyline->InsertCellPoint(6);
 		polyline->InsertCellPoint(7);
 		polyline->InsertCellPoint(4);
 
+		// Top
 		polyline->InsertNextCell(5);
 		polyline->InsertCellPoint(0);
 		polyline->InsertCellPoint(1);
@@ -514,6 +511,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 		polyline->InsertCellPoint(4);
 		polyline->InsertCellPoint(0); 
 		
+		// Bottom
 		polyline->InsertNextCell(5);
 		polyline->InsertCellPoint(7);
 		polyline->InsertCellPoint(3);
@@ -521,13 +519,62 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 		polyline->InsertCellPoint(6);
 		polyline->InsertCellPoint(7);
 
+		// Close Z plane
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(0);
+		
+		// Far Z plane
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(4);
+		// Top
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(0); 
+		// Bottom
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(7);
+
+		// Right
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(0); 
+		
+		// Left
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(1);
+
 		polyData->SetPoints(points);
 		polyData->SetLines(polyline);
+		if (solidSurface) {
+			polyData->SetPolys(cells);
+		}
 
 		this->VolumePolyData = polyData;
 		return this->VolumePolyData;
 
-	} else if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora Dome
+	} else if (TrackingVolumeShapeTypes[this->Volume] == 0x0A) { // Aurora Dome
 		/* 
 		D1 = Offset from Field Generator
 		D2 = Cylinder radius along x-axis
@@ -539,12 +586,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 			Note: If D6 is equal to 0, the maximum offset is equal to D4 (the maximum dome radius)
 		*/
 
-		D1=50;
-		D2=480;
-		D3=50;
-		D4=660;
-		D5=0;
-		D6=0;
+
 
 		D5 = D5 == 0? D2 : D5; // see D5 note
 		D6 = D6 == 0? D4 : D6; // see D6 note
@@ -571,9 +613,12 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 		}
 
 		polyline->InsertNextCell(bottomCount+1);
+		cells->InsertNextCell(bottomCount+1);
 		for (unsigned int i = 0; i < bottomCount; i++) {
 			polyline->InsertCellPoint(i);
+			cells->InsertCellPoint(i);
 		}
+		cells->InsertCellPoint(0);
 		polyline->InsertCellPoint(0);
 		
 		// Top Elipse
@@ -585,10 +630,13 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 			topCount++;
 		}
 
+		cells->InsertNextCell(topCount+1);
 		polyline->InsertNextCell(topCount+1);
 		for (unsigned int i  = 0; i < topCount; i++) {
 			polyline->InsertCellPoint(i+bottomCount);
+			cells->InsertCellPoint(i+bottomCount);
 		}
+		cells->InsertCellPoint(bottomCount);
 		polyline->InsertCellPoint(bottomCount);
 		
 		// connect top and bottom Elipse
@@ -596,35 +644,44 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume() {
 			polyline->InsertNextCell(2);
 			polyline->InsertCellPoint(i);
 			polyline->InsertCellPoint(i+topCount);
+
+			cells->InsertNextCell(5);
+			cells->InsertCellPoint(i);
+			cells->InsertCellPoint(i+topCount);
+			cells->InsertCellPoint(((i+1)%topCount)+topCount);
+			cells->InsertCellPoint(((i+1)%topCount));
+			cells->InsertCellPoint(i);
+
 		}
 
 		int totalPoints = bottomCount+topCount;
 
-		// draw top dome.
-
-		vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
-		sphere->SetRadius(D4);
-		//sphere->SetThetaResolution(25);
-		//sphere->SetPhiResolution(25);
-	
-	
 		polyData->SetPoints(points);
-		polyData->SetPolys(polyline);
+		if (solidSurface) {
+			polyData->SetPolys(cells);
+		}
 		polyData->SetLines(polyline);
 
-		vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
-		clipper->SetInput(polyData);
-		clipper->SetClipFunction(sphere);
-		clipper->SetValue(0);
-		clipper->Update();
+		
 
+		// draw top dome. // DOES NOT WORK YET
+		this->VolumePolyData = polyData;
+		/*
+		if (-D6 != D4) {
+			vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
+			sphere->SetRadius(D4);
 
+			vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
+			clipper->SetInput(polyData);
+			clipper->SetClipFunction(sphere);
+			clipper->SetValue(0);
+			clipper->Update();
 
-		vtkSmartPointer<vtkAppendPolyData> append = vtkSmartPointer<vtkAppendPolyData>::New();
-		//append->AddInput(cube->GetOutput());
-
-		append->AddInput(clipper->GetOutput());
-		this->VolumePolyData = append->GetOutput();
+			this->VolumePolyData = clipper->GetOutput();
+		} else {
+			this->VolumePolyData = polyData;
+		}
+		*/
 
 		return this->VolumePolyData;
 

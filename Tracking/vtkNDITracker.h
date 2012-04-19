@@ -119,7 +119,7 @@ public:
   // Return a pointer to the array containing the shape parameters.
   double* GetTrackingVolumeShapeParameters(int volume);
 
-  vtkSmartPointer<vtkPolyData> GeneratePolydataVolume();
+  vtkSmartPointer<vtkPolyData> GeneratePolydataVolume(bool solidSurface=false);
 
   // Description:
   // Set the volume.
