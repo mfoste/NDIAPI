@@ -2796,7 +2796,7 @@ static void ndi_COMM_helper(ndicapi *pol, const char *cp, const char *crp)
   int newspeed = 9600;
   int newhand = 0;
 
-  if (cp[5] >= '0' && cp[5] <= '5') {
+  if (cp[5] >= '0' && cp[5] <= '6') {
     newspeed = convert_baud[cp[5]-'0'];
   }
   if (cp[6] == '1') {
