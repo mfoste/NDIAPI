@@ -54,7 +54,7 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
   m_Tracker = 0;
   //m_GUI.setupUi(this);
 
-  this->m_TrackerSettingsDialog = new vtkTrackerSettingsDialog(this);
+  this->m_TrackerSettingsDialog = vtkTrackerSettingsDialog::New(this);
 
   // set up the timer.
   m_Timer = new QTimer(this);
@@ -83,7 +83,6 @@ vtkTrackerWidget::~vtkTrackerWidget()
   }
   //delete m_Tracker;
   delete m_Timer;
-  delete m_TrackerSettingsDialog;
 }
 
 QSize vtkTrackerWidget::sizeHint() const

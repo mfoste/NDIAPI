@@ -52,9 +52,14 @@ class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
   Q_OBJECT
 
 public:
+  static vtkTrackerSettingsDialog* New();
+  static vtkTrackerSettingsDialog* New(QWidget *parent);
+
+protected:
   vtkTrackerSettingsDialog( QWidget *parent);
   ~vtkTrackerSettingsDialog();
 
+public:
   void UpdateAndShow();
   inline int getSystem() {return this->m_System;}
   inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
@@ -75,7 +80,7 @@ private:
   // this.
   QWidget *m_Parent;
   // member variables.
-  Ui::TrackerSettingsDialog      m_GUI;
+  Ui::TrackerSettingsDialog      *m_GUI;
   vtkFakeTrackerSettingsWidget *m_FakeTrackerSettingsWidget;
   vtkAuroraTrackerSettingsWidget *m_AuroraSettingsWidget;
   vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;

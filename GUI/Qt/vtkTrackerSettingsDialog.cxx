@@ -41,32 +41,43 @@ or property, arising from the Sample Code or any use thereof.
 //#include "vtkTrackerSettingsDialog.moc"
 #include "vtkTrackerSettingsDialog.h"
 
+vtkTrackerSettingsDialog* vtkTrackerSettingsDialog::New()
+{
+  return vtkTrackerSettingsDialog::New(0);
+}
+
+vtkTrackerSettingsDialog* vtkTrackerSettingsDialog::New(QWidget *parent)
+{
+  return new vtkTrackerSettingsDialog(parent);
+}
+
 vtkTrackerSettingsDialog::vtkTrackerSettingsDialog( QWidget *parent )
+  : QDialog(parent), m_GUI(new Ui::TrackerSettingsDialog)
 {
   this->m_Parent = parent;
   // set up the GUI.
-  m_GUI.setupUi(this);
+  m_GUI->setupUi(this);
 
   // initialize the settings.
   this->m_Settings = new QSettings("./tracker.ini", QSettings::IniFormat);
 
   // add the FakeTrackerSettingsWidget to the stackedWidget
   this->m_FakeTrackerSettingsWidget = new vtkFakeTrackerSettingsWidget( this, this->m_Settings );
-  this->m_GUI.stackedWidget->insertWidget(FAKE_TRACKER, this->m_FakeTrackerSettingsWidget );
+  this->m_GUI->stackedWidget->insertWidget(FAKE_TRACKER, this->m_FakeTrackerSettingsWidget );
   // add the AuroraTrackerSettingsWidget to the stackedWidget
   this->m_AuroraSettingsWidget = new vtkAuroraTrackerSettingsWidget( this, this->m_Settings );
-  this->m_GUI.stackedWidget->insertWidget(NDI_AURORA, this->m_AuroraSettingsWidget );
+  this->m_GUI->stackedWidget->insertWidget(NDI_AURORA, this->m_AuroraSettingsWidget );
   // add the SpectraTrackerSettingsWidget to the stackedWidget
   this->m_SpectraSettingsWidget = new vtkSpectraTrackerSettingsWidget(this, this->m_Settings);
-  this->m_GUI.stackedWidget->insertWidget(NDI_SPECTRA, this->m_SpectraSettingsWidget );
+  this->m_GUI->stackedWidget->insertWidget(NDI_SPECTRA, this->m_SpectraSettingsWidget );
   
   // set up the connections in the GUI.
   this->CreateActions();
   
   // update the tracking system comboBox.
-  this->m_GUI.trackingSystemComboBox->addItem("Fake Tracker", FAKE_TRACKER);
-  this->m_GUI.trackingSystemComboBox->addItem("Aurora", NDI_AURORA);
-  this->m_GUI.trackingSystemComboBox->addItem("Spectra", NDI_SPECTRA);
+  this->m_GUI->trackingSystemComboBox->addItem("Fake Tracker", FAKE_TRACKER);
+  this->m_GUI->trackingSystemComboBox->addItem("Aurora", NDI_AURORA);
+  this->m_GUI->trackingSystemComboBox->addItem("Spectra", NDI_SPECTRA);
 
   // read the tracker settings in. 
   this->ReadTrackerSettings();
@@ -78,7 +89,7 @@ vtkTrackerSettingsDialog::~vtkTrackerSettingsDialog()
 
 void vtkTrackerSettingsDialog::CreateActions()
 {
-  connect(this->m_GUI.trackingSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnTrackingSystemChanged(int)) );
+  connect(this->m_GUI->trackingSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnTrackingSystemChanged(int)) );
   
 }
 
@@ -92,8 +103,8 @@ void vtkTrackerSettingsDialog::ReadTrackerSettings()
 {
   // which tracking system? NDI_AURORA is default
   this->m_System = this->m_Settings->value("TrackingSystem", NDI_AURORA).toInt();
-  this->m_GUI.trackingSystemComboBox->setCurrentIndex(this->m_GUI.trackingSystemComboBox->findData(this->m_System));
-  this->m_GUI.stackedWidget->setCurrentIndex(this->m_System);
+  this->m_GUI->trackingSystemComboBox->setCurrentIndex(this->m_GUI->trackingSystemComboBox->findData(this->m_System));
+  this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
 
 
   // Fake Tracker Settings.
@@ -118,8 +129,8 @@ void vtkTrackerSettingsDialog::WriteTrackerSettings()
 
 void vtkTrackerSettingsDialog::OnTrackingSystemChanged(int index)
 {
-  this->m_System = this->m_GUI.trackingSystemComboBox->itemData(index).toInt();
-  this->m_GUI.stackedWidget->setCurrentIndex(this->m_System);
+  this->m_System = this->m_GUI->trackingSystemComboBox->itemData(index).toInt();
+  this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
 }
 
 void vtkTrackerSettingsDialog::accept()
