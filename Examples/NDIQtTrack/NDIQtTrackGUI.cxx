@@ -135,6 +135,15 @@ void NDIQtTrackGUI::AboutQt()
 
 void NDIQtTrackGUI::closeEvent(QCloseEvent *event)
 {
+  // if tracker exists.
+  if( this->m_GUI->TrackerWidget->getTracker() )
+  {
+    // if it is tracking, stop it.
+    if( this->m_GUI->TrackerWidget->getTracker()->IsTracking() )
+    {
+      this->m_GUI->TrackerWidget->getTracker()->StopTracking();
+    }
+  }
   event->accept();
 }
 

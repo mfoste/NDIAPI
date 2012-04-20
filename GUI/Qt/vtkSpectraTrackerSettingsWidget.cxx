@@ -50,6 +50,28 @@ vtkSpectraTrackerSettingsWidget::vtkSpectraTrackerSettingsWidget( QWidget *paren
   {
     this->m_SpectraSettings.romFiles << "";
   }
+  this->m_SpectraSettings.bUseManual = false;
+  this->m_SpectraSettings.baudRate = -1;
+  this->m_SpectraSettings.commPort = -1;
+
+  this->m_Widget.baudRateComboBox->addItem("Auto", -1);
+  this->m_Widget.baudRateComboBox->addItem("9600", 9600);
+  this->m_Widget.baudRateComboBox->addItem("14400", 14400);
+  this->m_Widget.baudRateComboBox->addItem("19200", 19200);
+  this->m_Widget.baudRateComboBox->addItem("38400", 38400);
+  this->m_Widget.baudRateComboBox->addItem("57600", 57600);
+  this->m_Widget.baudRateComboBox->addItem("115200", 115200);
+  this->m_Widget.baudRateComboBox->addItem("921600", 921600);
+
+  this->m_Widget.commPortComboBox->addItem("Auto", -1);
+  this->m_Widget.commPortComboBox->addItem("COM1", 1);
+  this->m_Widget.commPortComboBox->addItem("COM2", 2);
+  this->m_Widget.commPortComboBox->addItem("COM3", 3);
+  this->m_Widget.commPortComboBox->addItem("COM4", 4);
+  this->m_Widget.commPortComboBox->addItem("COM5", 5);
+  this->m_Widget.commPortComboBox->addItem("COM6", 6);
+  this->m_Widget.commPortComboBox->addItem("COM7", 7);
+  this->m_Widget.commPortComboBox->addItem("COM8", 8);
 
   // set validators on port line edits.
   this->m_Widget.updateFrequencyLineEdit->setValidator(new QDoubleValidator(0.1, 60, 1, this) );
@@ -75,6 +97,10 @@ void vtkSpectraTrackerSettingsWidget::CreateActions()
   connect(this->m_Widget.portBRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
   connect(this->m_Widget.portCRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
   connect(this->m_Widget.portDRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
+  // manual parameters.
+  connect(this->m_Widget.useManualParmsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnUseManual(bool)) );
+  connect(this->m_Widget.commPortComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnCommPortChanged(int)) );
+  connect(this->m_Widget.baudRateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnBaudRateChanged(int)) );
 }
 
 void vtkSpectraTrackerSettingsWidget::ReadTrackerSettings()
@@ -245,24 +271,32 @@ void vtkSpectraTrackerSettingsWidget::OnLoadRomFile()
   {
     //TODO: error pop-up.
   }
-  
-  switch( port )
-  {
-  case 0:
-    
-    break;
-  case 1:
-    
-    break;
-  case 2:
-    
-    break;
-  case 3:
-    
-    break;
-  default:
-    // pop up message box invalid port given.
-    break;
-  }
+}
 
+void vtkSpectraTrackerSettingsWidget::OnUseManual(bool bUseManual)
+{
+  this->m_SpectraSettings.bUseManual = bUseManual;
+
+  if(!bUseManual)
+  {
+    this->m_Widget.baudRateComboBox->setCurrentIndex(0);
+    this->m_Widget.commPortComboBox->setCurrentIndex(0);
+  }
+  else
+  {
+    this->m_SpectraSettings.baudRate 
+      = this->m_Widget.baudRateComboBox->itemData(this->m_Widget.baudRateComboBox->currentIndex()).toInt();
+    this->m_SpectraSettings.commPort 
+      = this->m_Widget.commPortComboBox->itemData(this->m_Widget.commPortComboBox->currentIndex()).toInt();
+  }
+}
+
+void vtkSpectraTrackerSettingsWidget::OnCommPortChanged(int index)
+{
+  this->m_SpectraSettings.commPort = this->m_Widget.commPortComboBox->itemData(index).toInt();
+}
+
+void vtkSpectraTrackerSettingsWidget::OnBaudRateChanged(int index)
+{
+  this->m_SpectraSettings.baudRate = this->m_Widget.baudRateComboBox->itemData(index).toInt();
 }

@@ -66,6 +66,11 @@ struct ndiAuroraSettings
 {
   QStringList romFiles;
   double updateFrequency;
+  
+  // manual parameters.
+  bool bUseManual;
+  int commPort;
+  int baudRate;
 };
 
 // NDI Spectra tracker settings.
@@ -73,6 +78,11 @@ struct ndiSpectraSettings
 {
   QStringList romFiles; // wired 0-2, wireless 3-17
   double updateFrequency;
+
+  // manual parameters.
+  bool bUseManual;
+  int commPort;
+  int baudRate;
 };
 
 #endif

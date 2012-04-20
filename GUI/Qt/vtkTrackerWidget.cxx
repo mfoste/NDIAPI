@@ -135,6 +135,13 @@ void vtkTrackerWidget::CreateActions()
 
 void vtkTrackerWidget::OnConfigureTracker()
 {
+  if( this->m_Tracker )
+  {
+    if( this->m_Tracker->IsTracking() )
+    {
+      this->m_Tracker->StopTracking();
+    }
+  }
   /* launch tracker settings dialog. */
   this->m_TrackerSettingsDialog->UpdateAndShow();
 }
@@ -170,7 +177,16 @@ void vtkTrackerWidget::ConfigureTracker()
     break;
   case NDI_AURORA:
     m_Tracker = vtkNDITracker::New();
-    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200);
+    if( this->m_TrackerSettingsDialog->getAuroraSettings().bUseManual )
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getAuroraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getAuroraSettings().commPort);
+    }
+    else
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
+    }
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAuroraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 4; i++ )
@@ -184,7 +200,16 @@ void vtkTrackerWidget::ConfigureTracker()
     break;
   case NDI_SPECTRA:
     m_Tracker = vtkNDITracker::New();
-    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200);
+    if( this->m_TrackerSettingsDialog->getSpectraSettings().bUseManual )
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getSpectraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getSpectraSettings().commPort);
+    }
+    else
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
+    }
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 12; i++ )

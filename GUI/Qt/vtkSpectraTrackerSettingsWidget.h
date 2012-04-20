@@ -62,6 +62,9 @@ public:
 
 public slots:
   virtual void OnLoadRomFile();
+  virtual void OnUseManual(bool bUseManual);
+  virtual void OnCommPortChanged(int index);
+  virtual void OnBaudRateChanged(int index);
   
 private:
   // some helper functions.
