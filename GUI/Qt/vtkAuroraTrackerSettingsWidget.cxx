@@ -161,19 +161,19 @@ void vtkAuroraTrackerSettingsWidget::OnLoadRomFile()
   int port;
   QString filename;
 
-  if( this->sender()->objectName().compare("port01AuroraRomFileBrowseButton") )
+  if( this->sender()->objectName().compare("port01AuroraRomFileBrowseButton") == 0 )
   {
     port = 0;
   }
-  else if(this->sender()->objectName().compare("port02AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port02AuroraRomFileBrowseButton") == 0 )
   {
     port = 1;
   }
-  else if(this->sender()->objectName().compare("port03AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port03AuroraRomFileBrowseButton") == 0 )
   {
     port = 2;
   }
-  else if(this->sender()->objectName().compare("port04AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port04AuroraRomFileBrowseButton") == 0 )
   {
     port = 3;
   }
@@ -191,19 +191,19 @@ void vtkAuroraTrackerSettingsWidget::OnLoadRomFile()
     this->m_Widget.port01AuroraRomFileLineEdit->setText(filename);
     break;
   case 1:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 2"), 
       this->m_Widget.port02AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port02AuroraRomFileLineEdit->setText(filename);
     break;
   case 2:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 3"), 
       this->m_Widget.port03AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port03AuroraRomFileLineEdit->setText(filename);
     break;
   case 3:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 4"), 
       this->m_Widget.port04AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port04AuroraRomFileLineEdit->setText(filename);
