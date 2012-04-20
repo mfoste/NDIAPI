@@ -44,6 +44,7 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkTrackerSettingsDialog.h"
 #include "vtkFakeTrackerSettingsWidget.h"
 #include "vtkAuroraTrackerSettingsWidget.h"
+#include "vtkSpectraTrackerSettingsWidget.h"
 #include "ui_vtkTrackerSettingsDialog.h"
 
 class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
@@ -51,13 +52,19 @@ class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
   Q_OBJECT
 
 public:
+  static vtkTrackerSettingsDialog* New();
+  static vtkTrackerSettingsDialog* New(QWidget *parent);
+
+protected:
   vtkTrackerSettingsDialog( QWidget *parent);
   ~vtkTrackerSettingsDialog();
 
+public:
   void UpdateAndShow();
   inline int getSystem() {return this->m_System;}
   inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
   inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
+  inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
 
 public slots:
   virtual void OnTrackingSystemChanged( int index );
@@ -73,9 +80,11 @@ private:
   // this.
   QWidget *m_Parent;
   // member variables.
-  Ui::TrackerSettingsDialog      m_GUI;
+  Ui::TrackerSettingsDialog      *m_GUI;
   vtkFakeTrackerSettingsWidget *m_FakeTrackerSettingsWidget;
   vtkAuroraTrackerSettingsWidget *m_AuroraSettingsWidget;
+  vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;
+  
   // settings.
   QSettings *m_Settings; 
   // stored data.

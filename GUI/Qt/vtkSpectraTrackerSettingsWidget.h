@@ -32,8 +32,8 @@ NDI be liable for any claims, losses, damages, judgments, costs, awards, expense
 liabilities of any kind whatsoever arising directly or indirectly from any injury to person
 or property, arising from the Sample Code or any use thereof.
 */
-#ifndef __vtkAuroraTrackerSettingsWidget_h
-#define __vtkAuroraTrackerSettingsWidget_h
+#ifndef __vtkSpectraTrackerSettingsWidget_h
+#define __vtkSpectraTrackerSettingsWidget_h
 
 //#include "vtkTrackerWidget_global.h"
 
@@ -42,21 +42,21 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "vtkTrackerSettingsStructures.h"
 
-#include "ui_AuroraTrackerSettingsWidget.h"
+#include "ui_SpectraTrackerSettingsWidget.h"
 
-class vtkAuroraTrackerSettingsWidget : public QWidget
+class vtkSpectraTrackerSettingsWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  vtkAuroraTrackerSettingsWidget( QWidget *parent, QSettings *settings);
-  vtkAuroraTrackerSettingsWidget( QWidget *parent);
-  ~vtkAuroraTrackerSettingsWidget();
+  vtkSpectraTrackerSettingsWidget( QWidget *parent, QSettings *settings);
+  vtkSpectraTrackerSettingsWidget( QWidget *parent);
+  ~vtkSpectraTrackerSettingsWidget();
 
-  inline Ui::AuroraTrackerSettingsWidget getWidget() {return m_Widget;}
+  inline Ui::SpectraTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline ndiAuroraSettings GetAuroraSettings() {return this->m_AuroraSettings;}
+  inline ndiSpectraSettings GetSpectraSettings() {return this->m_SpectraSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
 
@@ -65,7 +65,6 @@ public slots:
   virtual void OnUseManual(bool bUseManual);
   virtual void OnCommPortChanged(int index);
   virtual void OnBaudRateChanged(int index);
-
   
 private:
   // some helper functions.
@@ -74,11 +73,11 @@ private:
   // this.
   QWidget *m_Parent;
   // member variables.
-  Ui::AuroraTrackerSettingsWidget m_Widget;
+  Ui::SpectraTrackerSettingsWidget m_Widget;
 
   //settings
   QSettings *m_Settings;
-  ndiAuroraSettings m_AuroraSettings;
+  ndiSpectraSettings m_SpectraSettings;
 };
 
-#endif //__vtkAuroraTrackerSettingsWidget_h
+#endif //__vtkSpectraTrackerSettingsWidget_h

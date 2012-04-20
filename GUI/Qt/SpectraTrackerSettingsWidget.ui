@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AuroraTrackerSettingsWidget</class>
- <widget class="QWidget" name="AuroraTrackerSettingsWidget">
+ <class>SpectraTrackerSettingsWidget</class>
+ <widget class="QWidget" name="SpectraTrackerSettingsWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>875</width>
-    <height>237</height>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_3">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>NDI Aurora Settings</string>
+        <string>NDI Polaris Spectra Settings</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
@@ -27,14 +27,14 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QLabel" name="updateFrequencyAuroraLabel">
+             <widget class="QLabel" name="updateFrequencyLabel">
               <property name="text">
                <string>Update Frequency (Hz):</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="updateFrequencyAuroraLineEdit">
+             <widget class="QLineEdit" name="updateFrequencyLineEdit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -65,25 +65,42 @@
            </layout>
           </item>
           <item>
+           <widget class="QLabel" name="wiredToolsLabel">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Wired Tools</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
-               <widget class="QLabel" name="port01AuroraLabel">
+               <widget class="QLabel" name="port01Label">
                 <property name="text">
                  <string>Port 1:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="port01AuroraVirtualRomCheckBox">
+               <widget class="QCheckBox" name="port01VirtualRomCheckBox">
                 <property name="text">
-                 <string>Virtual Rom?</string>
+                 <string>Virtual ROM?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="port01AuroraRomFileLineEdit">
+               <widget class="QLineEdit" name="port01RomFileLineEdit">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -93,7 +110,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="port01AuroraRomFileBrowseButton">
+               <widget class="QPushButton" name="port01RomFileBrowseButton">
                 <property name="text">
                  <string>Browse</string>
                 </property>
@@ -104,21 +121,21 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLabel" name="port02AuroraLabel">
+               <widget class="QLabel" name="port02Label">
                 <property name="text">
                  <string>Port 2:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="port02AuroraVirtualRomCheckBox">
+               <widget class="QCheckBox" name="port02VirtualRomCheckBox">
                 <property name="text">
-                 <string>Virtual Rom?</string>
+                 <string>Virtual ROM?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="port02AuroraRomFileLineEdit">
+               <widget class="QLineEdit" name="port02RomFileLineEdit">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -128,7 +145,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="port02AuroraRomFileBrowseButton">
+               <widget class="QPushButton" name="port02RomFileBrowseButton">
                 <property name="text">
                  <string>Browse</string>
                 </property>
@@ -139,21 +156,21 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QLabel" name="port03AuroraLabel">
+               <widget class="QLabel" name="port03Label">
                 <property name="text">
                  <string>Port 3:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="port03AuroraVirtualRomCheckBox">
+               <widget class="QCheckBox" name="port03VirtualRomCheckBox">
                 <property name="text">
-                 <string>Virtual Rom?</string>
+                 <string>Virtual ROM?</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="port03AuroraRomFileLineEdit">
+               <widget class="QLineEdit" name="port03RomFileLineEdit">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -163,7 +180,129 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="port03AuroraRomFileBrowseButton">
+               <widget class="QPushButton" name="port03RomFileBrowseButton">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="wirelessToolsLabel">
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Wireless Tools</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QLabel" name="portALabel">
+                <property name="text">
+                 <string>Port A:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="portAVirtualROMLabel">
+                <property name="text">
+                 <string>Virtual ROM</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="portARomFileLineEdit">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="portARomFileBrowseButton">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLabel" name="portBLabel">
+                <property name="text">
+                 <string>Port B:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="portBVirtualROMLabel">
+                <property name="text">
+                 <string>Virtual ROM</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="portBRomFileLineEdit">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="portBRomFileBrowseButton">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLabel" name="portCLabel">
+                <property name="text">
+                 <string>Port C:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="portCVirtualROMLabel">
+                <property name="text">
+                 <string>Virtual ROM</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="portCRomFileLineEdit">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="portCRomFileBrowseButton">
                 <property name="text">
                  <string>Browse</string>
                 </property>
@@ -174,21 +313,21 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
-               <widget class="QLabel" name="port04AuroraLabel">
+               <widget class="QLabel" name="portDLabel">
                 <property name="text">
-                 <string>Port 4:</string>
+                 <string>Port D:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="port04AuroraVirtualRomCheckBox">
+               <widget class="QLabel" name="portDVirtualROMLabel">
                 <property name="text">
-                 <string>Virtual Rom?</string>
+                 <string>Virtual ROM</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="port04AuroraRomFileLineEdit">
+               <widget class="QLineEdit" name="portDRomFileLineEdit">
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
@@ -198,7 +337,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="port04AuroraRomFileBrowseButton">
+               <widget class="QPushButton" name="portDRomFileBrowseButton">
                 <property name="text">
                  <string>Browse</string>
                 </property>
@@ -215,7 +354,7 @@
           <property name="title">
            <string>Manual Set-Up</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2">
+          <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
@@ -280,48 +419,16 @@
   <connection>
    <sender>useManualParmsCheckBox</sender>
    <signal>clicked(bool)</signal>
-   <receiver>commPortComboBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>765</x>
-     <y>68</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>797</x>
-     <y>86</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useManualParmsCheckBox</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>baudRateComboBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>738</x>
-     <y>65</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>791</x>
-     <y>119</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useManualParmsCheckBox</sender>
-   <signal>clicked(bool)</signal>
    <receiver>commPortLabel</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>725</x>
-     <y>65</y>
+     <x>715</x>
+     <y>68</y>
     </hint>
     <hint type="destinationlabel">
-     <x>723</x>
-     <y>90</y>
+     <x>718</x>
+     <y>91</y>
     </hint>
    </hints>
   </connection>
@@ -332,12 +439,44 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>810</x>
+     <x>734</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>739</x>
+     <y>117</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useManualParmsCheckBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>commPortComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>808</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>808</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useManualParmsCheckBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>baudRateComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>827</x>
      <y>68</y>
     </hint>
     <hint type="destinationlabel">
-     <x>734</x>
-     <y>114</y>
+     <x>827</x>
+     <y>118</y>
     </hint>
    </hints>
   </connection>

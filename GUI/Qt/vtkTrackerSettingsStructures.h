@@ -51,7 +51,8 @@ or property, arising from the Sample Code or any use thereof.
 enum TRACKER_SYSTEM_TYPES
 {
   FAKE_TRACKER = 0,
-  NDI_AURORA
+  NDI_AURORA,
+  NDI_SPECTRA = 3
 };
 
 // fake tracker
@@ -65,6 +66,23 @@ struct ndiAuroraSettings
 {
   QStringList romFiles;
   double updateFrequency;
+  
+  // manual parameters.
+  bool bUseManual;
+  int commPort;
+  int baudRate;
+};
+
+// NDI Spectra tracker settings.
+struct ndiSpectraSettings
+{
+  QStringList romFiles; // wired 0-2, wireless 3-17
+  double updateFrequency;
+
+  // manual parameters.
+  bool bUseManual;
+  int commPort;
+  int baudRate;
 };
 
 #endif

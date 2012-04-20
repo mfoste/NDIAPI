@@ -45,11 +45,34 @@ vtkAuroraTrackerSettingsWidget::vtkAuroraTrackerSettingsWidget( QWidget *parent,
   m_Widget.setupUi(this);
   this->CreateActions();
 
-  // initialize the from file list.
+  // initialize the rom file list.
   for(int i=0; i < 4; i++)
   {
     this->m_AuroraSettings.romFiles << "";
   }
+  this->m_AuroraSettings.bUseManual = false;
+  this->m_AuroraSettings.baudRate = -1;
+  this->m_AuroraSettings.commPort = -1;
+
+  this->m_Widget.baudRateComboBox->addItem("Auto", -1);
+  this->m_Widget.baudRateComboBox->addItem("9600", 9600);
+  this->m_Widget.baudRateComboBox->addItem("14400", 14400);
+  this->m_Widget.baudRateComboBox->addItem("19200", 19200);
+  this->m_Widget.baudRateComboBox->addItem("38400", 38400);
+  this->m_Widget.baudRateComboBox->addItem("57600", 57600);
+  this->m_Widget.baudRateComboBox->addItem("115200", 115200);
+  this->m_Widget.baudRateComboBox->addItem("921600", 921600);
+
+  this->m_Widget.commPortComboBox->addItem("Auto", -1);
+  this->m_Widget.commPortComboBox->addItem("COM1", 1);
+  this->m_Widget.commPortComboBox->addItem("COM2", 2);
+  this->m_Widget.commPortComboBox->addItem("COM3", 3);
+  this->m_Widget.commPortComboBox->addItem("COM4", 4);
+  this->m_Widget.commPortComboBox->addItem("COM5", 5);
+  this->m_Widget.commPortComboBox->addItem("COM6", 6);
+  this->m_Widget.commPortComboBox->addItem("COM7", 7);
+  this->m_Widget.commPortComboBox->addItem("COM8", 8);
+
 
   // set validators on port line edits.
   this->m_Widget.updateFrequencyAuroraLineEdit->setValidator(new QDoubleValidator(0.1, 40, 1, this) );
@@ -70,6 +93,9 @@ void vtkAuroraTrackerSettingsWidget::CreateActions()
   connect(this->m_Widget.port02AuroraRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
   connect(this->m_Widget.port03AuroraRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
   connect(this->m_Widget.port04AuroraRomFileBrowseButton, SIGNAL(clicked()), this, SLOT(OnLoadRomFile()) );
+  connect(this->m_Widget.useManualParmsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnUseManual(bool)) );
+  connect(this->m_Widget.commPortComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnCommPortChanged(int)) );
+  connect(this->m_Widget.baudRateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnBaudRateChanged(int)) );
 }
 
 void vtkAuroraTrackerSettingsWidget::ReadTrackerSettings()
@@ -161,19 +187,19 @@ void vtkAuroraTrackerSettingsWidget::OnLoadRomFile()
   int port;
   QString filename;
 
-  if( this->sender()->objectName().compare("port01AuroraRomFileBrowseButton") )
+  if( this->sender()->objectName().compare("port01AuroraRomFileBrowseButton") == 0 )
   {
     port = 0;
   }
-  else if(this->sender()->objectName().compare("port02AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port02AuroraRomFileBrowseButton") == 0 )
   {
     port = 1;
   }
-  else if(this->sender()->objectName().compare("port03AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port03AuroraRomFileBrowseButton") == 0 )
   {
     port = 2;
   }
-  else if(this->sender()->objectName().compare("port04AuroraRomFileBrowseButton"))
+  else if(this->sender()->objectName().compare("port04AuroraRomFileBrowseButton") == 0 )
   {
     port = 3;
   }
@@ -191,19 +217,19 @@ void vtkAuroraTrackerSettingsWidget::OnLoadRomFile()
     this->m_Widget.port01AuroraRomFileLineEdit->setText(filename);
     break;
   case 1:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 2"), 
       this->m_Widget.port02AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port02AuroraRomFileLineEdit->setText(filename);
     break;
   case 2:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 3"), 
       this->m_Widget.port03AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port03AuroraRomFileLineEdit->setText(filename);
     break;
   case 3:
-    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 1"), 
+    filename = QFileDialog::getOpenFileName(this, tr("Open Aurora ROM File: Port 4"), 
       this->m_Widget.port04AuroraRomFileLineEdit->text(), tr("NDI ROM File (*.rom)") );
     if( filename.isEmpty() ) return;
     this->m_Widget.port04AuroraRomFileLineEdit->setText(filename);
@@ -212,5 +238,32 @@ void vtkAuroraTrackerSettingsWidget::OnLoadRomFile()
     // pop up message box invalid port given.
     break;
   }
+}
 
+void vtkAuroraTrackerSettingsWidget::OnUseManual(bool bUseManual)
+{
+  this->m_AuroraSettings.bUseManual = bUseManual;
+
+  if(!bUseManual)
+  {
+    this->m_Widget.baudRateComboBox->setCurrentIndex(0);
+    this->m_Widget.commPortComboBox->setCurrentIndex(0);
+  }
+  else
+  {
+    this->m_AuroraSettings.baudRate 
+      = this->m_Widget.baudRateComboBox->itemData(this->m_Widget.baudRateComboBox->currentIndex()).toInt();
+    this->m_AuroraSettings.commPort 
+      = this->m_Widget.commPortComboBox->itemData(this->m_Widget.commPortComboBox->currentIndex()).toInt();
+  }
+}
+
+void vtkAuroraTrackerSettingsWidget::OnCommPortChanged(int index)
+{
+  this->m_AuroraSettings.commPort = this->m_Widget.commPortComboBox->itemData(index).toInt();
+}
+
+void vtkAuroraTrackerSettingsWidget::OnBaudRateChanged(int index)
+{
+  this->m_AuroraSettings.baudRate = this->m_Widget.baudRateComboBox->itemData(index).toInt();
 }
