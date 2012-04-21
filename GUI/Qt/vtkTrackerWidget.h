@@ -59,6 +59,9 @@ public:
 
   QSize sizeHint() const;
 
+  void Initialize();
+  void Initialize(QString settingsFile);
+
   inline vtkTracker* getTracker() {return m_Tracker;}
   void UpdateToolTransform(int port, QString status);
   void UpdateToolTransform(int port, ndQuatTransformation xfrm);

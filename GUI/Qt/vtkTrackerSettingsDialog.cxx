@@ -58,8 +58,27 @@ vtkTrackerSettingsDialog::vtkTrackerSettingsDialog( QWidget *parent )
   // set up the GUI.
   m_GUI->setupUi(this);
 
+  
+}
+
+vtkTrackerSettingsDialog::~vtkTrackerSettingsDialog()
+{
+}
+
+void vtkTrackerSettingsDialog::CreateActions()
+{
+  connect(this->m_GUI->trackingSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnTrackingSystemChanged(int)) );
+  
+}
+
+void vtkTrackerSettingsDialog::Initialize(QString settingsFile)
+{
+  if( settingsFile.isEmpty() )
+  {
+    settingsFile = "./tracker.ini";
+  }
   // initialize the settings.
-  this->m_Settings = new QSettings("./tracker.ini", QSettings::IniFormat);
+  this->m_Settings = new QSettings(settingsFile, QSettings::IniFormat);
 
   // add the FakeTrackerSettingsWidget to the stackedWidget
   this->m_FakeTrackerSettingsWidget = new vtkFakeTrackerSettingsWidget( this, this->m_Settings );
@@ -81,16 +100,6 @@ vtkTrackerSettingsDialog::vtkTrackerSettingsDialog( QWidget *parent )
 
   // read the tracker settings in. 
   this->ReadTrackerSettings();
-}
-
-vtkTrackerSettingsDialog::~vtkTrackerSettingsDialog()
-{
-}
-
-void vtkTrackerSettingsDialog::CreateActions()
-{
-  connect(this->m_GUI->trackingSystemComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnTrackingSystemChanged(int)) );
-  
 }
 
 void vtkTrackerSettingsDialog::UpdateAndShow()

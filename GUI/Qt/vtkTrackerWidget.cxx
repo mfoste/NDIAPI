@@ -85,6 +85,16 @@ vtkTrackerWidget::~vtkTrackerWidget()
   delete m_Timer;
 }
 
+void vtkTrackerWidget::Initialize()
+{
+  this->Initialize("");
+}
+
+void vtkTrackerWidget::Initialize(QString settingsFile)
+{
+  this->m_TrackerSettingsDialog->Initialize(settingsFile);
+}
+
 QSize vtkTrackerWidget::sizeHint() const
 {
   return QSize(170, 110);
