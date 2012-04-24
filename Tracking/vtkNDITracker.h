@@ -66,6 +66,12 @@ class vtkFrameToTimeConverter;
 #define VTK_NDI_NTOOLS 12
 #define VTK_NDI_REPLY_LEN 2048
 
+// types of NDI systems that use the combined API.
+#define NDI_AURORA_SYSTEM          0x01
+#define NDI_POLARIS_SPECTRA_SYSTEM 0x02
+#define NDI_POLARIS_VICRA_SYSTEM   0x04
+#define NDI_POLARIS_SYSTEM         0x08 // any other system would be Polaris.
+
 class VTK_EXPORT vtkNDITracker : public vtkTracker
 {
 public:
@@ -205,6 +211,7 @@ protected:
 
   vtkMatrix4x4 *SendMatrix;
   int SerialPort; 
+  int NDISystemType;
   int NumTrackingVolumes;
   int TrackingVolumeShapeTypes[NDI_MAX_VOLUMES];
   double TrackingVolumeParameters[NDI_MAX_VOLUMES][10];
