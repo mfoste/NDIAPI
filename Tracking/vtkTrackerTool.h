@@ -107,7 +107,8 @@ public:
   // is the uncertainty (one standard deviation) in the position of the
   // origin for any particular measurement.
   void InitializeToolTipCalibration();
-  int InsertNextCalibrationPoint();
+  //int InsertNextCalibrationPoint();
+  vtkSetMacro(CollectToolTipCalibrationData, int);
   double DoToolTipCalibration();
 
   // Description:
@@ -191,6 +192,7 @@ protected:
 
   vtkAmoebaMinimizer *Minimizer;
   vtkDoubleArray *CalibrationArray;
+  int CollectToolTipCalibrationData;
 
   int Flags;
 

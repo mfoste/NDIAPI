@@ -60,6 +60,18 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
   m_Timer = new QTimer(this);
   this->m_TrackerUpdateFrequency = 20; // arbitrary default of 20.
 
+  // set up the pivot variables.
+  this->m_PivotTool = -1;
+  this->m_bPrePivot = false;
+  this->m_PrePivotTime = 0.0;
+  this->m_bPivot = false;
+  this->m_PivotTime = 0.0;
+  // pivot timers.
+  this->m_PrePivotTimer = new QTimer(this);
+  this->m_PrePivotTimer->setSingleShot(this);
+  this->m_PivotTimer = new QTimer(this);
+  this->m_PivotTimer->setSingleShot(true);
+
   this->setupUi();
   this->setupUiLayout();
   this->CreateActions();  
@@ -83,6 +95,7 @@ vtkTrackerWidget::~vtkTrackerWidget()
   }
   //delete m_Tracker;
   delete m_Timer;
+  delete m_PivotTimer;
 }
 
 void vtkTrackerWidget::Initialize()
@@ -137,10 +150,13 @@ void vtkTrackerWidget::CreateActions()
 {
   connect(m_ConfigureTrackerButton, SIGNAL(clicked()), this, SLOT(OnConfigureTracker()));
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
-  connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
+  connect(m_VolumeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnVolumeSelected(int)));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_Timer, SIGNAL(timeout()), this, SLOT(UpdateData()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
+  //pivot connections.
+  connect(this->m_PrePivotTimer, SIGNAL(timeout()), this, SLOT(OnStartPivot()));
+  connect(this->m_PivotTimer, SIGNAL(timeout()), this, SLOT(OnStopPivot()));
 }
 
 void vtkTrackerWidget::OnConfigureTracker()
@@ -304,8 +320,12 @@ void vtkTrackerWidget::OnStopTracker()
 
   m_StartTrackingButton->setEnabled(true);
   m_StopTrackingButton->setEnabled(false);
-  this->m_VolumeSelectionComboBox->setEnabled(true);
 
+  if( (this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA) 
+    || (this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA) )
+  {
+    this->m_VolumeSelectionComboBox->setEnabled(true);
+  }
   emit TrackerStopped();
 }
 void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
@@ -336,8 +356,64 @@ void vtkTrackerWidget::UpdateData ()
     if (m_Tracker->IsTracking())
     {
       this->m_Tracker->Update();
+      if( this->m_bPrePivot )
+      {
+        emit ElapsedPrePivotTime((int)this->m_PhaseTime.elapsed()/1000.0);
+      }
+      else if( this->m_bPivot )
+      {
+        //m_Tracker->GetTool(this->m_PivotTool)->InsertNextCalibrationPoint();
+        emit ElapsedPivotTime((int)this->m_PhaseTime.elapsed()/1000.0);
+      }
     }
   }
+}
+
+void vtkTrackerWidget::OnInitializePivot(int port, double preTime, double collectTime)
+{
+  if( port > -1 && port < m_Tracker->GetNumberOfTools() )
+  {
+    this->m_PivotTool = port;
+    this->m_PrePivotTime = preTime;
+    this->m_PivotTime = collectTime;
+
+    // initialize the pivot tool.
+    this->m_Tracker->GetTool(this->m_PivotTool)->InitializeToolTipCalibration();
+
+    // start the timer.
+    this->m_bPrePivot = true;
+    this->m_PhaseTime.start();
+    this->m_PrePivotTimer->start(1000*this->m_PrePivotTime);
+
+    emit this->PrePivotStarted("Get Ready to Pivot...", (int)this->m_PrePivotTime);
+  }
+  else
+  {
+    this->PopUpError("Invalid port number provided for pivoting.");
+  }
+}
+
+void vtkTrackerWidget::OnStartPivot()
+{
+  this->m_bPrePivot = false;
+  this->m_bPivot = true;
+  emit this->PivotStarted("Pivot Now...", (int)this->m_PivotTime);
+  this->m_PhaseTime.start();
+  m_Tracker->GetTool(this->m_PivotTool)->SetCollectToolTipCalibrationData(1);
+  this->m_PivotTimer->start(1000*this->m_PivotTime);
+}
+
+void vtkTrackerWidget::OnStopPivot()
+{
+  double error;
+  this->m_bPivot = false;
+  m_Tracker->GetTool(this->m_PivotTool)->SetCollectToolTipCalibrationData(0);
+  // compute the calibration
+  error = this->m_Tracker->GetTool(this->m_PivotTool)->DoToolTipCalibration();
+
+  emit PivotFinished(error, this->m_Tracker->GetTool(this->m_PivotTool)->GetCalibrationMatrix());
+  //emit PivotError(error);
+  //emit PivotCalibrationMatrix(this->m_PivotTool, this->m_Tracker->GetTool(this->m_PivotTool)->GetCalibrationMatrix());
 }
 
 void vtkTrackerWidget::PopUpError(QString str)

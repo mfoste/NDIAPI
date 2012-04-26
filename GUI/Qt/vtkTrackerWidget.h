@@ -42,6 +42,9 @@ or property, arising from the Sample Code or any use thereof.
 #include <QPushButton>
 #include <QComboBox>
 #include <QVBoxLayout>
+#include <QTime>
+
+#include <vtkMatrix4x4.h>
 
 #include "ndXfrms.h"
 
@@ -74,6 +77,10 @@ public slots:
   virtual void OnStartTracker();
   virtual void OnStopTracker();
   virtual void UpdateData();
+  // pivot functions.
+  virtual void OnInitializePivot(int port, double preTime, double collectTime );
+  virtual void OnStartPivot();
+  virtual void OnStopPivot();
 
 signals:
   void TrackerConfigured(QString SerialNumber);
@@ -83,6 +90,13 @@ signals:
   void ToolTransformUpdated(int port, ndQuatTransformation xfrm);
   void ToolEffectiveFrequencyUpdated(int port, double freq);
   void ToolQualityNumberUpdated(int port, double quality);
+  void PrePivotStarted(QString label, int maxtime);
+  void ElapsedPrePivotTime(int elapsedTime);
+  void PivotStarted(QString label, int maxtime);
+  void ElapsedPivotTime(int elapsedTime);
+  void PivotFinished(double error, vtkMatrix4x4 *mat);
+  //void PivotError(double error);
+  //void PivotCalibrationMatrix(int port, vtkMatrix4x4 *mat);
 
 private:
   // some helper functions.
@@ -117,6 +131,16 @@ private:
   //timer.
   QTimer *m_Timer; // need a timer to update the tracker.
   double m_TrackerUpdateFrequency;
+
+  // pivot.
+  QTime m_PhaseTime;
+  int m_PivotTool;  // tool to pivot.
+  bool m_bPrePivot; // init pivot.
+  double m_PrePivotTime;
+  bool m_bPivot;  // whether we pivot.
+  double m_PivotTime;
+  QTimer *m_PrePivotTimer;
+  QTimer *m_PivotTimer;
 };
 
 #endif

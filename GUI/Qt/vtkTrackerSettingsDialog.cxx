@@ -38,7 +38,7 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkFakeTrackerSettingsWidget.h"
 #include "vtkAuroraTrackerSettingsWidget.h"
 #include "vtkSpectraTrackerSettingsWidget.h"
-//#include "vtkTrackerSettingsDialog.moc"
+
 #include "vtkTrackerSettingsDialog.h"
 
 vtkTrackerSettingsDialog* vtkTrackerSettingsDialog::New()
@@ -112,6 +112,8 @@ void vtkTrackerSettingsDialog::ReadTrackerSettings()
 {
   // which tracking system? NDI_AURORA is default
   this->m_System = this->m_Settings->value("TrackingSystem", NDI_AURORA).toInt();
+
+  // update the GUI
   this->m_GUI->trackingSystemComboBox->setCurrentIndex(this->m_GUI->trackingSystemComboBox->findData(this->m_System));
   this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
 
@@ -126,6 +128,7 @@ void vtkTrackerSettingsDialog::ReadTrackerSettings()
 
 void vtkTrackerSettingsDialog::WriteTrackerSettings()
 {
+  this->m_System = this->m_GUI->trackingSystemComboBox->itemData(this->m_GUI->trackingSystemComboBox->currentIndex()).toInt();
   this->m_Settings->setValue("TrackingSystem", this->m_System );
   
   // Fake Tracker Settings.

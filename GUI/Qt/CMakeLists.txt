@@ -76,6 +76,7 @@ set( WIDGET_SRC_FILES
     ndXfrms.cxx
 )
 
+#widget ui
 set( WIDGET_UI_FILES
 	AuroraTrackerSettingsWidget.ui
 	FakeTrackerSettingsWidget.ui

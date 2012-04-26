@@ -75,6 +75,7 @@ vtkTrackerTool::vtkTrackerTool()
   this->Minimizer = vtkAmoebaMinimizer::New();
   this->CalibrationArray = vtkDoubleArray::New();
   this->CalibrationArray->SetNumberOfComponents(16);
+  this->CollectToolTipCalibrationData = 0;
 
   this->LED1 = 0;
   this->LED2 = 0;
@@ -171,6 +172,10 @@ void vtkTrackerTool::Update()
     {
       this->Buffer->GetMatrix(this->TempMatrix, 0);
       this->Transform->SetMatrix(this->TempMatrix);
+      if( this->CollectToolTipCalibrationData )
+      {
+        this->CalibrationArray->InsertNextTuple(*this->TempMatrix->Element);
+      }
     } 
 
     this->TimeStamp = this->Buffer->GetTimeStamp(0);
@@ -190,13 +195,26 @@ void vtkTrackerTool::InitializeToolTipCalibration()
 }
 
 //----------------------------------------------------------------------------
-int vtkTrackerTool::InsertNextCalibrationPoint()
-{
-  this->Buffer->Lock();
-  this->Buffer->GetUncalibratedMatrix(this->TempMatrix, 0);
-  this->Buffer->Unlock();
-  return this->CalibrationArray->InsertNextTuple(*this->TempMatrix->Element);
-}
+//int vtkTrackerTool::InsertNextCalibrationPoint()
+//{
+//  int ret = 0;
+//
+//  this->Buffer->Lock();
+//  // check if transform is valid.
+//  // only update this if the time stamp has changed.
+//  if( this->Buffer->GetTimeStamp(0) > this->TimeStamp )
+//  {
+//    this->Flags = this->Buffer->GetFlags(0);
+//    if ((this->Flags & (TR_MISSING | TR_OUT_OF_VIEW))  == 0) 
+//    {
+//      this->Buffer->GetUncalibratedMatrix(this->TempMatrix, 0);
+//      //this->TempMatrix->Print(std::cout);
+//      ret = this->CalibrationArray->InsertNextTuple(*this->TempMatrix->Element); 
+//    }
+//  }
+//  this->Buffer->Unlock();
+//  return ret;
+//}
 
 //----------------------------------------------------------------------------
 void vtkTrackerToolCalibrationFunction(void *userData)
