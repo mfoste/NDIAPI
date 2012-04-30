@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkTracker.h,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: dgobbi $
-  Date:      $Date: 2008/04/10 17:26:35 $
-  Version:   $Revision: 1.7 $
 
 ==========================================================================
 
@@ -274,7 +271,11 @@ public:
   
   void ServerToolUpdate( int tool, 
 			 vtkMatrix4x4 *matrix, 
-			 long flags, double ts );
+			 long flags, double ts, double err=0 );
+
+  bool IsFrozen() { return this->Frozen; }
+  void Freeze() { this->Frozen = true; }
+  void Unfreeze() { this->Frozen = false; }
 
 protected:
   vtkTracker();
@@ -285,7 +286,7 @@ protected:
   // can communicate information back to the vtkTracker base class, which
   // will in turn relay the information to the appropriate vtkTrackerTool.
   void ToolUpdate(int tool, vtkMatrix4x4 *matrix, long flags, 
-      double timestamp);
+      double timestamp, double error=0);
 
   // Description:
   // Set the number of tools for the tracker -- this method is
@@ -313,6 +314,9 @@ protected:
   // occurred while the request was being processed.
   virtual int InternalSetToolLED(int tool, int led, int state) { return 1; };
 
+
+
+
   vtkMatrix4x4 *WorldCalibrationMatrix;
   int NumberOfTools;
   vtkTrackerTool **Tools;
@@ -331,6 +335,7 @@ protected:
   int ClientConnected;
   char *RemoteAddress;
   vtkSocketCommunicator *SocketCommunicator;
+  bool Frozen;
   
 private:
   vtkTracker(const vtkTracker&);

@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkNDITracker.h,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: kcharbon $
-  Date:      $Date: 2008/07/31 14:17:49 $
-  Version:   $Revision: 1.6 $
 
 ==========================================================================
 

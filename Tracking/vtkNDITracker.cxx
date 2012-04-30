@@ -4,9 +4,6 @@ Program:   AtamaiTracking for VTK
 Module:    $RCSfile: vtkNDITracker.cxx,v $
 Creator:   David Gobbi <dgobbi@atamai.com>
 Language:  C++
-Author:    $Author: kcharbon $
-Date:      $Date: 2008/07/31 14:17:49 $
-Version:   $Revision: 1.16 $
 
 ==========================================================================
 
@@ -480,8 +477,8 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
 		D5 = Minimum z value
 		D6 = Maximum z value
 		*/
-		D5 *=-1;
-		D6 *=-1;
+		//D5 *=-1;
+		//D6 *=-1;
 
 		points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
 		points->InsertNextPoint(D1,D3,D6); // Point 1 (D1, D3, D6)
@@ -1026,7 +1023,7 @@ void vtkNDITracker::InternalUpdate()
     }
     // send the matrix and flags to the tool
 
-    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp);   
+    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp, transform[tool][7]);   
   }
 }
 

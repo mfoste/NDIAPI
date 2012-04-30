@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkTrackerBuffer.h,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: dgobbi $
-  Date:      $Date: 2005/07/01 22:52:05 $
-  Version:   $Revision: 1.3 $
 
 ==========================================================================
 
@@ -95,7 +92,7 @@ public:
   // Add a matrix plus flags to the list.  If the timestamp is
   // less than or equal to the previous timestamp, then nothing
   // will be done.
-  void AddItem(vtkMatrix4x4 *matrix, long flags, double timestamp);
+  void AddItem(vtkMatrix4x4 *matrix, long flags, double timestamp, double error=0);
 
   // Description:
   // Get a matrix from the list, where '0' is the most recent and
@@ -120,6 +117,8 @@ public:
   // Description:
   // Get the timestamp (in seconds since Jan 1, 1970) for the matrix.
   double GetTimeStamp(int i);
+
+  double GetErrorValue(int i);
 
   // Description:
   // Set a calibration matrices to be applied when GetMatrix() is called.
@@ -158,6 +157,7 @@ protected:
   vtkDoubleArray *MatrixArray;
   vtkDoubleArray *TimeStampArray;
   vtkIntArray *FlagArray;
+  vtkDoubleArray *ErrorArray;
 
   vtkMatrix4x4 *ToolCalibrationMatrix;
   vtkMatrix4x4 *WorldCalibrationMatrix;

@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkTracker.cxx,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: pdas $
-  Date:      $Date: 2007/05/30 18:36:48 $
-  Version:   $Revision: 1.17 $
 
 ==========================================================================
 
@@ -96,7 +93,7 @@ vtkTracker::vtkTracker()
   this->NetworkPort = 11111;
   this->RemoteAddress = NULL;
   this->SerialNumber = NULL;
- 
+  this->Frozen = false;
 }
 
 //----------------------------------------------------------------------------
@@ -599,7 +596,7 @@ void vtkTracker::StopTracking()
 //----------------------------------------------------------------------------
 void vtkTracker::Update()
 {
-  if (!this->Tracking)
+  if (!this->Tracking || this->Frozen)
     { 
     return; 
     }
@@ -649,12 +646,12 @@ vtkMatrix4x4 *vtkTracker::GetWorldCalibrationMatrix()
 
 //----------------------------------------------------------------------------
 void vtkTracker::ToolUpdate(int tool, vtkMatrix4x4 *matrix, long flags,
-                            double timestamp) 
+                            double timestamp, double error) 
 {
   vtkTrackerBuffer *buffer = this->Tools[tool]->GetBuffer();
   
   buffer->Lock();
-  buffer->AddItem(matrix, flags, timestamp);
+  buffer->AddItem(matrix, flags, timestamp, error);
   buffer->Unlock();
 }
   
@@ -844,10 +841,10 @@ void vtkTracker::ConvertBufferToMessage( int tool, vtkMatrix4x4 *matrix,
 //-----------------------------------------------------------------------------
 void vtkTracker::ServerToolUpdate( int tool, 
 				   vtkMatrix4x4 *matrix, 
-				   long flags, double ts )
+				   long flags, double ts, double err )
 {
   if(!this->ServerMode )
     {
-    this->ToolUpdate( tool, matrix, flags, ts );
+    this->ToolUpdate( tool, matrix, flags, ts, err );
     }
 }
