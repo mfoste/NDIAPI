@@ -60,6 +60,7 @@ protected:
   ~vtkTrackerSettingsDialog();
 
 public:
+  void Initialize(QString settingsFile);
   void UpdateAndShow();
   inline int getSystem() {return this->m_System;}
   inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}

@@ -345,8 +345,22 @@ void vtkNDITracker::ParseSerialNumber()
   }
   serialNo = strStream.str();
 
+  if( reply.find("Polaris Spectra") != std::string::npos )
+  {
+    this->NDISystemType = NDI_POLARIS_SPECTRA_SYSTEM;
+  }
+  else if( reply.find("Polaris Vicra") != std::string::npos )
+  {
+    this->NDISystemType = NDI_POLARIS_VICRA_SYSTEM;
+  }
+  else if( reply.find("Polaris") != std::string::npos )
+  {
+    this->NDISystemType = NDI_POLARIS_SYSTEM;
+  }
+
   if( reply.find("Aurora") != std::string::npos )
   {
+    this->NDISystemType = NDI_AURORA_SYSTEM;
     this->ParseFGSerialNumber(serialNo);
   }
   else
@@ -779,6 +793,21 @@ int vtkNDITracker::InternalStartTracking()
     }
   }
   this->EnableToolPorts();
+
+  // if Polaris Spectra crank up to 60Hz, no point in using the legacy default of 20Hz.
+  if( this->NDISystemType & NDI_POLARIS_SPECTRA_SYSTEM )
+  {
+    // set some FG timings.
+    ndiCommand(this->Device, "set Param.Tracking.Illuminator Rate=2");
+    errnum = ndiGetError(this->Device);
+    if (errnum) 
+    {
+      vtkErrorMacro(<< ndiErrorString(errnum));
+      ndiClose(this->Device);
+      this->Device = 0;
+      return 0;
+    }
+  }
 
   // add VSEL command here.
   ndiVSEL(this->Device, this->Volume+1); // note VSEL is 1-based not zero-based.

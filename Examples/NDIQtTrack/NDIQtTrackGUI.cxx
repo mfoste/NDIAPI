@@ -66,6 +66,7 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
   m_mutex = new QMutex();
 
   m_GUI->setupUi(this);
+  this->m_GUI->TrackerWidget->Initialize();
 
   // set up the connections.
   this->CreateActions();

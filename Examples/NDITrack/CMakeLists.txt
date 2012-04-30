@@ -15,4 +15,4 @@ INSTALL(TARGETS NDITrack
         RUNTIME DESTINATION bin 
         LIBRARY DESTINATION lib 
         ARCHIVE DESTINATION lib/static 
-        COMPONENT AIGS )
+        COMPONENT Examples )

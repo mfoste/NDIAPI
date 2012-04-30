@@ -99,3 +99,32 @@ FOREACH(LIB QtCore QtGui QtNetwork QtXml QtTest QtSql QtWebKit phonon)
     ENDIF()
 ENDFOREACH(LIB)
 
+#VTK Libraries
+#Depending on how you compile vtk, you might need some other libraries: vtkParallel VPIC Cosmo
+SET( NDIQtTrack_VTK_COMMON_LIBS 
+		QVTK vtkalglib vtkCharts vtkCommon vtkDICOMParser vtkexoIIc vtkexpat vtkFiltering vtkfreetype vtkftgl
+        vtkGraphics vtkHybrid vtkImaging vtkInfovis vtkIO vtkjpeg vtklibxml2 vtkmetaio vtkNetCDF vtkpng 
+        vtkRendering vtksys vtktiff vtkverdict vtkViews vtkWidgets vtkzlib Cosmo VPIC vtkParallel)# vtkGenericFiltering vtksqlite )
+        
+SET( NDIQtTrack_VTK_COMMON_LIBS_UNVERSIONED vtkNetCDF_cxx )
+
+IF(WIN32)
+	FOREACH(LIB ${NDIQtTrack_VTK_COMMON_LIBS})
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/${LIB}.dll" DESTINATION bin COMPONENT Examples)
+	ENDFOREACH(LIB)
+    # unversioned libraries
+	FOREACH(LIB ${NDIQtTrack_VTK_COMMON_LIBS_UNVERSIONED} )
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/${LIB}.dll" DESTINATION bin COMPONENT Examples)
+	ENDFOREACH(LIB)
+ELSEIF( UNIX )
+	# versioned libraries.
+    FOREACH(LIB ${NDIQtTrack_VTK_COMMON_LIBS} )
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/lib${LIB}.so.${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_PATCH}" DESTINATION . COMPONENT NDIQtTrack)
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/lib${LIB}.so.${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}" DESTINATION . COMPONENT NDIQtTrack)	
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/lib${LIB}.so" DESTINATION . COMPONENT Examples)
+	ENDFOREACH(LIB)
+	# unversioned libraries
+	FOREACH(LIB ${NDIQtTrack_VTK_COMMON_LIBS_UNVERSIONED} )
+		INSTALL(FILES "${VTK_RUNTIME_LIBRARY_DIRS}/lib${LIB}.so" DESTINATION . COMPONENT Examples)
+	ENDFOREACH(LIB)
+ENDIF()
