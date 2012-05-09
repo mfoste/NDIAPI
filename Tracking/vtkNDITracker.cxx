@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGES.
 
 #include <limits.h>
 #include <float.h>
-#include <math.h>
+#include <cmath>
 #include <ctype.h>
 #include "ndicapi.h"
 #include "ndicapi_math.h"
