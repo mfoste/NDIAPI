@@ -93,7 +93,11 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       this->m_effectiveFrequency = -1.0;
     }
 
-    if( tool->IsMissing() ) // at NDI, this is equivalent to occupied.
+    if( tool->IsBrokenSensor() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
+    }
+    else if( tool->IsMissing() ) // at NDI, this is equivalent to occupied.
     {
       // do nothing do not send.
     }
@@ -104,11 +108,7 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     else if( tool->IsOutOfVolume() )
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool is out of volume.") );
-    }
-    else if( tool->IsBrokenSensor() )
-    {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
-    }
+    }    
     else //if( !tool->IsMissing() && !tool->IsOutOfView() && !tool->IsOutOfVolume() )
     {
       double pos[3], quat[4];
