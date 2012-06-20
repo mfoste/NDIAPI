@@ -4,9 +4,6 @@ Program:   AtamaiTracking for VTK
 Module:    $RCSfile: vtkNDITracker.cxx,v $
 Creator:   David Gobbi <dgobbi@atamai.com>
 Language:  C++
-Author:    $Author: kcharbon $
-Date:      $Date: 2008/07/31 14:17:49 $
-Version:   $Revision: 1.16 $
 
 ==========================================================================
 
@@ -44,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGES.
 
 #include <limits.h>
 #include <float.h>
-#include <math.h>
+#include <cmath>
 #include <ctype.h>
 #include "ndicapi.h"
 #include "ndicapi_math.h"
@@ -60,6 +57,12 @@ POSSIBILITY OF SUCH DAMAGES.
 #include "vtkSocketCommunicator.h"
 #include <string.h>
 #include "vtkCharArray.h"
+
+#include "vtkCellArray.h"
+#include "vtkPoints.h"
+#include "vtkSphere.h"
+#include "vtkClipPolyData.h"
+
 
 //----------------------------------------------------------------------------
 vtkNDITracker* vtkNDITracker::New()
@@ -99,6 +102,10 @@ vtkNDITracker::vtkNDITracker()
   // for accurate timing
   this->Timer = vtkFrameToTimeConverter::New();
   this->Timer->SetNominalFrequency(60.0);
+
+  this->Volume = 0;
+  this->VolumePolyData = NULL;
+
 }
 
 //----------------------------------------------------------------------------
@@ -460,6 +467,244 @@ int vtkNDITracker::SetVolume(int v)
   return 1;
 }
 
+vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSurface) {
+
+	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+
+	int D1 = this->TrackingVolumeParameters[this->Volume][0];
+	int D2 = this->TrackingVolumeParameters[this->Volume][1];
+	int D3 = this->TrackingVolumeParameters[this->Volume][2];
+	int D4 = this->TrackingVolumeParameters[this->Volume][3];
+	int D5 = this->TrackingVolumeParameters[this->Volume][4];
+	int D6 = this->TrackingVolumeParameters[this->Volume][5];
+
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); //<-- solid surface
+	vtkSmartPointer<vtkCellArray> polyline = vtkSmartPointer<vtkCellArray>::New();
+		
+	if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora CUBE
+		/*
+		D1 = Minimum x value
+		D2 = Maximum x value
+		D3 = Minimum y value
+		D4 = Maximum y value
+		D5 = Minimum z value
+		D6 = Maximum z value
+		*/
+		//D5 *=-1;
+		//D6 *=-1;
+
+		points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
+		points->InsertNextPoint(D1,D3,D6); // Point 1 (D1, D3, D6)
+		points->InsertNextPoint(D2,D3,D6); // Point 2 (D2, D3, D6)
+		points->InsertNextPoint(D2,D4,D6); // Point 3 (D2, D4, D6)
+		points->InsertNextPoint(D1,D4,D5); // Point 4 (D1, D4, D5)
+		points->InsertNextPoint(D1,D3,D5); // Point 5 (D1, D3, D5)
+		points->InsertNextPoint(D2,D3,D5); // Point 6 (D2, D3, D5)
+		points->InsertNextPoint(D2,D4,D5); // Point 7 (D2, D4, D5)
+
+		// Close Z plane
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(0);
+		polyline->InsertCellPoint(1);
+		polyline->InsertCellPoint(2);
+		polyline->InsertCellPoint(3);
+		polyline->InsertCellPoint(0);
+		
+		// Far Z plane
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(4);
+		polyline->InsertCellPoint(5);
+		polyline->InsertCellPoint(6);
+		polyline->InsertCellPoint(7);
+		polyline->InsertCellPoint(4);
+
+		// Top
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(0);
+		polyline->InsertCellPoint(1);
+		polyline->InsertCellPoint(5);
+		polyline->InsertCellPoint(4);
+		polyline->InsertCellPoint(0); 
+		
+		// Bottom
+		polyline->InsertNextCell(5);
+		polyline->InsertCellPoint(7);
+		polyline->InsertCellPoint(3);
+		polyline->InsertCellPoint(2);
+		polyline->InsertCellPoint(6);
+		polyline->InsertCellPoint(7);
+
+		// Close Z plane
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(0);
+		
+		// Far Z plane
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(4);
+		// Top
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(0); 
+		// Bottom
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(7);
+
+		// Right
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(0);
+		cells->InsertCellPoint(4);
+		cells->InsertCellPoint(7);
+		cells->InsertCellPoint(3);
+		cells->InsertCellPoint(0); 
+		
+		// Left
+		cells->InsertNextCell(5);
+		cells->InsertCellPoint(1);
+		cells->InsertCellPoint(5);
+		cells->InsertCellPoint(6);
+		cells->InsertCellPoint(2);
+		cells->InsertCellPoint(1);
+
+		polyData->SetPoints(points);
+		polyData->SetLines(polyline);
+		if (solidSurface) {
+			polyData->SetPolys(cells);
+		}
+
+		this->VolumePolyData = polyData;
+		return this->VolumePolyData;
+
+	} else if (TrackingVolumeShapeTypes[this->Volume] == 0x0A) { // Aurora Dome
+		/* 
+		D1 = Offset from Field Generator
+		D2 = Cylinder radius along x-axis
+		D3 = Minimum dome radius
+		D4 = Maximum dome radius
+		D5 = Cylinder radius along y-axis 
+			Note: If D5 is equal to 0, the y-axis radius is equal to the x-axis radius (circular cylinder)
+		D6 = Maximum offset from Field Generator
+			Note: If D6 is equal to 0, the maximum offset is equal to D4 (the maximum dome radius)
+		*/
+
+
+
+		D5 = D5 == 0? D2 : D5; // see D5 note
+		D6 = D6 == 0? D4 : D6; // see D6 note
+
+		D1 *=-1;
+		D6 *=-1;
+
+		double majorAxis = D2 >= D5 ? D2 : D5;
+		double minorAxis = D2 < D5 ? D2 : D5;
+
+		double foci = std::sqrt((majorAxis*majorAxis)-(minorAxis*minorAxis));
+
+		double inc =0;
+		int bottomCount = 0;
+
+		double spacingInc = 15.0;
+
+
+		// Bottom Elipse
+		while (inc <= (2*vtkMath::Pi())) {
+			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
+			inc=inc+(vtkMath::Pi()/spacingInc);
+			bottomCount++;
+		}
+
+		polyline->InsertNextCell(bottomCount+1);
+		cells->InsertNextCell(bottomCount+1);
+		for (unsigned int i = 0; i < bottomCount; i++) {
+			polyline->InsertCellPoint(i);
+			cells->InsertCellPoint(i);
+		}
+		cells->InsertCellPoint(0);
+		polyline->InsertCellPoint(0);
+		
+		// Top Elipse
+		int topCount = 0;
+		inc =0;
+		while (inc <= (2*vtkMath::Pi())) {
+			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D6);
+			inc=inc+(vtkMath::Pi()/spacingInc);
+			topCount++;
+		}
+
+		cells->InsertNextCell(topCount+1);
+		polyline->InsertNextCell(topCount+1);
+		for (unsigned int i  = 0; i < topCount; i++) {
+			polyline->InsertCellPoint(i+bottomCount);
+			cells->InsertCellPoint(i+bottomCount);
+		}
+		cells->InsertCellPoint(bottomCount);
+		polyline->InsertCellPoint(bottomCount);
+		
+		// connect top and bottom Elipse
+		for (unsigned int i  = 0; i < topCount; i++) {
+			polyline->InsertNextCell(2);
+			polyline->InsertCellPoint(i);
+			polyline->InsertCellPoint(i+topCount);
+
+			cells->InsertNextCell(5);
+			cells->InsertCellPoint(i);
+			cells->InsertCellPoint(i+topCount);
+			cells->InsertCellPoint(((i+1)%topCount)+topCount);
+			cells->InsertCellPoint(((i+1)%topCount));
+			cells->InsertCellPoint(i);
+
+		}
+
+		int totalPoints = bottomCount+topCount;
+
+		polyData->SetPoints(points);
+		if (solidSurface) {
+			polyData->SetPolys(cells);
+		}
+		polyData->SetLines(polyline);
+
+		
+
+		// draw top dome. // DOES NOT WORK YET
+		this->VolumePolyData = polyData;
+		/*
+		if (-D6 != D4) {
+			vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
+			sphere->SetRadius(D4);
+
+			vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
+			clipper->SetInput(polyData);
+			clipper->SetClipFunction(sphere);
+			clipper->SetValue(0);
+			clipper->Update();
+
+			this->VolumePolyData = clipper->GetOutput();
+		} else {
+			this->VolumePolyData = polyData;
+		}
+		*/
+
+		return this->VolumePolyData;
+
+	}
+
+	return NULL;
+}
 //----------------------------------------------------------------------------
 int vtkNDITracker::InternalStartTracking()
 {
@@ -807,7 +1052,7 @@ void vtkNDITracker::InternalUpdate()
     }
     // send the matrix and flags to the tool
 
-    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp);   
+    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp, transform[tool][7]);   
   }
 }
 

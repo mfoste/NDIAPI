@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkNDITracker.h,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: kcharbon $
-  Date:      $Date: 2008/07/31 14:17:49 $
-  Version:   $Revision: 1.6 $
 
 ==========================================================================
 
@@ -59,6 +56,9 @@ POSSIBILITY OF SUCH DAMAGES.
 
 #include "vtkTracker.h"
 #include "ndicapi.h"
+
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
 class vtkFrameToTimeConverter;
 
@@ -121,6 +121,8 @@ public:
   // Description:
   // Return a pointer to the array containing the shape parameters.
   double* GetTrackingVolumeShapeParameters(int volume);
+
+  vtkSmartPointer<vtkPolyData> GeneratePolydataVolume(bool solidSurface=false);
 
   // Description:
   // Set the volume.
@@ -216,6 +218,7 @@ protected:
   int TrackingVolumeShapeTypes[NDI_MAX_VOLUMES];
   double TrackingVolumeParameters[NDI_MAX_VOLUMES][10];
   int Volume;
+  vtkSmartPointer<vtkPolyData> VolumePolyData;
   int BaudRate;
   int IsDeviceTracking;
 

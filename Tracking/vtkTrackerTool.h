@@ -4,9 +4,6 @@
   Module:    $RCSfile: vtkTrackerTool.h,v $
   Creator:   David Gobbi <dgobbi@atamai.com>
   Language:  C++
-  Author:    $Author: dgobbi $
-  Date:      $Date: 2005/07/01 22:52:05 $
-  Version:   $Revision: 1.2 $
 
 ==========================================================================
 
@@ -131,6 +128,8 @@ public:
   // the tool Transform.
   double GetTimeStamp() { return this->TimeStamp; };
 
+  double GetErrorValue() { return this->Error; };
+
   // Description:
   // Set the states of the LEDs on the tool.  If the tracking system
   // is not in tracking mode, the state will not be realized until
@@ -201,6 +200,8 @@ protected:
   int LED1;
   int LED2;
   int LED3;
+
+  double Error;
 
   char *ToolType;
   char *ToolRevision;
