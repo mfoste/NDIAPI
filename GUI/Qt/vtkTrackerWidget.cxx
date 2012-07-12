@@ -205,12 +205,13 @@ void vtkTrackerWidget::ConfigureTracker()
     m_Tracker = vtkNDITracker::New();
     if( this->m_TrackerSettingsDialog->getAuroraSettings().bUseManual )
     {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getAuroraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getAuroraSettings().baudRate); 
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getAuroraSettings().commPort);
     }
     else
     {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
+	  // otherwise use auto detect.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(-1); 
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
     }
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAuroraSettings().updateFrequency;
