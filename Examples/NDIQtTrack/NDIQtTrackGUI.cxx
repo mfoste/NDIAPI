@@ -87,6 +87,7 @@ void NDIQtTrackGUI::CreateActions()
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,QString)), this, SLOT(OnToolTransformUpdated(int,QString)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,ndQuatTransformation)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,double)) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolQualityNumberUpdated(int,double)), this, SLOT(OnToolQualityUpdated(int,double)) );
 }
 
 void NDIQtTrackGUI::About()
@@ -284,7 +285,39 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
 
 void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
 {
-  // to implement.
+    switch(port){
+    case 0:
+      // Port 1
+      this->m_GUI->port01QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 1:
+      // Port 2
+      this->m_GUI->port02QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 2:
+      // Port 3
+      this->m_GUI->port03QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 3:
+      // Port 4
+      this->m_GUI->port04QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 4:
+      // Port 5
+      this->m_GUI->port05QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 5:
+      // Port 6
+      this->m_GUI->port06QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    case 6:
+      // Port 7
+      this->m_GUI->port07QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
+      break;
+    default:
+      //do nothing for now.
+      break;
+    }
 }
 
 QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)

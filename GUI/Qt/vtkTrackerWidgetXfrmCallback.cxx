@@ -97,6 +97,10 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     {
       // do nothing do not send.
     }
+	else if( tool->IsBrokenSensor() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
+    }
     else if( tool->IsOutOfView() ) // at NDI, this is equivalent to missing.
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool is out of view.") );
@@ -104,15 +108,12 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     else if( tool->IsOutOfVolume() )
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool is out of volume.") );
-    }
-    else if( tool->IsBrokenSensor() )
-    {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
-    }
+    }    
     else //if( !tool->IsMissing() && !tool->IsOutOfView() && !tool->IsOutOfVolume() )
     {
       double pos[3], quat[4];
       double rotMat[3][3];
+	  double quality = 0.0;
 
       // extract the rotation matrix
       rotMat[0][0] = tool->GetTransform()->GetMatrix()->GetElement(0,0);
@@ -136,9 +137,11 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       xfrm.translation.x = pos[0];
       xfrm.translation.y = pos[1];
       xfrm.translation.z = pos[2];
+	  
+	  quality = tool->GetErrorValue();
 
       // send out.
-      m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, ND_BAD_FLOAT);
+	  m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, quality);
     }  
   }
 }
