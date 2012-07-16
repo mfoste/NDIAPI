@@ -37,6 +37,9 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "vtkFakeTrackerSettingsWidget.h"
 #include "vtkAuroraTrackerSettingsWidget.h"
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+#include "vtkAscension3DGTrackerSettingsWidget.h"
+#endif
 #include "vtkSpectraTrackerSettingsWidget.h"
 
 #include "vtkTrackerSettingsDialog.h"
@@ -86,6 +89,10 @@ void vtkTrackerSettingsDialog::Initialize(QString settingsFile)
   // add the AuroraTrackerSettingsWidget to the stackedWidget
   this->m_AuroraSettingsWidget = new vtkAuroraTrackerSettingsWidget( this, this->m_Settings );
   this->m_GUI->stackedWidget->insertWidget(NDI_AURORA, this->m_AuroraSettingsWidget );
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  this->m_Ascension3DGSettingsWidget = new vtkAscension3DGTrackerSettingsWidget( this, this->m_Settings );
+  this->m_GUI->stackedWidget->insertWidget(ASCENSION_3DG, this->m_Ascension3DGSettingsWidget );
+#endif
   // add the SpectraTrackerSettingsWidget to the stackedWidget
   this->m_SpectraSettingsWidget = new vtkSpectraTrackerSettingsWidget(this, this->m_Settings);
   this->m_GUI->stackedWidget->insertWidget(NDI_SPECTRA, this->m_SpectraSettingsWidget );
@@ -96,6 +103,15 @@ void vtkTrackerSettingsDialog::Initialize(QString settingsFile)
   // update the tracking system comboBox.
   this->m_GUI->trackingSystemComboBox->addItem("Fake Tracker", FAKE_TRACKER);
   this->m_GUI->trackingSystemComboBox->addItem("Aurora", NDI_AURORA);
+#if defined (Ascension3DG_DriveBay)
+  this->m_GUI->trackingSystemComboBox->addItem("Ascension 3DG driveBAY", ASCENSION_3DG );
+#elif defined (Ascension3DG_MedSafe)
+  this->m_GUI->trackingSystemComboBox->addItem("Ascension 3DG medSAFE", ASCENSION_3DG );
+#elif defined (Ascension3DG_TrakStar)
+  this->m_GUI->trackingSystemComboBox->addItem("Ascension 3DG trakSTAR", ASCENSION_3DG );
+#elif defined (Ascension3DG_TrakStar2)
+  this->m_GUI->trackingSystemComboBox->addItem("Ascension 3DG trakSTAR2", ASCENSION_3DG );
+#endif
   this->m_GUI->trackingSystemComboBox->addItem("Spectra", NDI_SPECTRA);
 
   // read the tracker settings in. 
@@ -117,11 +133,14 @@ void vtkTrackerSettingsDialog::ReadTrackerSettings()
   this->m_GUI->trackingSystemComboBox->setCurrentIndex(this->m_GUI->trackingSystemComboBox->findData(this->m_System));
   this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
 
-
   // Fake Tracker Settings.
   this->m_FakeTrackerSettingsWidget->ReadTrackerSettings();
   // Aurora Tracker Settings.
   this->m_AuroraSettingsWidget->ReadTrackerSettings();
+  // Ascension Tracker Settings.
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  this->m_Ascension3DGSettingsWidget->ReadTrackerSettings();
+#endif
   // Spectra Tracker Settings.
   this->m_SpectraSettingsWidget->ReadTrackerSettings();
 }
@@ -135,12 +154,18 @@ void vtkTrackerSettingsDialog::WriteTrackerSettings()
   this->m_FakeTrackerSettingsWidget->WriteTrackerSettings();
   // Aurora Tracker Settings.
   this->m_AuroraSettingsWidget->WriteTrackerSettings();  
+  // Ascension Tracker Settings.
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  this->m_Ascension3DGSettingsWidget->WriteTrackerSettings();
+#endif
   // Spectra Tracker Settings.
   this->m_SpectraSettingsWidget->WriteTrackerSettings();
 }
 
 void vtkTrackerSettingsDialog::OnTrackingSystemChanged(int index)
 {
+  
+  // change the system ID.
   this->m_System = this->m_GUI->trackingSystemComboBox->itemData(index).toInt();
   this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
 }

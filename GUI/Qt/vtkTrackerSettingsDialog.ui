@@ -7,15 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>930</width>
-    <height>294</height>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout_6">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_9">
        <item>

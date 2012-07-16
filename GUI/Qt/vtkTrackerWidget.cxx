@@ -42,6 +42,15 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkTracker.h"
 #include "vtkFakeTracker.h"
 #include "vtkNDITracker.h"
+
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+#include "ATC3DG.h"
+#include "vtkAscension3DGTracker.h"
+#elif defined (Ascension3DG_MedSafe)
+#include "ATC3DGm.h"
+#include "vtkAscension3DGTracker.h"
+#endif
+
 #include "vtkTrackerTool.h"
 #include "vtkTrackerSettingsStructures.h"
 #include "vtkTrackerSettingsDialog.h"
@@ -122,7 +131,7 @@ void vtkTrackerWidget::setupUi()
   this->m_VolumeSelectionComboBox = new QComboBox(this);
   //this->m_ConfigureTrackerButton->setMaximumWidth(110);
   this->m_VolumeSelectionComboBox->setEnabled(false);
-  //this->m_VolumeSelectionComboBox->setVisible(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
 
   this->m_StartTrackingButton = new QPushButton(this);
   this->m_StartTrackingButton->setText("Start Tracking");
@@ -225,6 +234,18 @@ void vtkTrackerWidget::ConfigureTracker()
       }
     }
     break;
+// Ascension Tracker Settings.
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  case ASCENSION_3DG:
+    m_Tracker = vtkAscension3DGTracker::New();
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseSynchronousRecord(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseSynchronousRecord);
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseAllSensors(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseAllSensors);
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAscension3DGSettings().updateFrequency;
+    // not volume selection not needed for Ascension.
+    this->m_VolumeSelectionComboBox->setEnabled(false);
+    this->m_VolumeSelectionComboBox->setVisible(false);
+    break;
+#endif
   case NDI_SPECTRA:
     m_Tracker = vtkNDITracker::New();
     if( this->m_TrackerSettingsDialog->getSpectraSettings().bUseManual )
@@ -292,8 +313,8 @@ void vtkTrackerWidget::ConfigureTracker()
 
 void vtkTrackerWidget::OnVolumeSelected(int volume)
 {
-  // TODO: make this work with Polaris as well.
-  if( this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA )
+  if( this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+    || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA)
   {
     dynamic_cast<vtkNDITracker*>(m_Tracker)->SetVolume(volume);
   }
@@ -307,6 +328,14 @@ void vtkTrackerWidget::OnStartTracker()
 
   m_Tracker->StartTracking();
 
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  if( this->m_TrackerSettingsDialog->getSystem() == ASCENSION_3DG )
+  {
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetMeasurementRate(this->m_TrackerUpdateFrequency);
+  }
+#endif
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
   m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));

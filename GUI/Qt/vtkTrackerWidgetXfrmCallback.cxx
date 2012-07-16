@@ -76,7 +76,7 @@ vtkTrackerWidgetXfrmCallback::~vtkTrackerWidgetXfrmCallback()
 void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long eventId, void *vtkNotUsed(callData))
 {
   ndQuatTransformation xfrm;
-  if( vtkCommand::ModifiedEvent == eventId )
+  if( eventId == vtkCommand::ModifiedEvent )
   {
     vtkTrackerTool *tool = static_cast<vtkTrackerTool*>(caller);
     // compute the effective frequency.
