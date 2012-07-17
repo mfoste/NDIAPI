@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2011-2012, Northern Digital Inc. All rights reserved.
- 
+
 All Northern Digital Inc. (“NDI”) Media and/or Sample Code and/or Sample Code
 Documentation (collectively referred to as “Sample Code”) is licensed and provided "as
 is” without warranty of any kind. The licensee, by use of the Sample Code, warrants to
@@ -60,7 +60,7 @@ NDIQtTrackGUI *NDIQtTrackGUI::New(QWidget *parent)
 }
 
 NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent) 
-: QMainWindow(parent), m_GUI(new Ui::NDIQtTrackMainWindow)
+  : QMainWindow(parent), m_GUI(new Ui::NDIQtTrackMainWindow)
 {
   // set up the mutex lock first.
   m_mutex = new QMutex();
@@ -156,36 +156,47 @@ void NDIQtTrackGUI::OnTrackerConfigured(QString systemInfo)
 
 void NDIQtTrackGUI::OnTrackerStarted()
 {
-   QString toolInfo;
-   // update the tool info - port 1.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(0)->GetToolSerialNumber());
-   this->m_GUI->port01DataLabel->setText( toolInfo );
-   // update the tool info - port 2.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(1)->GetToolSerialNumber());
-   this->m_GUI->port02DataLabel->setText( toolInfo );
-   // update the tool info - port 3.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(2)->GetToolSerialNumber());
-   this->m_GUI->port03DataLabel->setText( toolInfo );
-   // update the tool info - port 4/A.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(3)->GetToolSerialNumber());
-   this->m_GUI->port04DataLabel->setText( toolInfo );
-   // update the tool info - port 5/B.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(4)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(4)->GetToolSerialNumber());
-   this->m_GUI->port05DataLabel->setText( toolInfo );
-   // update the tool info - port 6/C.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(5)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(5)->GetToolSerialNumber());
-   this->m_GUI->port06DataLabel->setText( toolInfo );
-   // update the tool info - port 7/D.
-   toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(6)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(6)->GetToolSerialNumber());
-   this->m_GUI->port07DataLabel->setText( toolInfo );
-
+  QString toolInfo;
+  for(int tool=0; tool < this->m_GUI->TrackerWidget->getTracker()->GetNumberOfTools(); tool++)
+  {
+    // create the string
+    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolPartNumber())
+      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolSerialNumber());
+    switch(tool) 
+    {
+    case 0:
+      // update the tool info - port 1.
+      this->m_GUI->port01DataLabel->setText( toolInfo );
+      break;
+    case 1:
+      // update the tool info - port 2.
+      this->m_GUI->port02DataLabel->setText( toolInfo );
+      break;
+    case 2:
+      // update the tool info - port 3.
+      this->m_GUI->port03DataLabel->setText( toolInfo );
+      break;
+    case 3:
+      // update the tool info - port 4/A.
+      this->m_GUI->port04DataLabel->setText( toolInfo );
+      break;
+    case 4:
+      // update the tool info - port 5/B.
+      this->m_GUI->port05DataLabel->setText( toolInfo );
+      break;
+    case 5:
+      // update the tool info - port 6/C.
+      this->m_GUI->port06DataLabel->setText( toolInfo );
+      break;
+    case 6:
+      // update the tool info - port 7/D.
+      this->m_GUI->port07DataLabel->setText( toolInfo );
+      break;
+    default:
+      std::cout << "Port " << tool << " exists but will not be updated in this app." << std::endl;
+      break;
+    }
+  }
 }
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status) 
@@ -285,39 +296,55 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
 
 void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
 {
-    switch(port){
-    case 0:
-      // Port 1
-      this->m_GUI->port01QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 1:
-      // Port 2
-      this->m_GUI->port02QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 2:
-      // Port 3
-      this->m_GUI->port03QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 3:
-      // Port 4
-      this->m_GUI->port04QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 4:
-      // Port 5
-      this->m_GUI->port05QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 5:
-      // Port 6
-      this->m_GUI->port06QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    case 6:
-      // Port 7
-      this->m_GUI->port07QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', 4));
-      break;
-    default:
-      //do nothing for now.
-      break;
-    }
+  int prec;
+
+  switch(this->m_GUI->TrackerWidget->getTrackerSystemType())
+  {
+  case NDI_AURORA:
+  case NDI_SPECTRA:
+    prec = 4;
+    break;
+  case ASCENSION_3DG:
+    prec = 0;
+    break;
+  default:
+    prec = 4;
+    break;
+  }
+
+  switch(port){
+  case 0:
+    // Port 1
+    this->m_GUI->port01QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 1:
+    // Port 2
+    this->m_GUI->port02QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 2:
+    // Port 3
+    this->m_GUI->port03QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 3:
+    // Port 4
+    this->m_GUI->port04QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 4:
+    // Port 5
+    this->m_GUI->port05QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 5:
+    // Port 6
+    this->m_GUI->port06QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+    break;
+  case 6:
+    // Port 7
+    this->m_GUI->port07QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  default:
+    //do nothing for now.
+    break;
+  }
 }
 
 QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)
@@ -326,9 +353,9 @@ QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)
 
   if( !ndIsXfrmMissing( &xfrm ) )
   {
-  xfrmString.sprintf("%+ 1.6f %+ 1.6f %+ 1.6f %+ 1.6f %+ 6.2f  %+ 6.2f  %+ 6.2f", 
-    xfrm.rotation.q0, xfrm.rotation.qx, xfrm.rotation.qy, xfrm.rotation.qz, 
-    xfrm.translation.x, xfrm.translation.y, xfrm.translation.z);
+    xfrmString.sprintf("%+ 1.6f %+ 1.6f %+ 1.6f %+ 1.6f %+ 6.2f  %+ 6.2f  %+ 6.2f", 
+      xfrm.rotation.q0, xfrm.rotation.qx, xfrm.rotation.qy, xfrm.rotation.qz, 
+      xfrm.translation.x, xfrm.translation.y, xfrm.translation.z);
   }
   else
   {

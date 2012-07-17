@@ -287,9 +287,9 @@ void vtkAscension3DGTracker::InternalUpdate()
   double nextcount = 0;
   int i;
 
-  // for some timing.
-  clock_t start, curr;
-  double tElapsed = 0;
+  //debug: for some timing.
+  //clock_t start, curr;
+  //double tElapsed = 0;
 
 
   // for the sensor status.
@@ -301,14 +301,20 @@ void vtkAscension3DGTracker::InternalUpdate()
   }
   if( this->m_bUseAllSensors )
   {
+    
+    // debug:
+    //start = clock();
+
     //use all sensors.
-    start = clock();
     if(this->m_bUseSynchronous)
     {
       errorCode = GetSynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[sensorID]));
-      curr = clock();
-      tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-      std::cout << "GetSynchronous-ALL_SENORS time elapsed: " << tElapsed << std::endl;
+      
+      // debug:
+      //curr = clock();
+      //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
+      //std::cout << "GetSynchronous-ALL_SENORS time elapsed: " << tElapsed << std::endl;
+
       if(errorCode!=BIRD_ERROR_SUCCESS) 
       {
         errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetSynchronousRecord(ALL_SENSORS, pRecord, System.numberSensors*sizeof(record[sensorID]))");
@@ -317,9 +323,12 @@ void vtkAscension3DGTracker::InternalUpdate()
     else
     {
       errorCode = GetAsynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[sensorID]));
-      curr = clock();
-      tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-      std::cout << "GetAsynchronous - ALL_SENSORS time elapsed: " << tElapsed << std::endl;
+      
+      // debug:
+      //curr = clock();
+      //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
+      //std::cout << "GetAsynchronous - ALL_SENSORS time elapsed: " << tElapsed << std::endl;
+
       if(errorCode!=BIRD_ERROR_SUCCESS) 
       {
         errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetAsynchronousRecord(ALL_SENSORS, pRecord, System.numberSensors*sizeof(record[sensorID]))");
@@ -385,13 +394,18 @@ void vtkAscension3DGTracker::InternalUpdate()
 
       if( attached && PortEnabled[sensorID])
       {
-        start = clock();
+        // debug:
+        //start = clock();
+
         if(this->m_bUseSynchronous)
         {
           errorCode = GetSynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
-          curr = clock();
-          tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-          std::cout << "GetSynchronous - sensorID time elapsed: " << tElapsed << std::endl;
+          
+          // debug:
+          //curr = clock();
+          //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
+          //std::cout << "GetSynchronous - sensorID time elapsed: " << tElapsed << std::endl;
+
           if(errorCode!=BIRD_ERROR_SUCCESS) 
           {
             errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetSynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]))");
@@ -401,9 +415,12 @@ void vtkAscension3DGTracker::InternalUpdate()
         {
 
           errorCode = GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
-          curr = clock();
-          tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-          std::cout << "GetAsynchronous - sensorID time elapsed: " << tElapsed << std::endl;
+          
+          // debug:
+          //curr = clock();
+          //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
+          //std::cout << "GetAsynchronous - sensorID time elapsed: " << tElapsed << std::endl;
+
           if(errorCode!=BIRD_ERROR_SUCCESS) 
           {
             errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]))");
@@ -483,11 +500,18 @@ void vtkAscension3DGTracker::InternalUpdate()
     //std::cout << "Angles: " << record[tool].a << ", " << record[tool].e << ", " << record[tool].r << "\n";
 
     double tooltimestamp = nextcount;
-    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp);
+
+    // due to legacy issues, the value needs to be shifted 8 bits.
+    double qDouble = (double) (record[tool].quality >> 8);
+    
+    //debug:
+    //std::cout << "Quality Tool #" << tool << ": " <<  qDouble << std::endl;
+
+    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp, qDouble );
 
     // print out time stamp.
     // std::cout << "Tool: " << tool << ", Time stamp: " << tooltimestamp << std::endl;
-  }
+  } /* for each tool */
 }
 //----------------------------------------------------------------------------
 // Protected Methods

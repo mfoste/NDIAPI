@@ -335,7 +335,7 @@ void vtkTrackerWidget::OnStartTracker()
   }
 #endif
   this->m_VolumeSelectionComboBox->setEnabled(false);
-  
+   
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
   m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));
@@ -358,6 +358,12 @@ void vtkTrackerWidget::OnStopTracker()
   }
   emit TrackerStopped();
 }
+
+int vtkTrackerWidget::getTrackerSystemType()
+{
+  return this->m_TrackerSettingsDialog->getSystem();
+}
+
 void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
 {
   ndSetXfrmMissing(&this->m_xfrms[port]);

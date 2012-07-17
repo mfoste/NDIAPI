@@ -47,6 +47,7 @@ or property, arising from the Sample Code or any use thereof.
 #include <vtkMatrix4x4.h>
 
 #include "ndXfrms.h"
+#include "vtkTrackerSettingsStructures.h"
 
 class vtkTracker;
 class vtkTrackerSettingsDialog;
@@ -66,6 +67,7 @@ public:
   void Initialize(QString settingsFile);
 
   inline vtkTracker* getTracker() {return m_Tracker;}
+  int getTrackerSystemType();
   void UpdateToolTransform(int port, QString status);
   void UpdateToolTransform(int port, ndQuatTransformation xfrm);
   void UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality);
