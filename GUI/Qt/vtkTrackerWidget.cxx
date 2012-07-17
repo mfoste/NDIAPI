@@ -159,7 +159,8 @@ void vtkTrackerWidget::CreateActions()
 {
   connect(m_ConfigureTrackerButton, SIGNAL(clicked()), this, SLOT(OnConfigureTracker()));
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
-  connect(m_VolumeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnVolumeSelected(int)));
+  connect(m_TrackerSettingsDialog, SIGNAL(rejected()), this, SLOT(OnConfigureTrackerCanceled()));
+  connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_Timer, SIGNAL(timeout()), this, SLOT(UpdateData()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
@@ -177,6 +178,13 @@ void vtkTrackerWidget::OnConfigureTracker()
       this->m_Tracker->StopTracking();
     }
   }
+
+  // clean up the button functionality and visibility when configuring.
+  this->m_StartTrackingButton->setEnabled(false);
+  this->m_StopTrackingButton->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
+
   /* launch tracker settings dialog. */
   this->m_TrackerSettingsDialog->UpdateAndShow();
 }
@@ -184,6 +192,21 @@ void vtkTrackerWidget::OnConfigureTracker()
 void vtkTrackerWidget::OnConfigureTrackerAccepted()
 {
   this->ConfigureTracker();
+}
+
+void vtkTrackerWidget::OnConfigureTrackerCanceled()
+{
+  if( this->m_Tracker )
+  {
+    this->m_StartTrackingButton->setEnabled(true);
+    if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+      || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
+    {
+      // update the volume information.
+      this->m_VolumeSelectionComboBox->setEnabled(true);
+      this->m_VolumeSelectionComboBox->setVisible(true);
+    }
+  }
 }
 
 void vtkTrackerWidget::ConfigureTracker()
@@ -305,6 +328,8 @@ void vtkTrackerWidget::ConfigureTracker()
       this->m_VolumeSelectionComboBox->insertItem(i,
         QString::fromStdString(dynamic_cast<vtkNDITracker*>(m_Tracker)->GetTrackingVolumeShapeType(i)));
     }
+    this->m_VolumeSelectionComboBox->setCurrentIndex(0);
+    this->OnVolumeSelected(0);
   }
   
   m_StartTrackingButton->setEnabled(true);

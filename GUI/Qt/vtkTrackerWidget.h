@@ -75,6 +75,7 @@ public:
 public slots:
   virtual void OnConfigureTracker();
   virtual void OnConfigureTrackerAccepted();
+  virtual void OnConfigureTrackerCanceled();
   virtual void OnVolumeSelected(int volume);
   virtual void OnStartTracker();
   virtual void OnStopTracker();
