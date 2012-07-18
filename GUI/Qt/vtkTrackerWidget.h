@@ -107,6 +107,7 @@ private:
 	void setupUiLayout();
   void CreateActions();
   void ConfigureTracker();
+  void RemoveTracker();
   void PopUpError(QString str);
 
   // the owner of this widget.

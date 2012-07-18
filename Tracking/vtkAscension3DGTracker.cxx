@@ -381,7 +381,9 @@ void vtkAscension3DGTracker::InternalUpdate()
       DEVICE_STATUS status = GetSensorStatus(sensorID);
       saturated[sensorID] = status & SATURATED;
       attached = !(status & NOT_ATTACHED);
-#ifndef Ascension3DG_DriveBay  // these are not implemented for the driveBay -- only trakStar apparently.
+#if defined (Ascension3DG_TrakStar)
+      // TODO: clarify these.
+      // these are not implemented for the driveBay -- only trakStar apparently, but not trakSTAR 2.
       inMotionBox[sensorID] = !(status & OUT_OF_MOTIONBOX); // not implemented with the MedSafe.  Always true.
       transmitterRunning = !(status & NO_TRANSMITTER_RUNNING);
       transmitterAttached = !(status & NO_TRANSMITTER_ATTACHED);

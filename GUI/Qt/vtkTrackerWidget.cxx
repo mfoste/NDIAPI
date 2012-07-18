@@ -213,17 +213,15 @@ void vtkTrackerWidget::ConfigureTracker()
 {
   QString errorString;
   int nVolumes;
+
+  QProgressDialog progress("Configuring Tracker...", "Cancel", 0, 4, this);
+  progress.setWindowModality(Qt::WindowModal);
   
-  // if a tracker exists, delete it.
-  if( m_Tracker )
+  progress.setValue(1);
+  if( progress.wasCanceled() )
   {
-    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
-    {
-      m_Tracker->GetTool(i)->RemoveAllObservers();
-    }
-    m_Tracker->RemoveAllObservers();
-    m_Tracker->Delete();
-    m_Tracker = 0;
+    this->RemoveTracker();
+    return;
   }
 
   switch( this->m_TrackerSettingsDialog->getSystem() )
@@ -296,6 +294,14 @@ void vtkTrackerWidget::ConfigureTracker()
     this->PopUpError("Invalid tracker system type given.  Check your tracker settings.");
     return;
   }
+
+  progress.setValue(2);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
+    return;
+  }
+
   // set up the event observers.
   this->m_xfrms.resize(m_Tracker->GetNumberOfTools());
   this->m_effectiveFrequencies.resize(m_Tracker->GetNumberOfTools());
@@ -312,6 +318,13 @@ void vtkTrackerWidget::ConfigureTracker()
   if( !m_Tracker->Probe() )
   {
     this->PopUpError("The tracking system you specified is not attached. Please check your connections and retry." );
+    return;
+  }
+
+  progress.setValue(3);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
     return;
   }
 
@@ -334,6 +347,23 @@ void vtkTrackerWidget::ConfigureTracker()
   
   m_StartTrackingButton->setEnabled(true);
   emit TrackerConfigured(QString(m_Tracker->GetSerialNumber()));
+  
+  progress.setValue(4);
+}
+
+void vtkTrackerWidget::RemoveTracker()
+{
+  // if a tracker exists, delete it.
+  if( m_Tracker )
+  { 
+    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
+    {
+      m_Tracker->GetTool(i)->RemoveAllObservers();
+    }
+    m_Tracker->RemoveAllObservers();
+    m_Tracker->Delete();
+    m_Tracker = 0;
+  }
 }
 
 void vtkTrackerWidget::OnVolumeSelected(int volume)
