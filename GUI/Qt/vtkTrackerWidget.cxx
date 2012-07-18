@@ -159,7 +159,8 @@ void vtkTrackerWidget::CreateActions()
 {
   connect(m_ConfigureTrackerButton, SIGNAL(clicked()), this, SLOT(OnConfigureTracker()));
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
-  connect(m_VolumeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnVolumeSelected(int)));
+  connect(m_TrackerSettingsDialog, SIGNAL(rejected()), this, SLOT(OnConfigureTrackerCanceled()));
+  connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_Timer, SIGNAL(timeout()), this, SLOT(UpdateData()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
@@ -177,6 +178,13 @@ void vtkTrackerWidget::OnConfigureTracker()
       this->m_Tracker->StopTracking();
     }
   }
+
+  // clean up the button functionality and visibility when configuring.
+  this->m_StartTrackingButton->setEnabled(false);
+  this->m_StopTrackingButton->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
+
   /* launch tracker settings dialog. */
   this->m_TrackerSettingsDialog->UpdateAndShow();
 }
@@ -186,21 +194,34 @@ void vtkTrackerWidget::OnConfigureTrackerAccepted()
   this->ConfigureTracker();
 }
 
+void vtkTrackerWidget::OnConfigureTrackerCanceled()
+{
+  if( this->m_Tracker )
+  {
+    this->m_StartTrackingButton->setEnabled(true);
+    if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+      || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
+    {
+      // update the volume information.
+      this->m_VolumeSelectionComboBox->setEnabled(true);
+      this->m_VolumeSelectionComboBox->setVisible(true);
+    }
+  }
+}
+
 void vtkTrackerWidget::ConfigureTracker()
 {
   QString errorString;
   int nVolumes;
+
+  QProgressDialog progress("Configuring Tracker...", "Cancel", 0, 4, this);
+  progress.setWindowModality(Qt::WindowModal);
   
-  // if a tracker exists, delete it.
-  if( m_Tracker )
+  progress.setValue(1);
+  if( progress.wasCanceled() )
   {
-    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
-    {
-      m_Tracker->GetTool(i)->RemoveAllObservers();
-    }
-    m_Tracker->RemoveAllObservers();
-    m_Tracker->Delete();
-    m_Tracker = 0;
+    this->RemoveTracker();
+    return;
   }
 
   switch( this->m_TrackerSettingsDialog->getSystem() )
@@ -273,6 +294,14 @@ void vtkTrackerWidget::ConfigureTracker()
     this->PopUpError("Invalid tracker system type given.  Check your tracker settings.");
     return;
   }
+
+  progress.setValue(2);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
+    return;
+  }
+
   // set up the event observers.
   this->m_xfrms.resize(m_Tracker->GetNumberOfTools());
   this->m_effectiveFrequencies.resize(m_Tracker->GetNumberOfTools());
@@ -292,6 +321,13 @@ void vtkTrackerWidget::ConfigureTracker()
     return;
   }
 
+  progress.setValue(3);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
+    return;
+  }
+
   if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
     || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
   {
@@ -305,10 +341,29 @@ void vtkTrackerWidget::ConfigureTracker()
       this->m_VolumeSelectionComboBox->insertItem(i,
         QString::fromStdString(dynamic_cast<vtkNDITracker*>(m_Tracker)->GetTrackingVolumeShapeType(i)));
     }
+    this->m_VolumeSelectionComboBox->setCurrentIndex(0);
+    this->OnVolumeSelected(0);
   }
   
   m_StartTrackingButton->setEnabled(true);
   emit TrackerConfigured(QString(m_Tracker->GetSerialNumber()));
+  
+  progress.setValue(4);
+}
+
+void vtkTrackerWidget::RemoveTracker()
+{
+  // if a tracker exists, delete it.
+  if( m_Tracker )
+  { 
+    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
+    {
+      m_Tracker->GetTool(i)->RemoveAllObservers();
+    }
+    m_Tracker->RemoveAllObservers();
+    m_Tracker->Delete();
+    m_Tracker = 0;
+  }
 }
 
 void vtkTrackerWidget::OnVolumeSelected(int volume)
