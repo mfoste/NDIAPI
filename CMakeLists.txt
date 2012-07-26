@@ -94,6 +94,7 @@ IF (AIGS_USE_TRACKING)
   OPTION (AIGS_USE_LOGITECH "Provide support for the Logitech 3D mouse" OFF)
   OPTION (AIGS_USE_POLHEMUS "Provide support for the Polhemus FasTrak" OFF)
   OPTION (AIGS_USE_MICRONTRACKER "Provide support for the Claron MicronTracker" OFF)
+  OPTION (AIGS_USE_REPLAYTRACKER "Provide support for a tracker that loads a csv file to set as tool transforms.  Similar to vtkFakeTracker but provides ability to set custom tool transforms" OFF)
   
   ADD_SUBDIRECTORY(Utilities)
   ADD_SUBDIRECTORY(Tracking)

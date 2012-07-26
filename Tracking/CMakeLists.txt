@@ -90,6 +90,16 @@ IF (AIGS_USE_MICRONTRACKER)
   INCLUDE (${CMAKE_ROOT}/Modules/FindOpenGL.cmake)
 ENDIF (AIGS_USE_MICRONTRACKER)
 
+
+IF (AIGS_USE_REPLAYTRACKER)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkReplayData.h
+	vtkReplayTracker.h)
+  SET ( Kit_SRCS ${Kit_SRCS}
+        vtkReplayData.cxx
+	vtkReplayTracker.cxx)
+ENDIF (AIGS_USE_REPLAYTRACKER)
+
 SET(Kit_EXTRA_SRCS)
 SET(Kit_EXTRA_CMDS)
 SET(Kit_TCL_EXTRA_SRCS)
