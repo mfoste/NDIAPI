@@ -67,6 +67,8 @@ public:
   vtkGetMacro(SerialPort, int);
 
   void LoadData(char * filename, int tool);
+  void SetUpdateRate(int rate);
+  int GetUpdateRate();
 
 protected:
   vtkReplayTracker();
@@ -78,7 +80,7 @@ protected:
   double updateRate;
   double NextMTime;
   int SerialPort;
-  vtkSmartPointer<vtkReplayData> replayData;
+  vtkReplayData * replayData;
 };
 
 

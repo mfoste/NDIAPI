@@ -100,13 +100,15 @@ vtkReplayTracker::vtkReplayTracker()
 	this->Tools[3]->SetToolPartNumber("Device4");
 	this->Tools[3]->SetToolSerialNumber("RRID4");
 
-	replayData= vtkSmartPointer<vtkReplayData>::New();
+	this->replayData= vtkReplayData::New();
 
 }
 
 vtkReplayTracker::~vtkReplayTracker()
 {
+	this->StopTracking();
 	this->InternalTransform->Delete();
+	this->replayData->Delete();
 }
 
 int vtkReplayTracker::Probe()
@@ -166,6 +168,16 @@ void vtkReplayTracker::InternalUpdate()
 	}
 	this->replayData->AdvanceFrame();
 	this->Modified();
-	this->NextMTime = this->GetMTime()+(1000/30);
+	this->NextMTime = newtime+(1/this->updateRate);
   }
 
+
+  void vtkReplayTracker::SetUpdateRate(int rate)
+  {
+	  this->updateRate=rate;
+  }
+
+  int vtkReplayTracker::GetUpdateRate()
+  {
+	  return this->updateRate;
+  }
