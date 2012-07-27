@@ -341,7 +341,7 @@ void vtkReplayData::LoadData(char * filename, int tool)
 
 void vtkReplayData::ChangeFrame(int frame) 
 {
-	if (frame < this->data.size())
+	if (frame < this->data.size() && frame >=0)
 	{
 		this->frame = frame;
 	}
