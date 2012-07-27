@@ -76,6 +76,8 @@ public:
 
 	void AdvanceFrame();
 
+	void ChangeFrame(int frame);
+
 protected:
 	bool InsertDataSet(vtkMatrix4x4 *matrix, int tool);
 

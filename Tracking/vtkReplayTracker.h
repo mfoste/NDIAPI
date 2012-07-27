@@ -70,6 +70,10 @@ public:
   void SetUpdateRate(int rate);
   int GetUpdateRate();
 
+  void ChangeCurrentFrame(int frame);
+  void ForceRestart();
+
+
 protected:
   vtkReplayTracker();
   ~vtkReplayTracker();

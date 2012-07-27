@@ -338,3 +338,11 @@ void vtkReplayData::LoadData(char * filename, int tool)
 		cout << "Unable to open file"; 
 	}
 }
+
+void vtkReplayData::ChangeFrame(int frame) 
+{
+	if (frame < this->data.size())
+	{
+		this->frame = frame;
+	}
+}

@@ -127,6 +127,16 @@ int vtkReplayTracker::InternalStopTracking()
 	return 1;
 }
 
+void vtkReplayTracker::ChangeCurrentFrame(int frame) 
+{
+	this->replayData->ChangeFrame(frame);
+}
+
+void vtkReplayTracker::ForceRestart() 
+{
+	this->replayData->ChangeFrame(0);
+}
+
 void vtkReplayTracker::LoadData(char * filename, int tool)
 {
 	this->replayData->LoadData(filename, tool);
