@@ -767,16 +767,44 @@ int vtkNDITracker::InternalStartTracking()
 
   // set the baud rate
   // also: NOHANDSHAKE cuts down on CRC errs and timeouts
-  // todo: make this smarter.  Let's start with the highest baud rate and work
-  //       our way down to one that works.
-  ndiCommand(this->Device,"COMM:%d%03d%d",baud,NDI_8N1,NDI_NOHANDSHAKE);
-  errnum = ndiGetError(this->Device);
-  if (errnum) 
+  // Made this smarter: if auto baud, start with the highest baud rate and work
+  //                    our way down to one that works so that we always connect
+  //                    at the highest baud rate possible.
+  if( baud < 0 )
   {
-    vtkErrorMacro(<< ndiErrorString(errnum));
-    ndiClose(this->Device);
-    this->Device = 0;
-    return 0;
+	  for( int autoBaud = 6; autoBaud >-1; autoBaud--)
+	  {
+		  ndiCommand(this->Device,"COMM:%d%03d%d",autoBaud,NDI_8N1,NDI_NOHANDSHAKE);
+		  errnum = ndiGetError(this->Device);
+		  if(errnum)
+		  {
+			  vtkWarningMacro(<< "Invalid baud rate, trying the next one");
+			  continue;
+		  }
+		  else
+			  break;
+	  }
+
+	  if(errnum)
+	  {
+		  vtkErrorMacro(<<"Unable to find a valid baud rate. " << ndiErrorString(errnum));
+		  ndiClose(this->Device);
+		  this->Device = 0;
+		  return 0;
+	  }
+  }
+  // otherwise, use the specified baud rates.
+  else
+  {
+	  ndiCommand(this->Device,"COMM:%d%03d%d",baud,NDI_8N1,NDI_NOHANDSHAKE);
+	  errnum = ndiGetError(this->Device);
+	  if (errnum) 
+	  {
+		  vtkErrorMacro(<< ndiErrorString(errnum));
+		  ndiClose(this->Device);
+		  this->Device = 0;
+		  return 0;
+	  }
   }
 
   // get information about the device

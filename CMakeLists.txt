@@ -8,6 +8,11 @@ IF(COMMAND CMAKE_POLICY)
   CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND CMAKE_POLICY)
 
+# default build type
+IF( NOT CMAKE_BUILD_TYPE )
+SET( CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+ENDIF( NOT CMAKE_BUILD_TYPE )
+
 # Look for a VTK build directory
 FIND_PACKAGE(VTK)
 IF (VTK_FOUND)
@@ -95,7 +100,51 @@ IF (AIGS_USE_TRACKING)
   OPTION (AIGS_USE_POLHEMUS "Provide support for the Polhemus FasTrak" OFF)
   OPTION (AIGS_USE_MICRONTRACKER "Provide support for the Claron MicronTracker" OFF)
   OPTION (AIGS_USE_REPLAYTRACKER "Provide support for a tracker that loads a csv file to set as tool transforms.  Similar to vtkFakeTracker but provides ability to set custom tool transforms" OFF)
-  
+
+  # ascension microbird and 3DG libraries are only available for windows.
+  IF(WIN32)
+	OPTION (AIGS_USE_MICROBIRD "Provide support for the Ascension MicroBird" OFF)
+	OPTION (AIGS_USE_3DG "Provide support for the Ascension 3D Guidance trakStar, medSafe or driveBay" OFF)
+	IF( AIGS_USE_3DG )
+		OPTION (AIGS_USE_3DG_MEDSAFE "Provide support for the Ascension 3D Guidance medSafe" OFF)
+		OPTION (AIGS_USE_3DG_TRAKSTAR "Provide support for the Ascension 3D Guidance trakStar" OFF)
+		OPTION (AIGS_USE_3DG_TRAKSTAR2 "Provide support for the Ascension 3D Guidance trakStar 2" OFF)
+		OPTION (AIGS_USE_3DG_DRIVEBAY "Provide support for the Ascension 3D Guidance driveBay" OFF)
+		# check to make sure only one is selected, we cannot use more than one as they link to the same named dll.
+		IF( AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_DRIVEBAY )
+			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSafe/3D Guidance API/" 
+			CACHE PATH "Directory where the ATC3DGm.h file is located for the medSAFE" )
+			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSAFE/3D Guidance API/ATC3DGm.lib" 
+			CACHE FILEPATH "Full path to the ATC3DGm.lib file for the medSAFE")
+			ADD_DEFINITIONS( /DAscension3DG_MedSafe)
+			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSafe/3D Guidance API")
+	    ELSEIF( AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_DRIVEBAY )
+			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API/" 
+			CACHE PATH "Directory where the ATC3DG.h file is located for the trakSTAR" )
+			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API/ATC3DG.lib" 
+			CACHE FILEPATH "Full path to the ATC3DG.lib file for the trakStar")
+			ADD_DEFINITIONS( /DAscension3DG_TrakStar)
+			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API")
+		ELSEIF( AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_DRIVEBAY )
+			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API/" 
+			CACHE PATH "Directory where the ATC3DG.h file is located for the trakSTAR2" )
+			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API/ATC3DG.lib" 
+			CACHE FILEPATH "Full path to the ATC3DG.lib file for the trakSTAR2")
+			ADD_DEFINITIONS( /DAscension3DG_TrakStar2)
+			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API")
+		ELSEIF( AIGS_USE_3DG_DRIVEBAY AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_TRAKSTAR2 )
+			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API/" 
+			CACHE PATH "Directory where the ATC3DG.h file is located for the driveBay" )
+			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API/ATC3DG.lib" 
+			CACHE FILEPATH "Full path to the ATC3DG.lib file for the driveBay")
+			ADD_DEFINITIONS( /DAscension3DG_DriveBay)
+			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API")
+		ELSE()
+			MESSAGE( FATAL_ERROR "Can only use one of the 3DG tracker types.  Please only select one 3DG tracker type." )
+		ENDIF()
+	ENDIF()
+  ENDIF(WIN32)
+  MESSAGE( STATUS "ATC_LIBRARY: ${ATC_LIBRARY}" )
   ADD_SUBDIRECTORY(Utilities)
   ADD_SUBDIRECTORY(Tracking)
 

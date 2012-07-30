@@ -59,6 +59,15 @@ IF (AIGS_USE_FLOCK)
                       ${VTKFLOCK_BINARY_DIR})
 ENDIF (AIGS_USE_FLOCK)
 
+IF (AIGS_USE_3DG)
+  SET ( Kit_HDRS ${Kit_HDRS}
+	vtkAscension3DGTracker.h)
+  SET ( Kit_SRCS ${Kit_SRCS}
+    vtkAscension3DGTracker.cxx)
+  INCLUDE_DIRECTORIES( ${ATC_INCLUDE_DIRECTORY} )
+  SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} ${ATC_LIBRARY})
+ENDIF (AIGS_USE_3DG)
+
 IF (AIGS_USE_LOGITECH)
   SET ( Kit_HDRS ${Kit_HDRS}
 	vtkLogitechTracker.h)

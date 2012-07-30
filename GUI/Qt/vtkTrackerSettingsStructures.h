@@ -52,6 +52,7 @@ enum TRACKER_SYSTEM_TYPES
 {
   FAKE_TRACKER = 0,
   NDI_AURORA,
+  ASCENSION_3DG,
   NDI_SPECTRA = 3
 };
 
@@ -66,12 +67,20 @@ struct ndiAuroraSettings
 {
   QStringList romFiles;
   double updateFrequency;
-  
   // manual parameters.
   bool bUseManual;
   int commPort;
   int baudRate;
 };
+
+#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
+struct ascension3DGSettings
+{
+  bool bUseSynchronousRecord;
+  bool bUseAllSensors;
+  double updateFrequency;
+};
+#endif
 
 // NDI Spectra tracker settings.
 struct ndiSpectraSettings

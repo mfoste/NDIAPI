@@ -33,73 +33,63 @@ liabilities of any kind whatsoever arising directly or indirectly from any injur
 or property, arising from the Sample Code or any use thereof.
 */
 
-#ifndef __vtkTrackerSettingsDialog_h
-#define __vtkTrackerSettingsDialog_h
-
-#include "vtkTrackerWidget_global.h"
-
-#include <QDialog>
-#include <QSettings>
+#include <QtGui>
 
 #include "vtkTrackerSettingsDialog.h"
-#include "vtkFakeTrackerSettingsWidget.h"
-#include "vtkAuroraTrackerSettingsWidget.h"
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
 #include "vtkAscension3DGTrackerSettingsWidget.h"
-#endif
-#include "vtkSpectraTrackerSettingsWidget.h"
-#include "ui_vtkTrackerSettingsDialog.h"
 
-class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
+vtkAscension3DGTrackerSettingsWidget::vtkAscension3DGTrackerSettingsWidget( QWidget *parent, QSettings *settings )
 {
-  Q_OBJECT
+  this->m_Parent = parent;
+  this->m_Settings = settings;
+  // set up the GUI.
+  m_Widget.setupUi(this);
 
-public:
-  static vtkTrackerSettingsDialog* New();
-  static vtkTrackerSettingsDialog* New(QWidget *parent);
+  // set validators on port line edits.
+  this->m_Widget.updateFrequencyAscension3DGLineEdit->setValidator(new QDoubleValidator(0.1, 40, 1, this) );
+}
 
-protected:
-  vtkTrackerSettingsDialog( QWidget *parent);
-  ~vtkTrackerSettingsDialog();
+vtkAscension3DGTrackerSettingsWidget::vtkAscension3DGTrackerSettingsWidget( QWidget *parent)
+{
+  vtkAscension3DGTrackerSettingsWidget(parent, 0);
+}
 
-public:
-  void Initialize(QString settingsFile);
-  void UpdateAndShow();
-  inline int getSystem() {return this->m_System;}
-  inline Ui::TrackerSettingsDialog* getGUI() {return m_GUI;}
-  inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
-  inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-  inline ascension3DGSettings getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
-#endif
-  inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
+vtkAscension3DGTrackerSettingsWidget::~vtkAscension3DGTrackerSettingsWidget()
+{
+}
 
-public slots:
-  virtual void OnTrackingSystemChanged( int index );
-  virtual void accept();
-  virtual void reject();
-
-private:
-  // some helper functions.
-  void CreateActions();
+void vtkAscension3DGTrackerSettingsWidget::CreateActions()
+{
   
-  void ReadTrackerSettings();
-  void WriteTrackerSettings();
-  // this.
-  QWidget *m_Parent;
-  // member variables.
-  Ui::TrackerSettingsDialog       *m_GUI;
-  vtkFakeTrackerSettingsWidget    *m_FakeTrackerSettingsWidget;
-  vtkAuroraTrackerSettingsWidget  *m_AuroraSettingsWidget;
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-  vtkAscension3DGTrackerSettingsWidget *m_Ascension3DGSettingsWidget;
-#endif
-  vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;
-  
-  // settings.
-  QSettings *m_Settings; 
-  // stored data.
-  int m_System;
-};
+}
 
-#endif
+void vtkAscension3DGTrackerSettingsWidget::ReadTrackerSettings()
+{
+  if( !m_Settings )
+    return;
+
+  // read the settings.
+  this->m_Ascension3DGSettings.bUseSynchronousRecord = this->m_Settings->value("Ascension3DG/useSynchronousRecord", false).toBool();
+  this->m_Ascension3DGSettings.bUseAllSensors = this->m_Settings->value("Ascension3DG/useAllSensors", false).toBool();
+  this->m_Ascension3DGSettings.updateFrequency = this->m_Settings->value("Ascension3DG/updateFrequency", 22.0).toDouble(); 
+
+  // update the GUI.
+  this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseSynchronousRecord);
+  this->m_Widget.useAllSensorsAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseAllSensors);
+  this->m_Widget.updateFrequencyAscension3DGLineEdit->setText(QString("%1").arg(this->m_Ascension3DGSettings.updateFrequency));
+}
+
+void vtkAscension3DGTrackerSettingsWidget::WriteTrackerSettings()
+{
+  if( !m_Settings )
+    return;
+
+  this->m_Ascension3DGSettings.bUseSynchronousRecord = this->m_Widget.useSynchronousAscension3DGCheckBox->isChecked();
+  this->m_Settings->setValue("Ascension3DG/useSynchronousRecord", this->m_Ascension3DGSettings.bUseSynchronousRecord);
+
+  this->m_Ascension3DGSettings.bUseAllSensors = this->m_Widget.useAllSensorsAscension3DGCheckBox->isChecked();
+  this->m_Settings->setValue("Ascension3DG/useAllSensors", this->m_Ascension3DGSettings.bUseAllSensors);
+
+  this->m_Ascension3DGSettings.updateFrequency = this->m_Widget.updateFrequencyAscension3DGLineEdit->text().toDouble();
+  this->m_Settings->setValue("Ascension3DG/updateFrequency", this->m_Ascension3DGSettings.updateFrequency);  
+}

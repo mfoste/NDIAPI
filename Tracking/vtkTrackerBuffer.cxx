@@ -125,13 +125,13 @@ vtkTrackerBuffer::~vtkTrackerBuffer()
   this->Mutex->Delete();
 
   if (this->WorldCalibrationMatrix)
-    {
+  {
     this->WorldCalibrationMatrix->Delete();
-    }
+  }
   if (this->ToolCalibrationMatrix)
-    {
+  {
     this->ToolCalibrationMatrix->Delete();
-    }
+  }
 }
 
 //----------------------------------------------------------------------------

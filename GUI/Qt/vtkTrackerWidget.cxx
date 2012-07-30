@@ -42,6 +42,15 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkTracker.h"
 #include "vtkFakeTracker.h"
 #include "vtkNDITracker.h"
+
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+#include "ATC3DG.h"
+#include "vtkAscension3DGTracker.h"
+#elif defined (Ascension3DG_MedSafe)
+#include "ATC3DGm.h"
+#include "vtkAscension3DGTracker.h"
+#endif
+
 #include "vtkTrackerTool.h"
 #include "vtkTrackerSettingsStructures.h"
 #include "vtkTrackerSettingsDialog.h"
@@ -122,7 +131,7 @@ void vtkTrackerWidget::setupUi()
   this->m_VolumeSelectionComboBox = new QComboBox(this);
   //this->m_ConfigureTrackerButton->setMaximumWidth(110);
   this->m_VolumeSelectionComboBox->setEnabled(false);
-  //this->m_VolumeSelectionComboBox->setVisible(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
 
   this->m_StartTrackingButton = new QPushButton(this);
   this->m_StartTrackingButton->setText("Start Tracking");
@@ -150,7 +159,8 @@ void vtkTrackerWidget::CreateActions()
 {
   connect(m_ConfigureTrackerButton, SIGNAL(clicked()), this, SLOT(OnConfigureTracker()));
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
-  connect(m_VolumeSelectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnVolumeSelected(int)));
+  connect(m_TrackerSettingsDialog, SIGNAL(rejected()), this, SLOT(OnConfigureTrackerCanceled()));
+  connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_Timer, SIGNAL(timeout()), this, SLOT(UpdateData()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
@@ -168,6 +178,13 @@ void vtkTrackerWidget::OnConfigureTracker()
       this->m_Tracker->StopTracking();
     }
   }
+
+  // clean up the button functionality and visibility when configuring.
+  this->m_StartTrackingButton->setEnabled(false);
+  this->m_StopTrackingButton->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+  this->m_VolumeSelectionComboBox->setVisible(false);
+
   /* launch tracker settings dialog. */
   this->m_TrackerSettingsDialog->UpdateAndShow();
 }
@@ -177,21 +194,34 @@ void vtkTrackerWidget::OnConfigureTrackerAccepted()
   this->ConfigureTracker();
 }
 
+void vtkTrackerWidget::OnConfigureTrackerCanceled()
+{
+  if( this->m_Tracker )
+  {
+    this->m_StartTrackingButton->setEnabled(true);
+    if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+      || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
+    {
+      // update the volume information.
+      this->m_VolumeSelectionComboBox->setEnabled(true);
+      this->m_VolumeSelectionComboBox->setVisible(true);
+    }
+  }
+}
+
 void vtkTrackerWidget::ConfigureTracker()
 {
   QString errorString;
   int nVolumes;
+
+  QProgressDialog progress("Configuring Tracker...", "Cancel", 0, 4, this);
+  progress.setWindowModality(Qt::WindowModal);
   
-  // if a tracker exists, delete it.
-  if( m_Tracker )
+  progress.setValue(1);
+  if( progress.wasCanceled() )
   {
-    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
-    {
-      m_Tracker->GetTool(i)->RemoveAllObservers();
-    }
-    m_Tracker->RemoveAllObservers();
-    m_Tracker->Delete();
-    m_Tracker = 0;
+    this->RemoveTracker();
+    return;
   }
 
   switch( this->m_TrackerSettingsDialog->getSystem() )
@@ -205,12 +235,13 @@ void vtkTrackerWidget::ConfigureTracker()
     m_Tracker = vtkNDITracker::New();
     if( this->m_TrackerSettingsDialog->getAuroraSettings().bUseManual )
     {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getAuroraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getAuroraSettings().baudRate); 
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getAuroraSettings().commPort);
     }
     else
     {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
+	  // otherwise use auto detect.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(-1); 
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
     }
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAuroraSettings().updateFrequency;
@@ -224,6 +255,18 @@ void vtkTrackerWidget::ConfigureTracker()
       }
     }
     break;
+// Ascension Tracker Settings.
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  case ASCENSION_3DG:
+    m_Tracker = vtkAscension3DGTracker::New();
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseSynchronousRecord(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseSynchronousRecord);
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseAllSensors(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseAllSensors);
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAscension3DGSettings().updateFrequency;
+    // not volume selection not needed for Ascension.
+    this->m_VolumeSelectionComboBox->setEnabled(false);
+    this->m_VolumeSelectionComboBox->setVisible(false);
+    break;
+#endif
   case NDI_SPECTRA:
     m_Tracker = vtkNDITracker::New();
     if( this->m_TrackerSettingsDialog->getSpectraSettings().bUseManual )
@@ -251,6 +294,14 @@ void vtkTrackerWidget::ConfigureTracker()
     this->PopUpError("Invalid tracker system type given.  Check your tracker settings.");
     return;
   }
+
+  progress.setValue(2);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
+    return;
+  }
+
   // set up the event observers.
   this->m_xfrms.resize(m_Tracker->GetNumberOfTools());
   this->m_effectiveFrequencies.resize(m_Tracker->GetNumberOfTools());
@@ -270,6 +321,13 @@ void vtkTrackerWidget::ConfigureTracker()
     return;
   }
 
+  progress.setValue(3);
+  if( progress.wasCanceled() )
+  {
+    this->RemoveTracker();
+    return;
+  }
+
   if(this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
     || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA )
   {
@@ -283,16 +341,35 @@ void vtkTrackerWidget::ConfigureTracker()
       this->m_VolumeSelectionComboBox->insertItem(i,
         QString::fromStdString(dynamic_cast<vtkNDITracker*>(m_Tracker)->GetTrackingVolumeShapeType(i)));
     }
+    this->m_VolumeSelectionComboBox->setCurrentIndex(0);
+    this->OnVolumeSelected(0);
   }
   
   m_StartTrackingButton->setEnabled(true);
   emit TrackerConfigured(QString(m_Tracker->GetSerialNumber()));
+  
+  progress.setValue(4);
+}
+
+void vtkTrackerWidget::RemoveTracker()
+{
+  // if a tracker exists, delete it.
+  if( m_Tracker )
+  { 
+    for( int i=0; i < m_Tracker->GetNumberOfTools(); i++ )
+    {
+      m_Tracker->GetTool(i)->RemoveAllObservers();
+    }
+    m_Tracker->RemoveAllObservers();
+    m_Tracker->Delete();
+    m_Tracker = 0;
+  }
 }
 
 void vtkTrackerWidget::OnVolumeSelected(int volume)
 {
-  // TODO: make this work with Polaris as well.
-  if( this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA )
+  if( this->m_TrackerSettingsDialog->getSystem() == NDI_AURORA 
+    || this->m_TrackerSettingsDialog->getSystem() == NDI_SPECTRA)
   {
     dynamic_cast<vtkNDITracker*>(m_Tracker)->SetVolume(volume);
   }
@@ -306,6 +383,14 @@ void vtkTrackerWidget::OnStartTracker()
 
   m_Tracker->StartTracking();
 
+#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  if( this->m_TrackerSettingsDialog->getSystem() == ASCENSION_3DG )
+  {
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetMeasurementRate(this->m_TrackerUpdateFrequency);
+  }
+#endif
+  this->m_VolumeSelectionComboBox->setEnabled(false);
+   
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
   m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));
@@ -328,6 +413,12 @@ void vtkTrackerWidget::OnStopTracker()
   }
   emit TrackerStopped();
 }
+
+int vtkTrackerWidget::getTrackerSystemType()
+{
+  return this->m_TrackerSettingsDialog->getSystem();
+}
+
 void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
 {
   ndSetXfrmMissing(&this->m_xfrms[port]);
