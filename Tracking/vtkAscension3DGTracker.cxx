@@ -256,6 +256,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings()
 
   // update the serial number.
   std::stringstream snStream;
+  //TODO: do not use device type, use get transmitter part number.
   snStream << "ATC-SN" << pXmtr->serialNumber << "-DT" << pXmtr->type;
   this->SetSerialNumber(snStream.str().c_str());
   return 1;
@@ -308,7 +309,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     //use all sensors.
     if(this->m_bUseSynchronous)
     {
-      errorCode = GetSynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[sensorID]));
+      errorCode = GetSynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[0]));
       
       // debug:
       //curr = clock();
@@ -322,7 +323,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     }
     else
     {
-      errorCode = GetAsynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[sensorID]));
+      errorCode = GetAsynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[0]));
       
       // debug:
       //curr = clock();
@@ -341,6 +342,7 @@ void vtkAscension3DGTracker::InternalUpdate()
       DEVICE_STATUS status = GetSensorStatus(sensorID);
       saturated[sensorID] = status & SATURATED;
       attached = !(status & NOT_ATTACHED);
+      //TODO: review the rev C. documentation and check the status bits -- different sets of status bits for each transmitter.
 #ifndef Ascension3DG_DriveBay  // these are not implemented for the driveBay -- only trakStar apparently.
       inMotionBox[sensorID] = !(status & OUT_OF_MOTIONBOX); // not implemented with the MedSafe.  Always true.
       transmitterRunning = !(status & NO_TRANSMITTER_RUNNING);
@@ -399,6 +401,7 @@ void vtkAscension3DGTracker::InternalUpdate()
         // debug:
         //start = clock();
 
+        // TODO: remove - doesn't work.
         if(this->m_bUseSynchronous)
         {
           errorCode = GetSynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
@@ -822,7 +825,7 @@ int vtkAscension3DGTracker::SetMeasurementRate(double rate)
     errorHandler(errorCode, "vtkAscension3DGTracker::SetMeasurementRate(double rate) - SetSystemParameter(MEASUREMENT_RATE, &rate, sizeof(rate))"); 
     return 0; 
   }
-  Sleep(5);
+  Sleep(2000);
   return 1;
 }
 
