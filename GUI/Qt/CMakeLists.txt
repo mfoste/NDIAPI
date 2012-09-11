@@ -84,6 +84,28 @@ set( WIDGET_UI_FILES
     vtkTrackerSettingsDialog.ui
 )
 
+if(AIGS_USE_3DG)
+	set( WIDGET_MOCHDR_FILES 
+		${WIDGET_MOCHDR_FILES} 
+		vtkAscension3DGTrackerSettingsWidget.h )
+	set( WIDGET_SRC_FILES 
+		${WIDGET_SRC_FILES} 
+		vtkAscension3DGTrackerSettingsWidget.cxx )
+	set( WIDGET_UI_FILES 
+		${WIDGET_UI_FILES} 
+		Ascension3DGTrackerSettingsWidget.ui )
+	IF(AIGS_USE_3DG_MEDSAFE) # Use MedSafe version
+		ADD_DEFINITIONS(-DAscension3DG_MedSafe)
+	ELSEIF( AIGS_USE_3DG_DRIVEBAY )
+       ADD_DEFINITIONS(-DAscension3DG_DriveBay)
+	ELSEIF( AIGS_USE_3DG_TRAKSTAR )
+	   ADD_DEFINITIONS(-DAscension3DG_TrakStar)
+	ELSE() # trakStar2 is the default
+       ADD_DEFINITIONS(-DAscension3DG_TrakStar2)
+	ENDIF()     	
+   INCLUDE_DIRECTORIES( ${ATC_INCLUDE_DIRECTORY} )
+endif()
+
 # CMake apparently doesn't do this automatically
 #SET_SOURCE_FILES_PROPERTIES(vtkTrackerWidgetPlugin.cxx PROPERTIES 
 #                            OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vtkTrackerWidget.cxx)
@@ -105,7 +127,8 @@ add_library( vtkTrackerWidget
 target_link_libraries( vtkTrackerWidget
     ${QT_LIBRARIES}
     vtkTracking 
-    vtkndicapi )    
+    vtkndicapi
+	${ATC_LIBRARY})    
 
 install( TARGETS vtkTrackerWidget DESTINATION bin )
 

@@ -32,74 +32,48 @@ NDI be liable for any claims, losses, damages, judgments, costs, awards, expense
 liabilities of any kind whatsoever arising directly or indirectly from any injury to person
 or property, arising from the Sample Code or any use thereof.
 */
+#ifndef __vtkAscension3DGTrackerSettingsWidget_h
+#define __vtkAscension3DGTrackerSettingsWidget_h
 
-#ifndef __vtkTrackerSettingsDialog_h
-#define __vtkTrackerSettingsDialog_h
+//#include "vtkTrackerWidget_global.h"
 
-#include "vtkTrackerWidget_global.h"
+#include <QWidget>
+#include <qsettings.h>
 
-#include <QDialog>
-#include <QSettings>
+#include "vtkTrackerSettingsStructures.h"
 
-#include "vtkTrackerSettingsDialog.h"
-#include "vtkFakeTrackerSettingsWidget.h"
-#include "vtkAuroraTrackerSettingsWidget.h"
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-#include "vtkAscension3DGTrackerSettingsWidget.h"
-#endif
-#include "vtkSpectraTrackerSettingsWidget.h"
-#include "ui_vtkTrackerSettingsDialog.h"
+#include "ui_Ascension3DGTrackerSettingsWidget.h"
 
-class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
+class vtkAscension3DGTrackerSettingsWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  static vtkTrackerSettingsDialog* New();
-  static vtkTrackerSettingsDialog* New(QWidget *parent);
+  vtkAscension3DGTrackerSettingsWidget( QWidget *parent, QSettings *settings);
+  vtkAscension3DGTrackerSettingsWidget( QWidget *parent);
+  ~vtkAscension3DGTrackerSettingsWidget();
 
-protected:
-  vtkTrackerSettingsDialog( QWidget *parent);
-  ~vtkTrackerSettingsDialog();
+  inline Ui::Ascension3DGTrackerSettingsWidget getWidget() {return m_Widget;}
 
-public:
-  void Initialize(QString settingsFile);
-  void UpdateAndShow();
-  inline int getSystem() {return this->m_System;}
-  inline Ui::TrackerSettingsDialog* getGUI() {return m_GUI;}
-  inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
-  inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-  inline ascension3DGSettings getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
-#endif
-  inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
+  inline void SetSettings(QSettings *settings) {m_Settings = settings;}
+  inline ascension3DGSettings GetAscension3DGSettings() {return this->m_Ascension3DGSettings;}
+  void ReadTrackerSettings();
+  void WriteTrackerSettings();
 
 public slots:
-  virtual void OnTrackingSystemChanged( int index );
-  virtual void accept();
-  virtual void reject();
-
+  
 private:
   // some helper functions.
   void CreateActions();
-  
-  void ReadTrackerSettings();
-  void WriteTrackerSettings();
+
   // this.
   QWidget *m_Parent;
   // member variables.
-  Ui::TrackerSettingsDialog       *m_GUI;
-  vtkFakeTrackerSettingsWidget    *m_FakeTrackerSettingsWidget;
-  vtkAuroraTrackerSettingsWidget  *m_AuroraSettingsWidget;
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-  vtkAscension3DGTrackerSettingsWidget *m_Ascension3DGSettingsWidget;
-#endif
-  vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;
-  
-  // settings.
-  QSettings *m_Settings; 
-  // stored data.
-  int m_System;
+  Ui::Ascension3DGTrackerSettingsWidget m_Widget;
+
+  //settings
+  QSettings *m_Settings;
+  ascension3DGSettings m_Ascension3DGSettings;
 };
 
-#endif
+#endif //__vtkAscension3DGTrackerSettingsWidget_h
