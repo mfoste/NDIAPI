@@ -35,15 +35,6 @@ EXPORTS ndiDeviceName
         ndiGetTXNumberOfPassiveStrays
         ndiGetTXPassiveStray
         ndiGetTXSystemStatus
-        ndiGetGXTransform
-        ndiGetGXPortStatus
-        ndiGetGXSystemStatus
-        ndiGetGXToolInfo
-        ndiGetGXMarkerInfo
-        ndiGetGXSingleStray
-        ndiGetGXFrame
-        ndiGetGXNumberOfPassiveStrays
-        ndiGetGXPassiveStray
         ndiGetPSTATPortStatus
         ndiGetPSTATToolInfo
         ndiGetPSTATCurrentTest

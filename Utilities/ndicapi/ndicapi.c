@@ -102,21 +102,6 @@ struct ndicapi {
   void (*error_callback)(int code, char *description, void *data);
   void *error_callback_data;              /* user data for callback */
 
-  /* GX command reply data */
-
-  char gx_transforms[3][52];              /* 3 active tool transforms */
-  char gx_status[8];                      /* tool and system status */
-  char gx_information[3][12];             /* extra transform information */
-  char gx_single_stray[3][24];            /* one stray marker per tool */
-  char gx_frame[3][8];                    /* frame number for each tool */
-
-  char gx_passive_transforms[9][52];      /* 9 passive tool transforms */
-  char gx_passive_status[24];             /* tool and system status */
-  char gx_passive_information[9][12];     /* extra transform information */
-  char gx_passive_frame[9][8];            /* frame number for each tool */
-
-  char gx_passive_stray[424];             /* all passive stray markers */
-
   /* PSTAT command reply data */
 
   char pstat_basic[3][32];                /* basic pstat info */
@@ -812,7 +797,6 @@ static void ndi_COMM_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PHINF_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PHSR_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_TX_helper(ndicapi *pol, const char *cp, const char *crp);
-static void ndi_GX_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_INIT_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_IRCHK_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PSTAT_helper(ndicapi *pol, const char *cp, const char *crp);
@@ -915,17 +899,16 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
   cp[i++] = '\r';                             /* tack on carriage return */
   cp[i] = '\0';                               /* terminate for good luck */
 
-  /* if the command is GX and thread_mode is on, we copy the reply from
+  /* if the command is TX or BX and thread_mode is on, we copy the reply from
      the thread rather than getting it directly from the Measurement System */
   if (pol->thread_mode && pol->tracking && 
-      nc == 2 && (cp[0] == 'G' && cp[1] == 'X' ||
-                  cp[0] == 'T' && cp[1] == 'X' ||
+      nc == 2 && (cp[0] == 'T' && cp[1] == 'X' ||
                   cp[0] == 'B' && cp[1] == 'X')) {
     int errcode = 0;
 
-    /* check that the thread is sending the GX command that we want */
+    /* check that the thread is sending the TX command that we want */
     if (strcmp(cp, pol->thread_command) != 0) {
-      /* tell thread to start using the new GX command */
+      /* tell thread to start using the new TX command */
       ndiMutexLock(pol->thread_mutex);
       strcpy(pol->thread_command, cp);
       ndiMutexUnlock(pol->thread_mutex);
@@ -954,7 +937,7 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
       return crp;
     }
   }
-  /* if the command is not a GX or thread_mode is not on, then
+  /* if the command is not a TX/BX or thread_mode is not on, then
      send the command directly to the Measurement System and get a reply */
   else {
     int errcode = 0;
@@ -977,7 +960,7 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
       pol->tracking = 1;
       if (thread_mode) {
         /* this will force the thread to wait until the application
-           sends the first GX command */
+           sends the first TX command */
         pol->thread_command[0] = '\0';
       }
     }
@@ -1058,9 +1041,6 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
 
   if (cp[0] == 'T' && cp[1] == 'X' && nc == 2) { /* the TX command */
     ndi_TX_helper(pol, cp, crp);
-  }
-  else if (cp[0] == 'G' && cp[1] == 'X' && nc == 2) { /* the GX command */
-    ndi_GX_helper(pol, cp, crp);
   }
   else if (cp[0] == 'C' && nc == 4 && strncmp(cp, "COMM", nc) == 0) {
     ndi_COMM_helper(pol, cp, crp);
@@ -1444,218 +1424,6 @@ int ndiGetTXSystemStatus(ndicapi *pol)
   return (int)ndiHexToUnsignedLong(dp, 4);
 }
 
-/*---------------------------------------------------------------------*/
-int ndiGetGXTransform(ndicapi *pol, int port, double transform[8])
-{
-  char *dp;
-  
-  if (port >= '1' && port <= '3') {
-    dp = pol->gx_transforms[port - '1'];
-  }
-  else if (port >= 'A' && port <= 'I') {
-    dp = pol->gx_passive_transforms[port - 'A'];
-  }
-  else {
-    return NDI_DISABLED;
-  }
-
-  if (*dp == 'D' || *dp == '\0') {
-    return NDI_DISABLED;
-  }
-  else if (*dp == 'M') {
-    return NDI_MISSING;
-  }
-
-  transform[0] = ndiSignedToLong(&dp[0],  6)*0.0001;
-  transform[1] = ndiSignedToLong(&dp[6],  6)*0.0001;
-  transform[2] = ndiSignedToLong(&dp[12], 6)*0.0001;
-  transform[3] = ndiSignedToLong(&dp[18], 6)*0.0001;
-  transform[4] = ndiSignedToLong(&dp[24], 7)*0.01;
-  transform[5] = ndiSignedToLong(&dp[31], 7)*0.01;
-  transform[6] = ndiSignedToLong(&dp[38], 7)*0.01;
-  transform[7] = ndiSignedToLong(&dp[45], 6)*0.0001;
-
-  return NDI_OKAY;
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXPortStatus(ndicapi *pol, int port)
-{
-  char *dp;
-
-  if (port >= '1' && port <= '3') {
-    dp = &pol->gx_status[6 - 2*(port - '1')];
-  }
-  else if (port >= 'A' && port <= 'C') {
-    dp = &pol->gx_passive_status[6 - 2*(port - 'A')];
-  }
-  else if (port >= 'D' && port <= 'F') {
-    dp = &pol->gx_passive_status[14 - 2*(port - 'D')];
-  }
-  else if (port >= 'G' && port <= 'I') {
-    dp = &pol->gx_passive_status[22 - 2*(port - 'G')];
-  }
-  else {
-    return 0;
-  }
-
-  return (int)ndiHexToUnsignedLong(dp, 2);
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXSystemStatus(ndicapi *pol)
-{
-  char *dp;
-
-  dp = pol->gx_status;
-
-  if (*dp == '\0') {
-    dp = pol->gx_passive_status;
-  }
-
-  return (int)ndiHexToUnsignedLong(dp, 2);
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXToolInfo(ndicapi *pol, int port)
-{
-  char *dp;
-
-  if (port >= '1' && port <= '3') {
-    dp = pol->gx_information[port - '1'];
-  }
-  else if (port >= 'A' && port <= 'I') {
-    dp = pol->gx_passive_information[port - 'A'];
-  }
-  else {
-    return 0;
-  }
-
-  return (int)ndiHexToUnsignedLong(dp, 2);
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXMarkerInfo(ndicapi *pol, int port, int marker)
-{
-  char *dp;
-
-  if (marker < 'A' || marker > 'T') {
-    return 0;
-  }
-
-  if (port >= '1' && port <= '3') {
-    dp = pol->gx_information[port - '1'];
-  }
-  else if (port >= 'A' && port <= 'I') {
-    dp = pol->gx_passive_information[port - 'A'];
-  }
-  else {
-    return 0;
-  }
-  dp += 11 - (marker - 'A');
-
-  return (int)ndiHexToUnsignedLong(dp, 1);
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXSingleStray(ndicapi *pol, int port, double coord[3])
-{
-  char *dp;
-  
-  if (port >= '1' && port <= '3') {
-    dp = pol->gx_single_stray[port - '1'];
-  }
-  else {
-    return NDI_DISABLED;
-  }
-
-  if (*dp == 'D' || *dp == '\0') {
-    return NDI_DISABLED;
-  }
-  else if (*dp == 'M') {
-    return NDI_MISSING;
-  }
-
-  coord[0] = ndiSignedToLong(&dp[0],  7)*0.01;
-  coord[1] = ndiSignedToLong(&dp[7],  7)*0.01;
-  coord[2] = ndiSignedToLong(&dp[14], 7)*0.01;
-
-  return NDI_OKAY;
-}
-
-/*---------------------------------------------------------------------*/
-unsigned long ndiGetGXFrame(ndicapi *pol, int port)
-{
-  char *dp;
-
-  if (port >= '1' && port <= '3') {
-    dp = pol->gx_frame[port - '1'];
-  }
-  else if (port >= 'A' && port <= 'I') {
-    dp = pol->gx_passive_frame[port - 'A'];
-  }
-  else {
-    return 0;
-  }
-
-  return (unsigned long)ndiHexToUnsignedLong(dp, 8);
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXNumberOfPassiveStrays(ndicapi *pol)
-{
-  const char *dp;
-  int n;
-
-  dp = pol->gx_passive_stray;
-
-  if (*dp == '\0') {
-    return 0;
-  }
-  
-  n = (int)ndiSignedToLong(dp, 3);
-  if (n < 0) {
-    return 0;
-  }
-  if (n > 20) {
-    return 20;
-  }
-
-  return n; 
-}
-
-/*---------------------------------------------------------------------*/
-int ndiGetGXPassiveStray(ndicapi *pol, int i, double coord[3])
-{
-  const char *dp;
-  int n;
-
-  dp = pol->gx_passive_stray;
-
-  if (*dp == '\0') {
-    return NDI_DISABLED;
-  }
-
-  n = (int)ndiSignedToLong(dp, 3);
-  dp += 3;
-  if (n < 0) {
-    return NDI_MISSING;
-  }
-  if (n > 20) {
-    n = 20;
-  }
-
-  if (i < 0 || i >= n) {
-    return NDI_MISSING;
-  }
-
-  dp += 7*3*i;
-  coord[0] = ndiSignedToLong(&dp[0],  7)*0.01;
-  coord[1] = ndiSignedToLong(&dp[7],  7)*0.01;
-  coord[2] = ndiSignedToLong(&dp[14], 7)*0.01;
-
-  return NDI_OKAY;
-}
 
 /*---------------------------------------------------------------------*/
 int ndiGetPSTATPortStatus(ndicapi *pol, int port)
@@ -2376,192 +2144,7 @@ static void ndi_TX_helper(ndicapi *pol, const char *cp, const char *crp)
   }
 }
 
-/*---------------------------------------------------------------------
-  Copy all the GX reply information into the ndicapi structure, according
-  to the GX reply mode that was requested.
 
-  This function is called every time a GX command is sent to the
-  Measurement System.
-
-  This information can be later extracted through one of the ndiGetGXxx()
-  functions.
-*/
-static void ndi_GX_helper(ndicapi *pol, const char *cp, const char *crp)
-{
-  unsigned long mode = 0x0001; /* the default reply mode */
-  char *dp;
-  int i, j, k;
-  int npassive, nactive;
-
-  /* if the GX command had a reply mode, read it */
-  if ((cp[2] == ':' && cp[7] != '\r') || (cp[2] == ' ' && cp[3] != '\r')) { 
-    mode = ndiHexToUnsignedLong(&cp[3], 4);
-  }
-
-  /* always three active ports */
-  nactive = 3;
-
-  if (mode & NDI_XFORMS_AND_STATUS) {
-    for (k = 0; k < nactive; k += 3) {
-      /* grab the three transforms */
-      for (i = 0; i < 3; i++) {
-        dp = pol->gx_transforms[i];
-        for (j = 0; j < 51 && *crp >= ' '; j++) {
-          *dp++ = *crp++;
-        }
-        *dp = '\0';
-        /* fprintf(stderr, "xf %.51s\n", pol->gx_transforms[i]); */
-        /* eat the trailing newline */
-        if (*crp == '\n') {
-          crp++;
-        }
-      }
-      /* grab the status flags */
-      dp = pol->gx_status + k/3*8;
-      for (j = 0; j < 8 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "st %.8s\n", pol->gx_status); */
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  if (mode & NDI_ADDITIONAL_INFO) {
-    /* grab information for each port */
-    for (i = 0; i < nactive; i++) {
-      dp = pol->gx_information[i];
-      for (j = 0; j < 12 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "ai %.12s\n", pol->gx_information[i]); */
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  if (mode & NDI_SINGLE_STRAY) {
-    /* grab stray marker for each port */
-    for (i = 0; i < nactive; i++) {
-      dp = pol->gx_single_stray[i];
-      for (j = 0; j < 21 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      *dp = '\0';
-      /* fprintf(stderr, "ss %.21s\n", pol->gx_single_stray[i]); */      
-      /* eat the trailing newline */
-      if (*crp == '\n') {
-        crp++;
-      }
-    }
-  }
-
-  if (mode & NDI_FRAME_NUMBER) {
-    /* get frame number for each port */
-    for (i = 0; i < nactive; i++) {
-      dp = pol->gx_frame[i];
-      for (j = 0; j < 8 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "fn %.8s\n", pol->gx_frame[i]); */
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  /* if there is no passive information, stop here */
-  if (!(mode & NDI_PASSIVE)) {
-    return;
-  }
-
-  /* in case there are 9 passive tools instead of just 3 */
-  npassive = 3;
-  if (mode & NDI_PASSIVE_EXTRA) {
-    npassive = 9;
-  }
-
-  if ((mode & NDI_XFORMS_AND_STATUS) || (mode == NDI_PASSIVE)) {
-    /* the information is grouped in threes */
-    for (k = 0; k < npassive; k += 3) {
-      /* grab the three transforms */
-      for (i = 0; i < 3; i++) {
-        dp = pol->gx_passive_transforms[k+i];
-        for (j = 0; j < 51 && *crp >= ' '; j++) {
-          *dp++ = *crp++;
-        }
-        *dp = '\0';
-        /* fprintf(stderr, "pxf %.31s\n", pol->gx_passive_transforms[k+i]); */
-        /* eat the trailing newline */
-        if (*crp == '\n') {
-          crp++;
-        }
-      }
-      /* grab the status flags */
-      dp = pol->gx_passive_status + k/3*8;
-      for (j = 0; j < 8 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "pst %.8s\n", pol->gx_passive_status + k/3*8); */
-      /* skip the newline */
-      if (*crp == '\n') {
-        crp++;
-      }
-      else { /* no newline: no more passive transforms */
-        npassive = k + 3;
-      }
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  if (mode & NDI_ADDITIONAL_INFO) {
-    /* grab information for each port */
-    for (i = 0; i < npassive; i++) {
-      dp = pol->gx_passive_information[i];
-      for (j = 0; j < 12 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "pai %.12s\n", pol->gx_passive_information[i]); */
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  if (mode & NDI_FRAME_NUMBER) {
-    /* get frame number for each port */
-    for (i = 0; i < npassive; i++) {
-      dp = pol->gx_passive_frame[i];
-      for (j = 0; j < 8 && *crp >= ' '; j++) {
-        *dp++ = *crp++;
-      }
-      /* fprintf(stderr, "pfn %.8s\n", pol->gx_passive_frame[i]); */      
-    }
-    /* eat the trailing newline */
-    if (*crp == '\n') {
-      crp++;
-    }
-  }
-
-  if (mode & NDI_PASSIVE_STRAY) {
-    /* get all the passive stray information */
-    /* this will be a maximum of 3 + 20*3*7 = 423 bytes */
-    dp = pol->gx_passive_stray;
-    for (j = 0; j < 423 && *crp >= ' '; j++) {
-      *dp++ = *crp++;
-    }
-    /* fprintf(stderr, "psm %s\n", pol->gx_passive_stray); */
-  }
-}
 
 /*---------------------------------------------------------------------
   Copy all the PSTAT reply information into the ndicapi structure.
@@ -2969,7 +2552,7 @@ static int ndi_set_error(ndicapi *pol, int errnum)
 /*---------------------------------------------------------------------
   The tracking thread.
 
-  This thread continually sends the most recent GX command to the
+  This thread continually sends the most recent TX/BX command to the
   NDICAPI until it is told to quit or until an error occurs.
 
   The thread is blocked unless the Measurement System is in tracking mode.
@@ -2996,7 +2579,7 @@ static void *ndi_thread(void *userdata)
       return NULL;
     }
 
-    /* check whether we have a GX command ready to send */
+    /* check whether we have a TX command ready to send */
     if (cp[0] == '\0') {
       ndiSerialSleep(pol->serial_device, 20);
       ndiMutexUnlock(pol->thread_mutex);

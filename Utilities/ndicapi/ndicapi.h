@@ -138,24 +138,24 @@ void ndiClose(ndicapi *pol);
   \param mode   1 to turn on threading, 0 to turn off threading
 
   It can take milliseconds or even tens of milliseconds for the tracking
-  system to return the transform data after a TX or GX command.  During
+  system to return the transform data after a TX command.  During
   this time, the application normally sits idle.
 
   One way to avoid this idle time is to spawn a separate thread to send
-  the GX/TX/BX commands to the device and wait for the replies.
+  the TX/BX commands to the device and wait for the replies.
   This allows the main application thread to continue to execute while
   the other thread is waiting for a reply from the device.
 
-  When the thread mode is set, every time the application sends a GX,
+  When the thread mode is set, every time the application sends a 
   TX or BX command to the device during tracking mode the
-  spawned thread will automatically begin resending the GX/TX/BX
+  spawned thread will automatically begin resending the TX/BX
   command as fast as possible.  
-  Then when the application sends the next GX/TX/BX command, the
+  Then when the application sends the next TX/BX command, the
   thread will simply send the application the most recent reply
   instead of forcing the application to wait through a full command/reply
   cycle.
 
-  If the application changes the reply mode for the GX, TX or BX command,
+  If the application changes the reply mode for the TX or BX command,
   then the thread will begin sending commands with the new reply format.
 */
 void ndiSetThreadMode(ndicapi *pol, int mode);
@@ -185,10 +185,8 @@ void ndiSetThreadMode(ndicapi *pol, int mode);
            be retrieved though the ndiGetPHSR() functions.
   - "PHINF:" - The information returned by the PHINF command is stored and can
            be retrieved though the ndiGetPHINF() functions.
-  - "TX:"   - The information returned by the GX command is stored and can
+  - "TX:"   - The information returned by the TX command is stored and can
            be retrieved though the ndiGetTX() functions.
-  - "GX:"   - The information returned by the GX command is stored and can
-           be retrieved though the ndiGetGX() functions.
   - "PSTAT:" - The information returned by the PSTAT command is stored and
            can be retrieved through one of the ndiGetPSTAT() functions.
   - "SSTAT:" - The information returned by the SSTAT command is stored and
@@ -294,34 +292,6 @@ void ndiSetErrorCallback(ndicapi *pol, NDIErrorCallback callback,
   Take the device out of diagnostic mode.
 */
 #define ndiDSTOP(p) ndiCommand((p),"DSTOP:")
-
-/*!
-  Request tracking information from the system.  This command is
-  only available in tracking mode.  Please note that this command has
-  been deprecated in favor of the TX command.
-
-  \param mode a reply mode containing the following bits:
-  - NDI_XFORMS_AND_STATUS  0x0001 - transforms and status
-  - NDI_ADDITIONAL_INFO    0x0002 - additional tool transform info
-  - NDI_SINGLE_STRAY       0x0004 - stray active marker reporting
-  - NDI_FRAME_NUMBER       0x0008 - frame number for each tool
-  - NDI_PASSIVE            0x8000 - include information for ports 'A', 'B', 'C'
-  - NDI_PASSIVE_EXTRA      0x2000 - with NDI_PASSIVE, ports 'A' to 'I'
-  - NDI_PASSIVE_STRAY      0x1000 - stray passive marker reporting
-
-  <p>The GX command with the appropriate reply mode is used to update the
-  data that is returned by the following functions:
-  - int \ref ndiGetGXTransform(ndicapi *pol, int port, double transform[8])
-  - int \ref ndiGetGXPortStatus(ndicapi *pol, int port)
-  - int \ref ndiGetGXSystemStatus(ndicapi *pol)
-  - int \ref ndiGetGXToolInfo(ndicapi *pol, int port)
-  - int \ref ndiGetGXMarkerInfo(ndicapi *pol, int port, int marker)
-  - int \ref ndiGetGXSingleStray(ndicapi *pol, int port, double coord[3])
-  - unsigned long \ref ndiGetGXFrame(ndicapi *pol, int port)
-  - int \ref ndiGetGXNumberOfPassiveStrays(ndicapi *pol)
-  - int \ref ndiGetGXPassiveStray(ndicapi *pol, int i, double coord[3])
-*/
-#define ndiGX(p,mode) ndiCommand((p),"GX:%04X",(mode))
 
 /*!
   Initialize the device.  The device must be
@@ -1047,7 +1017,7 @@ int ndiGetTXMarkerInfo(ndicapi *pol, int ph, int marker);
   - NDI_DISABLED - port disabled or illegal port specified
   - NDI_MISSING - stray marker is not visible to the device
 
-  <p>The stray marker position is only updated when the GX command is
+  <p>The stray marker position is only updated when the TX command is
   called with the NDI_SINGLE_STRAY (0x0004) bit set.
 */
 int ndiGetTXSingleStray(ndicapi *pol, int ph, double coord[3]);
@@ -1102,180 +1072,6 @@ int ndiGetTXPassiveStray(ndicapi *pol, int i, double coord[3]);
   called with the NDI_XFORMS_AND_STATUS (0x0001) bit set in the reply mode.
 */
 int ndiGetTXSystemStatus(ndicapi *pol);
-
-/*! \ingroup GetMethods
-  Get the transformation for the specified port.
-  The first four numbers are a quaternion, the next three numbers are
-  the coodinates in millimetres, and the final number
-  is a unitless error estimate.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3' or 'A' to 'I'
-  \param transform space for the 8 numbers in the transformation
-  
-  \return one of the following: 
-  - NDI_OKAY if successful
-  - NDI_DISABLED if tool port is nonexistent or disabled
-  - NDI_MISSING if tool transform cannot be computed
-
-  <p>If NDI_DISABLED or NDI_MISSING is returned, then the values in the
-  supplied transform array will be left unchanged.
-
-  The transforms for ports '1', '2', '3' are updated whenever the
-  GX comand is sent with the NDI_XFORMS_AND_STATUS (0x0001) bit set
-  in the reply mode.
-  The passive ports 'A', 'B', 'C' are updated if the NDI_PASSIVE (0x8000)
-  bit is also set, and ports 'A' though 'I' are updated if both
-  NDI_PASSIVE (0x8000) and NDI_PASSIVE_EXTRA (0x2000) are also set.
-
-  The transformation for any particular port will remain unchanged
-  until it is updated by a GX command with an appropriate reply mode
-  as specified above.
-*/ 
-int ndiGetGXTransform(ndicapi *pol, int port, double transform[8]);
-
-/*! \ingroup GetMethods
-  Get the 8-bit status value for the specified port.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3' or 'A' to 'I'
-
-  \return status bits or zero if there is no information:
-  - NDI_TOOL_IN_PORT        0x01
-  - NDI_SWITCH_1_ON         0x02
-  - NDI_SWITCH_2_ON         0x04
-  - NDI_SWITCH_3_ON         0x08
-  - NDI_INITIALIZED         0x10
-  - NDI_ENABLED             0x20
-  - NDI_OUT_OF_VOLUME       0x40
-  - NDI_PARTIALLY_IN_VOLUME 0x80
-
-  The status of the ports is updated according to the same rules as
-  specified for ndiGetGXTransform().
-*/
-int ndiGetGXPortStatus(ndicapi *pol, int port);
-
-/*! \ingroup GetMethods
-  Get an 8-bit status bitfield for the system.
-
-  \param pol       valid NDI device handle
-
-  \return status bits or zero if there is no information:
-  - NDI_COMM_SYNC_ERROR            0x01
-  - NDI_TOO_MUCH_EXTERNAL_INFRARED 0x02
-  - NDI_COMM_CRC_ERROR             0x04
-
-  <p>The system stutus information is updated whenever the GX command is
-  called with the NDI_XFORMS_AND_STATUS (0x0001) bit set in the reply mode.
-*/
-int ndiGetGXSystemStatus(ndicapi *pol);
-
-/*! \ingroup GetMethods
-  Get additional information about the tool transformation.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3' or 'A' to 'I'
-
-  \return status bits, or zero if there is no information available
-  - NDI_BAD_TRANSFORM_FIT   0x01
-  - NDI_NOT_ENOUGH_MARKERS  0x02
-  - NDI_TOOL_FACE_USED      0x70 - 3 bits give 8 possible faces
-
-  <p>The tool information is only updated when the GX command is called with
-  the NDI_ADDITIONAL_INFO (0x0002) mode bit, and then only for the ports
-  specified by the NDI_PASSIVE (0x8000) and NDI_PASSIVE_EXTRA (0x2000) bits.
-*/
-int ndiGetGXToolInfo(ndicapi *pol, int port);
-
-/*! \ingroup GetMethods
-  Get additional information about the tool markers.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3' or 'A' to 'I'
-  \param marker    one of 'A' through 'T' for the 20 markers
-
-  \return status bits, or zero if there is no information available
-  - NDI_MARKER_MISSING             0
-  - NDI_MARKER_EXCEEDED_MAX_ANGLE  1
-  - NDI_MARKER_EXCEEDED_MAX_ERROR  2
-  - NDI_MARKER_USED                3  
-
-  <p>The tool marker information is only updated when the GX command is
-  called with the NDI_ADDITIONAL_INFO (0x0002) mode bit set, and then only
-  for the ports specified by the NDI_PASSIVE (0x8000) and
-  NDI_PASSIVE_EXTRA (0x2000) bits.
-*/
-int ndiGetGXMarkerInfo(ndicapi *pol, int port, int marker);
-
-/*! \ingroup GetMethods
-  Get the coordinates of a stray marker on an active tool.
-  This command is only meaningful for active tools that have a stray
-  marker.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3'
-  \param coord     array to hold the three coordinates
-
-  \return the return value will be one of
-  - NDI_OKAY - values returned in coord
-  - NDI_DISABLED - port disabled or illegal port specified
-  - NDI_MISSING - stray marker is not visible to the device
-
-  <p>The stray marker position is only updated when the GX command is
-  called with the NDI_SINGLE_STRAY (0x0004) bit set.
-*/
-int ndiGetGXSingleStray(ndicapi *pol, int port, double coord[3]);
-
-/*! \ingroup GetMethods
-  Get the camera frame number for the latest transform.
-
-  \param pol       valid NDI device handle
-  \param port      one of '1', '2', '3' (active ports only)
-
-  \return a 32-bit frame number, or zero if no information was available
-
-  The frame number is only updated when the GX command is called with
-  the NDI_FRAME_NUMBER (0x0008) bit, and then only for the ports specified
-  by the NDI_PASSIVE (0x8000) and NDI_PASSIVE_EXTRA (0x2000) bits.
-*/
-unsigned long ndiGetGXFrame(ndicapi *pol, int port);
-
-/*! \ingroup GetMethods
-  Get the number of passive stray markers detected.
-
-  \param pol       valid NDI device handle
-  \return          a number between 0 and 20
-  
-  The passive stray information is updated when a GX command is sent
-  with the NDI_PASSIVE_STRAY (0x1000) and NDI_PASSIVE (0x8000) bits set
-  in the reply mode.  The information persists until the next time GX is
-  sent with these bits set.
-
-  If no information is available, the return value is zero.
-*/
-int ndiGetGXNumberOfPassiveStrays(ndicapi *pol);
-
-/*! \ingroup GetMethods
-  Copy the coordinates of the specified stray marker into the
-  supplied array.
-
-  \param pol       valid NDI device handle
-  \param i         a number between 0 and 19
-  \param coord     array to hold the coordinates
-  \return          one of:
-  - NDI_OKAY - information was returned in coord
-  - NDI_DISABLED - no stray marker reporting is available
-  - NDI_MISSING - marker number i is not visible
-
-  <p>Use ndiGetGXNumberOfPassiveStrays() to get the number of stray
-  markers that are visible.
-  
-  The passive stray marker coordinates are updated when a GX command
-  is sent with the NDI_PASSIVE_STRAY (0x1000) and NDI_PASSIVE (0x8000)
-  bits set in the reply mode.  The information persists until the next
-  time GX is sent with these bits set.
-*/
-int ndiGetGXPassiveStray(ndicapi *pol, int i, double coord[3]);
 
 /*! \ingroup GetMethods
   Get the 8-bit status value for the specified port.
@@ -1853,7 +1649,7 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define  NDI_BUTTON_BOX  'B'    /* tool with no IREDs */
 /*\}*/
 
-/* ndiGX() reply mode bit definitions */
+/* ndiTX() reply mode bit definitions */
 /*\{*/
 #define  NDI_XFORMS_AND_STATUS  0x0001  /* transforms and status */
 #define  NDI_ADDITIONAL_INFO    0x0002  /* additional tool transform info */
@@ -1879,8 +1675,8 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define  NDI_SWITCH_3_ON         0x08
 #define  NDI_INITIALIZED         0x10
 #define  NDI_ENABLED             0x20
-#define  NDI_OUT_OF_VOLUME       0x40 /* only for ndiGetGXPortStatus() */
-#define  NDI_PARTIALLY_IN_VOLUME 0x80 /* only for ndiGetGXPortStatus() */ 
+#define  NDI_OUT_OF_VOLUME       0x40 /* only for ndiGetTXPortStatus() */
+#define  NDI_PARTIALLY_IN_VOLUME 0x80 /* only for ndiGetTXPortStatus() */ 
 #define  NDI_BROKEN_SENSOR       0x100
 #define  NDI_CURRENT_DETECT      0x80 /* only for ndiGetPSTATPortStatus() */
 /*\}*/
@@ -1897,7 +1693,7 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define  NDI_PORT_UNOCCUPIED            0x0080
 /*\}*/
 
-/* ndiGetGXToolInfo() return value bits */
+/* ndiGetTXToolInfo() return value bits */
 /*\{*/
 #define  NDI_BAD_TRANSFORM_FIT   0x01
 #define  NDI_NOT_ENOUGH_MARKERS  0x02

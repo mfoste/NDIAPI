@@ -1357,17 +1357,20 @@ void vtkNDITracker::EnableToolPorts()
     }
     // decompose identity string from end to front
     ndiGetPHINFToolInfo(this->Device, identity);
-    identity[31] = '\0';
-    this->Tools[port]->SetToolSerialNumber(vtkStripWhitespace(&identity[23]));
-    identity[23] = '\0';
-    this->Tools[port]->SetToolRevision(vtkStripWhitespace(&identity[20]));
-    identity[20] = '\0';
-    this->Tools[port]->SetToolManufacturer(vtkStripWhitespace(&identity[8]));
-    identity[8] = '\0';
-    this->Tools[port]->SetToolType(vtkStripWhitespace(&identity[0]));
-    ndiGetPHINFPartNumber(this->Device, partNumber);
-    partNumber[20] = '\0';
-    this->Tools[port]->SetToolPartNumber(vtkStripWhitespace(partNumber));
+    if( port >= 0 )
+    {
+      identity[31] = '\0';
+      this->Tools[port]->SetToolSerialNumber(vtkStripWhitespace(&identity[23]));
+      identity[23] = '\0';
+      this->Tools[port]->SetToolRevision(vtkStripWhitespace(&identity[20]));
+      identity[20] = '\0';
+      this->Tools[port]->SetToolManufacturer(vtkStripWhitespace(&identity[8]));
+      identity[8] = '\0';
+      this->Tools[port]->SetToolType(vtkStripWhitespace(&identity[0]));
+      ndiGetPHINFPartNumber(this->Device, partNumber);
+      partNumber[20] = '\0';
+      this->Tools[port]->SetToolPartNumber(vtkStripWhitespace(partNumber));
+    }
     status = ndiGetPHINFPortStatus(this->Device);
 
     // send the Tool Info to the server
@@ -1447,19 +1450,22 @@ void vtkNDITracker::EnableToolPorts()
     }
     // done sending the Tool Info
 
-    this->PortEnabled[port] = ((status & NDI_ENABLED) != 0);
+    if( port >= 0 )
+    {
+      this->PortEnabled[port] = ((status & NDI_ENABLED) != 0);
 
-    if (this->Tools[port]->GetLED1())
-    {
-      this->InternalSetToolLED(tool,1,this->Tools[port]->GetLED1());
-    }
-    if (this->Tools[port]->GetLED2())
-    {
-      this->InternalSetToolLED(tool,2,this->Tools[port]->GetLED2());
-    }
-    if (this->Tools[port]->GetLED3())
-    {
-      this->InternalSetToolLED(tool,3,this->Tools[port]->GetLED3());
+      if (this->Tools[port]->GetLED1())
+      {
+        this->InternalSetToolLED(tool,1,this->Tools[port]->GetLED1());
+      }
+      if (this->Tools[port]->GetLED2())
+      {
+        this->InternalSetToolLED(tool,2,this->Tools[port]->GetLED2());
+      }
+      if (this->Tools[port]->GetLED3())
+      {
+        this->InternalSetToolLED(tool,3,this->Tools[port]->GetLED3());
+      }
     }
   }
 
