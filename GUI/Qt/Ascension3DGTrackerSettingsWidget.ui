@@ -27,6 +27,13 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_8">
             <item>
+             <widget class="QCheckBox" name="useDefaultFrequencyCheckBox">
+              <property name="text">
+               <string>Use Default Frequency (Measurement Rate)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
                <widget class="QLabel" name="updateFrequencyAscensionLabel">

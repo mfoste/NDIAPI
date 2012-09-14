@@ -61,7 +61,24 @@ vtkAscension3DGTrackerSettingsWidget::~vtkAscension3DGTrackerSettingsWidget()
 
 void vtkAscension3DGTrackerSettingsWidget::CreateActions()
 {
+  connect( this->m_Widget.useDefaultFrequencyCheckBox, SIGNAL(toggled(bool)), this, SLOT(OnUseDefaultFrequency(bool)) );
   connect( this->m_Widget.useAllSensorsAscension3DGCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnUseAllSensors(bool)) );
+}
+
+void vtkAscension3DGTrackerSettingsWidget::OnUseDefaultFrequency(bool checked)
+{
+  if( checked )
+  {
+    this->m_Widget.updateFrequencyAscension3DGLineEdit->clear();
+    this->m_Widget.updateFrequencyAscensionLabel->setEnabled(false);
+    this->m_Widget.updateFrequencyAscension3DGLineEdit->setEnabled(false);
+  }
+  else
+  {
+    this->m_Widget.updateFrequencyAscension3DGLineEdit->setText(QString("%1").arg(this->m_Ascension3DGSettings.updateFrequency));
+    this->m_Widget.updateFrequencyAscensionLabel->setEnabled(true);
+    this->m_Widget.updateFrequencyAscension3DGLineEdit->setEnabled(true);
+  }
 }
 
 void vtkAscension3DGTrackerSettingsWidget::OnUseAllSensors(bool useAllSensors)
@@ -85,23 +102,20 @@ void vtkAscension3DGTrackerSettingsWidget::ReadTrackerSettings()
   // read the settings.
   this->m_Ascension3DGSettings.bUseSynchronousRecord = this->m_Settings->value("Ascension3DG/useSynchronousRecord", false).toBool();
   this->m_Ascension3DGSettings.bUseAllSensors = this->m_Settings->value("Ascension3DG/useAllSensors", false).toBool();
-  this->m_Ascension3DGSettings.updateFrequency = this->m_Settings->value("Ascension3DG/updateFrequency", 22.0).toDouble(); 
+  this->m_Ascension3DGSettings.bUseDefaultFrequency = this->m_Settings->value("Ascension3DG/useDefaultFrequency", false).toBool();
+  this->m_Ascension3DGSettings.updateFrequency = this->m_Settings->value("Ascension3DG/updateFrequency", 80.0).toDouble(); 
 
   // update the GUI.
   this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseSynchronousRecord);
   this->m_Widget.useAllSensorsAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseAllSensors);
-  
-  // check to make sure that correct combinations are used due known issue with Ascension.
-  if( this->m_Ascension3DGSettings.bUseAllSensors )
-  {
-    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(true);
-  }
-  else
-  {
-    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(false);
-    this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(false);
-  }
+  this->OnUseAllSensors(this->m_Ascension3DGSettings.bUseAllSensors);
+
+  // update the frequency box first...
   this->m_Widget.updateFrequencyAscension3DGLineEdit->setText(QString("%1").arg(this->m_Ascension3DGSettings.updateFrequency));
+  
+  // then apply the default check box.
+  this->m_Widget.useDefaultFrequencyCheckBox->setChecked(this->m_Ascension3DGSettings.bUseDefaultFrequency);
+  this->OnUseDefaultFrequency(this->m_Ascension3DGSettings.bUseDefaultFrequency);  
 }
 
 void vtkAscension3DGTrackerSettingsWidget::WriteTrackerSettings()
@@ -115,6 +129,12 @@ void vtkAscension3DGTrackerSettingsWidget::WriteTrackerSettings()
   this->m_Ascension3DGSettings.bUseAllSensors = this->m_Widget.useAllSensorsAscension3DGCheckBox->isChecked();
   this->m_Settings->setValue("Ascension3DG/useAllSensors", this->m_Ascension3DGSettings.bUseAllSensors);
 
-  this->m_Ascension3DGSettings.updateFrequency = this->m_Widget.updateFrequencyAscension3DGLineEdit->text().toDouble();
+  this->m_Ascension3DGSettings.bUseDefaultFrequency = this->m_Widget.useDefaultFrequencyCheckBox->isChecked();
+  this->m_Settings->setValue("Ascension3DG/useDefaultFrequency", this->m_Ascension3DGSettings.bUseDefaultFrequency);
+  
+  if( !this->m_Ascension3DGSettings.bUseDefaultFrequency )
+  {
+    this->m_Ascension3DGSettings.updateFrequency = this->m_Widget.updateFrequencyAscension3DGLineEdit->text().toDouble();
+  }
   this->m_Settings->setValue("Ascension3DG/updateFrequency", this->m_Ascension3DGSettings.updateFrequency);  
 }

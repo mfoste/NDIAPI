@@ -144,7 +144,7 @@ int vtkAscension3DGTracker::Probe()
   }
 
   // get the current settings.
-  if( !this->GetCurrentSettings( this->m_TrackerCurrentConfig ) )
+  if( !this->ReadCurrentSettings( this->m_TrackerCurrentConfig ) )
   {
     this->InternalCloseBIRDSystem();
     return 0;
@@ -169,7 +169,7 @@ int vtkAscension3DGTracker::SetSerialPort(int port)
 } 
 
 //----------------------------------------------------------------------------
-int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
+int  vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config)
 {
   //*******************************************************
   // System Configuration
@@ -208,7 +208,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetSensorConfiguration(i, &(config->m_SensorConfig[i]) );
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorConfiguration(i, &(config->m_SensorConfig[i]) )"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetSensorConfiguration(i, &(config->m_SensorConfig[i]) )"); 
         return 0;
       }
 
@@ -216,7 +216,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetSensorParameter(i, PART_NUMBER_RX, config->m_SensorPartInfo[i].partNumber, 16);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, PART_NUMBER_RX, config->m_SensorPartInfo->partNumber, 16)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, PART_NUMBER_RX, config->m_SensorPartInfo->partNumber, 16)"); 
         return 0;
       }
 
@@ -224,7 +224,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetSensorParameter(i, MODEL_STRING_RX, config->m_SensorPartInfo[i].modelString, 11);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, MODEL_STRING_RX, config->m_SensorPartInfo->modelString, 11)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, MODEL_STRING_RX, config->m_SensorPartInfo->modelString, 11)"); 
         return 0;
       }
     }
@@ -252,7 +252,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetBoardConfiguration(i, &config->m_BoardConfig[i]);
       if(errorCode!=BIRD_ERROR_SUCCESS) 
       { 
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardConfiguration(i, &config->m_BoardConfig[i])"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetBoardConfiguration(i, &config->m_BoardConfig[i])"); 
         return 0;
       }
 
@@ -260,7 +260,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetBoardParameter(i, PART_NUMBER_PCB, config->m_BoardPartInfo[i].partNumber, 16);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, PART_NUMBER_PCB, config->m_XmtrPartInfo->partNumber, 16)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, PART_NUMBER_PCB, config->m_XmtrPartInfo->partNumber, 16)"); 
         return 0;
       }
 
@@ -268,7 +268,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetBoardParameter(i, MODEL_STRING_PCB, config->m_BoardPartInfo[i].modelString, 11);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, MODEL_STRING_PCB, config->m_XmtrPartInfo->modelString, 11)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, MODEL_STRING_PCB, config->m_XmtrPartInfo->modelString, 11)"); 
         return 0;
       }
     }
@@ -300,7 +300,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetTransmitterConfiguration(i, &config->m_XmtrConfig[i]);
       if(errorCode!=BIRD_ERROR_SUCCESS) 
       { 
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) -GetTransmitterConfiguration(i, &config->m_XmtrConfig[i])"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) -GetTransmitterConfiguration(i, &config->m_XmtrConfig[i])"); 
         return 0;
       }
 
@@ -308,7 +308,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetTransmitterParameter(i, PART_NUMBER_TX, config->m_XmtrPartInfo[i].partNumber, 16);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetTransmitterParameter(i, PART_NUMBER_TX, config->m_XmtrPartInfo->partNumber, 16)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config) - GetTransmitterParameter(i, PART_NUMBER_TX, config->m_XmtrPartInfo->partNumber, 16)"); 
         return 0;
       }
 
@@ -316,7 +316,7 @@ int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
       errorCode = GetTransmitterParameter(i, MODEL_STRING_TX, config->m_XmtrPartInfo[i].modelString, 11);
       if(errorCode != BIRD_ERROR_SUCCESS)
       {
-        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)- GetTransmitterParameter(i, MODEL_STRING_TX, config->m_XmtrPartInfo->modelString, 11)"); 
+        errorHandler(errorCode, "vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config)- GetTransmitterParameter(i, MODEL_STRING_TX, config->m_XmtrPartInfo->modelString, 11)"); 
         return 0;
       }
     }
@@ -361,7 +361,7 @@ int vtkAscension3DGTracker::InternalStartTracking()
   }
 
   // update the current settings structure.
-  this->GetCurrentSettings(this->m_TrackerCurrentConfig);
+  this->ReadCurrentSettings(this->m_TrackerCurrentConfig);
 
   // enable the transmitter and tool ports.
   this->EnableTransmitter();

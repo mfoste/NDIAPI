@@ -70,9 +70,12 @@ public:
   inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
   inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
 #if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
-  inline ascension3DGSettings getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
+  inline ascension3DGSettings* getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
 #endif
   inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
+
+  void ReadTrackerSettings();
+  void WriteTrackerSettings();
 
 public slots:
   virtual void OnTrackingSystemChanged( int index );
@@ -83,8 +86,6 @@ private:
   // some helper functions.
   void CreateActions();
   
-  void ReadTrackerSettings();
-  void WriteTrackerSettings();
   // this.
   QWidget *m_Parent;
   // member variables.

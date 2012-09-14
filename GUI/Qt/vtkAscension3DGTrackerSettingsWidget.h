@@ -56,11 +56,12 @@ public:
   inline Ui::Ascension3DGTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline ascension3DGSettings GetAscension3DGSettings() {return this->m_Ascension3DGSettings;}
+  inline ascension3DGSettings* GetAscension3DGSettings() {return &this->m_Ascension3DGSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
 
 public slots:
+  void OnUseDefaultFrequency(bool checked);
   void OnUseAllSensors(bool useAllSensors);
 
 private:

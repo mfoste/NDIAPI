@@ -259,9 +259,9 @@ void vtkTrackerWidget::ConfigureTracker()
 #if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
   case ASCENSION_3DG:
     m_Tracker = vtkAscension3DGTracker::New();
-    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseSynchronousRecord(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseSynchronousRecord);
-    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseAllSensors(this->m_TrackerSettingsDialog->getAscension3DGSettings().bUseAllSensors);
-    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAscension3DGSettings().updateFrequency;
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseSynchronousRecord(this->m_TrackerSettingsDialog->getAscension3DGSettings()->bUseSynchronousRecord);
+    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseAllSensors(this->m_TrackerSettingsDialog->getAscension3DGSettings()->bUseAllSensors);
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAscension3DGSettings()->updateFrequency;
     // not volume selection not needed for Ascension.
     this->m_VolumeSelectionComboBox->setEnabled(false);
     this->m_VolumeSelectionComboBox->setVisible(false);
@@ -383,9 +383,20 @@ void vtkTrackerWidget::OnStartTracker()
   m_StopTrackingButton->setEnabled(true);
 
 #if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+  double freq;
   if( this->m_TrackerSettingsDialog->getSystem() == ASCENSION_3DG )
   {
-    dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetMeasurementRate(this->m_TrackerUpdateFrequency);
+    if( this->m_TrackerSettingsDialog->getAscension3DGSettings()->bUseDefaultFrequency )
+    {
+      freq = dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->GetCurrentSettings()->m_SystemConfig->measurementRate;
+      this->m_TrackerSettingsDialog->getAscension3DGSettings()->updateFrequency = freq;
+      this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAscension3DGSettings()->updateFrequency;
+      this->m_TrackerSettingsDialog->WriteTrackerSettings();
+    }
+    else
+    {
+      dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetMeasurementRate(this->m_TrackerUpdateFrequency);
+    }
   }
 #endif
   this->m_VolumeSelectionComboBox->setEnabled(false);

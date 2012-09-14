@@ -78,6 +78,7 @@ struct ascension3DGSettings
 {
   bool bUseSynchronousRecord;
   bool bUseAllSensors;
+  bool bUseDefaultFrequency;
   double updateFrequency;
 };
 #endif

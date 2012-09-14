@@ -77,7 +77,8 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   //***************************************************************************
   // SYSTEM CONFIGURATION
   //***************************************************************************
-  int  GetCurrentSettings( vtkAscension3DGConfig *config);
+  int  ReadCurrentSettings( vtkAscension3DGConfig *config);
+  inline vtkAscension3DGConfig* GetCurrentSettings() {return this->m_TrackerCurrentConfig;}
   int  RestoreConfiguration(char * filename);
   int  SaveConfiguration(char * filename);
 
