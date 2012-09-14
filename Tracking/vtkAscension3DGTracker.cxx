@@ -69,7 +69,6 @@ vtkAscension3DGTracker::vtkAscension3DGTracker()
   this->SetNumberOfTools(VTK_3DG_NTOOLS);
 
   this->m_TrackerCurrentConfig = new vtkAscension3DGConfig();
-  this->m_TrackerCustomConfig = new vtkAscension3DGConfig();
 
   this->m_bUseDefaultSystemSettings = true;
   this->m_bUseDefaultSensorSettings = true;
@@ -101,7 +100,7 @@ void vtkAscension3DGTracker::PrintSelf(ostream& os, vtkIndent indent)
 
 int vtkAscension3DGTracker::InternalInitializeBIRDSystem()
 {
-  errorCode = InitializeBIRDSystem();
+  int errorCode = InitializeBIRDSystem();
   if(errorCode != BIRD_ERROR_SUCCESS) 
   { 
     errorHandler(errorCode, "vtkAscension3DGTracker::InternalInitializeBIRDSystem()"); 
@@ -112,7 +111,7 @@ int vtkAscension3DGTracker::InternalInitializeBIRDSystem()
 
 int vtkAscension3DGTracker::InternalCloseBIRDSystem()
 {
-  errorCode = CloseBIRDSystem();
+  int errorCode = CloseBIRDSystem();
   if( errorCode!= BIRD_ERROR_SUCCESS) 
   {
     errorHandler(errorCode, "vtkAscension3DGTracker::InternalCloseBIRDSystem()");
@@ -174,7 +173,7 @@ int  vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config)
   //*******************************************************
   // System Configuration
   //*******************************************************
-  errorCode = GetBIRDSystemConfiguration(config->m_SystemConfig);
+  int errorCode = GetBIRDSystemConfiguration(config->m_SystemConfig);
   if(errorCode != BIRD_ERROR_SUCCESS) 
   { 
     errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - GetBIRDSystemConfiguration(config->m_SystemConfig)"); 
@@ -368,7 +367,7 @@ int vtkAscension3DGTracker::InternalStartTracking()
   this->EnableToolPorts();
 
   DATA_FORMAT_TYPE type = DOUBLE_ALL_TIME_STAMP_Q;
-  for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
+  for(int sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
   {
     if( !this->SetSensorDataFormat(sensorID,type)) {return 0;}
   }
@@ -397,7 +396,7 @@ int vtkAscension3DGTracker::InternalStopTracking()
 void vtkAscension3DGTracker::InternalUpdate()
 {
   int absent[VTK_3DG_NTOOLS];
-  int tool;
+  int errorCode, tool;
   DOUBLE_ALL_TIME_STAMP_Q_RECORD *referenceTransform = 0;
   double nextcount = 0;
   int i;
@@ -443,7 +442,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   else //do each sensor individual.
   {
     // scan the sensors and request a record if the sensor is physically attached
-    for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
+    for(int sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
     {
       if( this->m_TrackerCurrentConfig->m_SensorConfig[sensorID].attached && PortEnabled[sensorID])
       {
@@ -515,9 +514,9 @@ void vtkAscension3DGTracker::InternalUpdate()
         nextcount = record[tool].time; 
       }
     }
-    else if(!attached && !PortEnabled[sensorID])
+    else if(!attached && !PortEnabled[tool])
     {
-      absent[sensorID] = 1;
+      absent[tool] = 1;
     }
     else 
     {
@@ -776,7 +775,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     char serNum[20];
     char partNum[20];
     char modelString[20];
-    for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
+    for(int sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
     {
       if(this->m_TrackerCurrentConfig->m_SensorConfig[sensorID].attached)
       {
@@ -804,9 +803,10 @@ void vtkAscension3DGTracker::InternalUpdate()
       }
     }
   }
+
   void vtkAscension3DGTracker::DisableToolPorts()
   { 
-    for(sensorID=0; sensorID<this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++) 
+    for(int sensorID=0; sensorID<this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++) 
     {
       this->Tools[sensorID]->SetToolSerialNumber("");
       this->Tools[sensorID]->SetToolManufacturer("");
@@ -817,6 +817,8 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   void vtkAscension3DGTracker::EnableTransmitter()
   {
+    int errorCode;
+
     for(short id=0; id < this->m_TrackerCurrentConfig->m_SystemConfig->numberTransmitters; id++)
     {
       if( (this->m_TrackerCurrentConfig->m_XmtrConfig+id)->attached)
@@ -834,7 +836,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   void vtkAscension3DGTracker::DisableTransmitter()
   { 
     short id = -1;
-    errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
+    int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
     if(errorCode!=BIRD_ERROR_SUCCESS) 
     {
       errorHandler(errorCode, "vtkAscension3DGTracker::DisableTransmitter() - SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id))");
@@ -843,14 +845,14 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int  vtkAscension3DGTracker::RestoreConfiguration(char * filename)
   {
-    errorCode = RestoreSystemConfiguration(filename);
+    int errorCode = RestoreSystemConfiguration(filename);
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
 
   int  vtkAscension3DGTracker::SaveConfiguration(char * filename)
   {
-    errorCode = SaveSystemConfiguration(filename);
+    int errorCode = SaveSystemConfiguration(filename);
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -864,7 +866,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int  vtkAscension3DGTracker::InternalSetPowerLineFrequency(double pl)
   {
-    errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, &pl, sizeof(pl));
+    int errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, &pl, sizeof(pl));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -872,7 +874,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int vtkAscension3DGTracker::GetPowerLineFrequency()
   {
     double pl, *pBuffer = &pl;
-    errorCode = GetSystemParameter(POWER_LINE_FREQUENCY, pBuffer, sizeof(pl));
+    int errorCode = GetSystemParameter(POWER_LINE_FREQUENCY, pBuffer, sizeof(pl));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0;}
     return pl;
   }
@@ -886,7 +888,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int vtkAscension3DGTracker::InternalSetAGCMode(AGC_MODE_TYPE agc)
   {
-    errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
+    int errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -894,7 +896,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   AGC_MODE_TYPE vtkAscension3DGTracker::GetAGCMode()
   {
     AGC_MODE_TYPE agc, *pBuffer = &agc;
-    errorCode = GetSystemParameter(AGC_MODE, pBuffer, sizeof(agc));
+    int errorCode = GetSystemParameter(AGC_MODE, pBuffer, sizeof(agc));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode);}
     return agc;
   }
@@ -908,7 +910,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int vtkAscension3DGTracker::InternalSetMeasurementRate(double rate)
   {
-    errorCode = SetSystemParameter(MEASUREMENT_RATE, &rate, sizeof(rate));
+    int errorCode = SetSystemParameter(MEASUREMENT_RATE, &rate, sizeof(rate));
     if(errorCode != BIRD_ERROR_SUCCESS) 
     { 
       errorHandler(errorCode, "vtkAscension3DGTracker::SetMeasurementRate(double rate) - SetSystemParameter(MEASUREMENT_RATE, &rate, sizeof(rate))"); 
@@ -921,7 +923,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   double vtkAscension3DGTracker::GetMeasurementRate()
   {
     double rate, *pBuffer = &rate;
-    errorCode = GetSystemParameter(MEASUREMENT_RATE, pBuffer, sizeof(rate));
+    int errorCode = GetSystemParameter(MEASUREMENT_RATE, pBuffer, sizeof(rate));
     if(errorCode != BIRD_ERROR_SUCCESS) 
     { 
       errorHandler(errorCode, "vtkAscension3DGTracker::GetMeasurementRate() - GetSystemParameter(MEASUREMENT_RATE, pBuffer, sizeof(rate))"); 
@@ -940,7 +942,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int vtkAscension3DGTracker::InternalSetMaximumRange(double range)
   {
-    errorCode = SetSystemParameter(MAXIMUM_RANGE, &range, sizeof(range));
+    int errorCode = SetSystemParameter(MAXIMUM_RANGE, &range, sizeof(range));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -948,7 +950,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   double  vtkAscension3DGTracker::GetMaximumRange()
   {
     double range, *pBuffer = &range;
-    errorCode = GetSystemParameter(MAXIMUM_RANGE, pBuffer, sizeof(range));
+    int errorCode = GetSystemParameter(MAXIMUM_RANGE, pBuffer, sizeof(range));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return range;
   }
@@ -972,7 +974,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     {
       metricBOOL = 1;
     }
-    errorCode = SetSystemParameter(METRIC, &metricBOOL, sizeof(metricBOOL));
+    int errorCode = SetSystemParameter(METRIC, &metricBOOL, sizeof(metricBOOL));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode, "vtkAscension3DGTracker::InternalSetMetric(bool metric)"); return 0; }
     return 1;
   }
@@ -980,7 +982,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   bool vtkAscension3DGTracker::GetMetric()
   {
     BOOL metric, *pBuffer = &metric;
-    errorCode = GetSystemParameter(METRIC, pBuffer, sizeof(metric));
+    int errorCode = GetSystemParameter(METRIC, pBuffer, sizeof(metric));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     if (metric == 1)
       return true;
@@ -990,7 +992,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int  vtkAscension3DGTracker::InternalSetTransmitter(short tx)
   {
-    errorCode = SetSystemParameter(SELECT_TRANSMITTER, &tx, sizeof(tx));
+    int errorCode = SetSystemParameter(SELECT_TRANSMITTER, &tx, sizeof(tx));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -998,7 +1000,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   short  vtkAscension3DGTracker::GetTransmitter( )
   {
     short tx, *pBuffer = &tx;
-    errorCode = GetSystemParameter(SELECT_TRANSMITTER, pBuffer, sizeof(tx));
+    int errorCode = GetSystemParameter(SELECT_TRANSMITTER, pBuffer, sizeof(tx));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return tx;
   }
@@ -1027,7 +1029,7 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int  vtkAscension3DGTracker::SetSensorDataFormat(int sensorID, DATA_FORMAT_TYPE buffer)
   {
-    errorCode = SetSensorParameter(sensorID, DATA_FORMAT, &buffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, DATA_FORMAT, &buffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1035,7 +1037,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorAngleAlign(int sensorID, DOUBLE_ANGLES_RECORD buffer)
   {
     DOUBLE_ANGLES_RECORD *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, ANGLE_ALIGN, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, ANGLE_ALIGN, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1043,7 +1045,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorHemisphere(int sensorID,HEMISPHERE_TYPE buffer)
   {
     HEMISPHERE_TYPE *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, HEMISPHERE, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, HEMISPHERE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1051,7 +1053,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorFilterACWideNotch(int sensorID, BOOL buffer)
   {
     BOOL *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, FILTER_AC_WIDE_NOTCH, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, FILTER_AC_WIDE_NOTCH, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1059,7 +1061,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorFilterACNarrowNotch(int sensorID, BOOL buffer)
   {
     BOOL  *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, FILTER_AC_NARROW_NOTCH, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, FILTER_AC_NARROW_NOTCH, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1067,7 +1069,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorFilterDCAdaptive(int sensorID,double buffer)
   {
     double *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, FILTER_DC_ADAPTIVE, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, FILTER_DC_ADAPTIVE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1075,7 +1077,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorFilterAlphaParamaters(int sensorID,ADAPTIVE_PARAMETERS buffer)
   {
     ADAPTIVE_PARAMETERS  *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, FILTER_ALPHA_PARAMETERS, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, FILTER_ALPHA_PARAMETERS, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1083,7 +1085,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorFilterLargeChange(int sensorID, BOOL buffer)
   {
     BOOL *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, FILTER_LARGE_CHANGE, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, FILTER_LARGE_CHANGE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1091,7 +1093,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SetSensorQuality(int sensorID,QUALITY_PARAMETERS buffer)
   {
     QUALITY_PARAMETERS  *pBuffer = &buffer;
-    errorCode = SetSensorParameter(sensorID, QUALITY, pBuffer, sizeof(buffer));
+    int errorCode = SetSensorParameter(sensorID, QUALITY, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1101,7 +1103,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   DATA_FORMAT_TYPE  vtkAscension3DGTracker::GetSensorDataFormat(int sensorID)
   {
     DATA_FORMAT_TYPE buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, DATA_FORMAT, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, DATA_FORMAT, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1109,7 +1111,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   DOUBLE_ANGLES_RECORD  vtkAscension3DGTracker::GetSensorAngleAlign(int sensorID)
   {
     DOUBLE_ANGLES_RECORD buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, ANGLE_ALIGN, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, ANGLE_ALIGN, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1117,7 +1119,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   HEMISPHERE_TYPE  vtkAscension3DGTracker::GetSensorHemisphere(int sensorID)
   {
     HEMISPHERE_TYPE buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, HEMISPHERE, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, HEMISPHERE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1126,7 +1128,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   BOOL  vtkAscension3DGTracker::GetSensorFilterACWideNotch(int sensorID)
   {
     BOOL buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, FILTER_AC_WIDE_NOTCH, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, FILTER_AC_WIDE_NOTCH, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return buffer;
   }
@@ -1134,7 +1136,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   BOOL  vtkAscension3DGTracker::GetSensorFilterACNarrowNotch(int sensorID)
   {
     BOOL buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, FILTER_AC_NARROW_NOTCH, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, FILTER_AC_NARROW_NOTCH, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return buffer;
   }
@@ -1142,7 +1144,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   double  vtkAscension3DGTracker::GetSensorFilterDCAdaptive(int sensorID)
   {
     double buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, FILTER_DC_ADAPTIVE, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, FILTER_DC_ADAPTIVE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return buffer;
   }
@@ -1151,7 +1153,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   {
 
     ADAPTIVE_PARAMETERS buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, FILTER_ALPHA_PARAMETERS, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, FILTER_ALPHA_PARAMETERS, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1159,7 +1161,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   BOOL vtkAscension3DGTracker::GetSensorFilterLargeChange(int sensorID)
   {
     BOOL buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, FILTER_LARGE_CHANGE, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, FILTER_LARGE_CHANGE, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return buffer;
   }
@@ -1167,7 +1169,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   QUALITY_PARAMETERS vtkAscension3DGTracker::GetSensorQuality(int sensorID)
   {
     QUALITY_PARAMETERS buffer, *pBuffer = &buffer;
-    errorCode = GetSensorParameter(sensorID, QUALITY, pBuffer, sizeof(buffer));
+    int errorCode = GetSensorParameter(sensorID, QUALITY, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1177,7 +1179,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   DOUBLE_ANGLES_RECORD vtkAscension3DGTracker::GetTransmitterReferenceFrame(int transmitterID)
   {
     DOUBLE_ANGLES_RECORD buffer, *pBuffer = &buffer;
-    errorCode = GetTransmitterParameter(transmitterID, REFERENCE_FRAME, pBuffer, sizeof(buffer));
+    int errorCode = GetTransmitterParameter(transmitterID, REFERENCE_FRAME, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1185,7 +1187,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   BOOL vtkAscension3DGTracker::GetTransmitterXYZReferenceFrame(int transmitterID)
   {
     BOOL buffer, *pBuffer = &buffer;
-    errorCode = GetTransmitterParameter(transmitterID, XYZ_REFERENCE_FRAME, pBuffer, sizeof(buffer));
+    int errorCode = GetTransmitterParameter(transmitterID, XYZ_REFERENCE_FRAME, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return buffer;
   }
@@ -1195,7 +1197,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int vtkAscension3DGTracker::SetTransmitterReferenceFrame(int transmitterID, DOUBLE_ANGLES_RECORD buffer)
   {
     DOUBLE_ANGLES_RECORD *pBuffer = &buffer;
-    errorCode = SetTransmitterParameter(transmitterID, REFERENCE_FRAME, pBuffer, sizeof(buffer));
+    int errorCode = SetTransmitterParameter(transmitterID, REFERENCE_FRAME, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
@@ -1203,7 +1205,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int vtkAscension3DGTracker::SetTransmitterXYZReferenceFrame(int transmitterID,BOOL buffer)
   {
     BOOL *pBuffer = &buffer;
-    errorCode = SetTransmitterParameter(transmitterID, XYZ_REFERENCE_FRAME, pBuffer, sizeof(buffer));
+    int errorCode = SetTransmitterParameter(transmitterID, XYZ_REFERENCE_FRAME, pBuffer, sizeof(buffer));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); }
     return 1;
   }
@@ -1212,20 +1214,20 @@ void vtkAscension3DGTracker::InternalUpdate()
 
   int vtkAscension3DGTracker::SetSensorOnly(){
     AGC_MODE_TYPE agc = SENSOR_AGC_ONLY;
-    errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
+    int errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
   int vtkAscension3DGTracker::SetSensorAndTransmitter(){
     AGC_MODE_TYPE agc = TRANSMITTER_AND_SENSOR_AGC;
-    errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
+    int errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }
 
   int vtkAscension3DGTracker::GetAGCType() {
     AGC_MODE_TYPE agc, *pBuffer = &agc;
-    errorCode = GetSystemParameter(AGC_MODE, pBuffer, sizeof(agc));
+    int errorCode = GetSystemParameter(AGC_MODE, pBuffer, sizeof(agc));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode);}
     if (agc == TRANSMITTER_AND_SENSOR_AGC) {
       return 2;

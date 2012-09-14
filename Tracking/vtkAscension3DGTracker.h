@@ -242,33 +242,12 @@ protected:
 
   // use probe() to fill in the tracker default values.
   vtkAscension3DGConfig *m_TrackerCurrentConfig;
-  // copy defaults to here and then edit these for custom configs.
-  vtkAscension3DGConfig *m_TrackerCustomConfig;
   
-
-  //*********************REMOVE THESE****************************************
-  //SYSTEM_CONFIGURATION			System;		// a pointer to a single instance of the system class	
-  //SENSOR_CONFIGURATION			*pSensor;		// a pointer to an array of sensor objects
-  //TRANSMITTER_CONFIGURATION		*pXmtr;			// a pointer to an array of transmitter objects
-
-	// Note the following is not normally needed but is provided for completeness
-	// The board configurations that are acquired from the system provide the user
-	// with informaton on board type and serial number
-  //BOARD_CONFIGURATION			*pBoard;		// a pointer to an array of board objects
-  //*********************REMOVE THESE****************************************
-
-  int				errorCode;		// used to hold error code returned from procedure call -- is this needed globally or should it be local to a function.
-  int				sensorID; // is this needed?
-  int				transmitterID;
-  short				id;
-  int				records;	// default
-  int				numberBytes;
-
   vtkMatrix4x4 *SendMatrix;
   int IsTracking;
 
   int PortEnabled[VTK_3DG_NTOOLS];
-  unsigned char *VirtualSROM[VTK_3DG_NTOOLS];
+  unsigned char *VirtualSROM[VTK_3DG_NTOOLS]; // is this needed?
 
   DOUBLE_ALL_TIME_STAMP_Q_RECORD record[VTK_3DG_NTOOLS];
   DOUBLE_ALL_TIME_STAMP_Q_RECORD *pRecord;
@@ -278,6 +257,7 @@ protected:
   // to simplify the start.
   bool m_bUseDefaultSystemSettings;
   bool m_bUseDefaultSensorSettings;
+
   // for changing the different data collection types.
   bool m_bUseSynchronous;  // if true use GetSynchronousRecord, otherwise use GetAsynchronousRecord
   bool m_bUseAllSensors;  // if true use ALL_SENSORS, otherwise loop through each sensor.
