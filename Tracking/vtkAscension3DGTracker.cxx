@@ -67,9 +67,12 @@ vtkAscension3DGTracker::vtkAscension3DGTracker()
   this->SendMatrix = vtkMatrix4x4::New();
   this->IsTracking = 0;
   this->SetNumberOfTools(VTK_3DG_NTOOLS);
-  this->pSensor = 0;
-  this->pXmtr = 0;
 
+  this->m_TrackerCurrentConfig = new vtkAscension3DGConfig();
+  this->m_TrackerCustomConfig = new vtkAscension3DGConfig();
+
+  this->m_bUseDefaultSystemSettings = true;
+  this->m_bUseDefaultSensorSettings = true;
   this->m_bUseSynchronous = false;
   this->m_bUseAllSensors = false;
 
@@ -96,68 +99,63 @@ void vtkAscension3DGTracker::PrintSelf(ostream& os, vtkIndent indent)
   this->SendMatrix->PrintSelf(os,indent.GetNextIndent());
 }
 
+int vtkAscension3DGTracker::InternalInitializeBIRDSystem()
+{
+  errorCode = InitializeBIRDSystem();
+  if(errorCode != BIRD_ERROR_SUCCESS) 
+  { 
+    errorHandler(errorCode, "vtkAscension3DGTracker::InternalInitializeBIRDSystem()"); 
+    return 0;
+  }
+  return 1;
+}
+
+int vtkAscension3DGTracker::InternalCloseBIRDSystem()
+{
+  errorCode = CloseBIRDSystem();
+  if( errorCode!= BIRD_ERROR_SUCCESS) 
+  {
+    errorHandler(errorCode, "vtkAscension3DGTracker::InternalCloseBIRDSystem()");
+   return 0;
+  }
+  return 1;
+}
+
 //----------------------------------------------------------------------------
 int vtkAscension3DGTracker::Probe()
 {
-  if (IsTracking)
+  if(this->IsTracking)
   {
     return 1;
   }
-  else 
+
+  // are there any parameters we want to set before we intialize?
+  // TODO: look into the preamble parms.
+
+  // start by initializing the ascension system.
+  if( !this->InternalInitializeBIRDSystem() )
+    return 0;
+
+  // always use metric.
+  if( !this->InternalSetMetric(true) )
   {
-    errorCode = InitializeBIRDSystem();
-    if(errorCode != BIRD_ERROR_SUCCESS) 
-    { 
-      errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - InitializeBIRDSystem()"); 
-      return 0;
-    }
-
-    errorCode = GetBIRDSystemConfiguration(&System);
-    if(errorCode != BIRD_ERROR_SUCCESS) 
-    { 
-      errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - GetBIRDSystemConfiguration(&System)"); 
-      return 0;
-    }
-
-    if (System.numberBoards > 0) 
-    {
-      // so far the system is connected.  
-      // Get the transmitter info so you have the serial number.
-      if( pXmtr ) {delete[] pXmtr;}
-      pXmtr = new TRANSMITTER_CONFIGURATION[System.numberTransmitters];
-      for(int i=0;i<System.numberTransmitters;i++)
-      {
-        errorCode = GetTransmitterConfiguration(i, &pXmtr[i]);
-        if(errorCode!=BIRD_ERROR_SUCCESS) 
-        { 
-          errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings() - GetTransmitterConfiguration(i, &pXmtr[i])"); 
-          return 0;
-        }
-      }
-      // update the serial number.
-      std::stringstream snStream;
-      snStream << "ATC-SN" << pXmtr->serialNumber << "-DT" << pXmtr->type;
-      this->SetSerialNumber(snStream.str().c_str());
-      // now close the sytem until you start tracking.
-      errorCode = CloseBIRDSystem();
-      if( errorCode != BIRD_ERROR_SUCCESS)
-      { 
-        errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - CloseBIRDSystem()");
-        return 0;
-      }
-      return 1;
-    }
-    else 
-    {
-      errorCode = CloseBIRDSystem();
-      if( errorCode!= BIRD_ERROR_SUCCESS) 
-      {
-        errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - CloseBIRDSystem()");
-        return 0;
-      }
-      return 0;
-    }
+    this->InternalCloseBIRDSystem();
+    return 0;
   }
+
+  // get the current settings.
+  if( !this->GetCurrentSettings( this->m_TrackerCurrentConfig ) )
+  {
+    this->InternalCloseBIRDSystem();
+    return 0;
+  }
+
+  // set use defaults to true.  
+  this->m_bUseDefaultSystemSettings = true;
+  this->m_bUseDefaultSensorSettings = true;
+  
+  // close the system until you start tracking.
+  return this->InternalCloseBIRDSystem();
 } 
 
 int vtkAscension3DGTracker::GetSerialPort()
@@ -171,96 +169,216 @@ int vtkAscension3DGTracker::SetSerialPort(int port)
 } 
 
 //----------------------------------------------------------------------------
+int  vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)
+{
+  //*******************************************************
+  // System Configuration
+  //*******************************************************
+  errorCode = GetBIRDSystemConfiguration(config->m_SystemConfig);
+  if(errorCode != BIRD_ERROR_SUCCESS) 
+  { 
+    errorHandler(errorCode, "vtkAscension3DGTracker::Probe() - GetBIRDSystemConfiguration(config->m_SystemConfig)"); 
+    return 0;
+  }
+
+
+  //*******************************************************
+  // Sensor Configuration
+  //*******************************************************
+  if( config->m_SystemConfig->numberSensors )
+  {
+    // remove the existing objects if present.
+    if( config->m_SensorConfig )
+    {
+      delete [] config->m_SensorConfig;
+    }
+    if( config->m_SensorPartInfo )
+    {
+      delete [] config->m_SensorPartInfo;
+    }
+
+    // create new objects.
+    config->m_SensorConfig = new SENSOR_CONFIGURATION[config->m_SystemConfig->numberSensors];
+    config->m_SensorPartInfo = new ATCPartInfo[config->m_SystemConfig->numberSensors];
+
+    // loop through and read the configuations and part infos.
+    for( int i=0; i < config->m_SystemConfig->numberSensors; i++ )
+    {
+      // sensor configuration.
+      errorCode = GetSensorConfiguration(i, &(config->m_SensorConfig[i]) );
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorConfiguration(i, &(config->m_SensorConfig[i]) )"); 
+        return 0;
+      }
+
+      // part number.
+      errorCode = GetSensorParameter(i, PART_NUMBER_RX, config->m_SensorPartInfo[i].partNumber, 16);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, PART_NUMBER_RX, config->m_SensorPartInfo->partNumber, 16)"); 
+        return 0;
+      }
+
+      // model string.
+      errorCode = GetSensorParameter(i, MODEL_STRING_RX, config->m_SensorPartInfo[i].modelString, 11);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetSensorParameter(i, MODEL_STRING_RX, config->m_SensorPartInfo->modelString, 11)"); 
+        return 0;
+      }
+    }
+  }
+
+  //*******************************************************
+  // Board Configuration
+  //*******************************************************
+
+  if( config->m_SystemConfig->numberBoards > 0 )
+  {
+    // remove the existing objects if present.
+    if( config->m_BoardConfig )
+      delete [] config->m_BoardConfig;
+    if( config->m_BoardPartInfo )
+      delete [] config->m_BoardPartInfo;
+
+    // create new objects.
+    config->m_BoardConfig = new BOARD_CONFIGURATION[config->m_SystemConfig->numberBoards];
+    config->m_BoardPartInfo = new ATCPartInfo[config->m_SystemConfig->numberBoards];
+    
+    // loop through and read the configuations and part infos.
+    for(int i=0; i < config->m_SystemConfig->numberBoards;i++)
+    {
+      errorCode = GetBoardConfiguration(i, &config->m_BoardConfig[i]);
+      if(errorCode!=BIRD_ERROR_SUCCESS) 
+      { 
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardConfiguration(i, &config->m_BoardConfig[i])"); 
+        return 0;
+      }
+
+      // part number.
+      errorCode = GetBoardParameter(i, PART_NUMBER_PCB, config->m_BoardPartInfo[i].partNumber, 16);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, PART_NUMBER_PCB, config->m_XmtrPartInfo->partNumber, 16)"); 
+        return 0;
+      }
+
+      // model string.
+      errorCode = GetBoardParameter(i, MODEL_STRING_PCB, config->m_BoardPartInfo[i].modelString, 11);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetBoardParameter(i, MODEL_STRING_PCB, config->m_XmtrPartInfo->modelString, 11)"); 
+        return 0;
+      }
+    }
+  }
+
+  //*******************************************************
+  // Transmitter Configuration
+  //*******************************************************
+  if (config->m_SystemConfig->numberTransmitters > 0) 
+  {
+    // remove the existing objects if present.
+    if( config->m_XmtrConfig ) 
+    {
+      delete [] config->m_XmtrConfig;
+    }
+    if( config->m_XmtrPartInfo )
+    {
+      delete [] config->m_XmtrPartInfo;
+    }
+
+    // create new objects.
+    config->m_XmtrConfig = new TRANSMITTER_CONFIGURATION[config->m_SystemConfig->numberTransmitters];
+    config->m_XmtrPartInfo = new ATCPartInfo[config->m_SystemConfig->numberTransmitters];
+    
+    // loop through and read the configuations and part infos.
+    for(int i=0; i < config->m_SystemConfig->numberTransmitters;i++)
+    {
+      // transmitter configuration.
+      errorCode = GetTransmitterConfiguration(i, &config->m_XmtrConfig[i]);
+      if(errorCode!=BIRD_ERROR_SUCCESS) 
+      { 
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) -GetTransmitterConfiguration(i, &config->m_XmtrConfig[i])"); 
+        return 0;
+      }
+
+      // part number.
+      errorCode = GetTransmitterParameter(i, PART_NUMBER_TX, config->m_XmtrPartInfo[i].partNumber, 16);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config) - GetTransmitterParameter(i, PART_NUMBER_TX, config->m_XmtrPartInfo->partNumber, 16)"); 
+        return 0;
+      }
+
+      // model string.
+      errorCode = GetTransmitterParameter(i, MODEL_STRING_TX, config->m_XmtrPartInfo[i].modelString, 11);
+      if(errorCode != BIRD_ERROR_SUCCESS)
+      {
+        errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings(vtkAscension3DGConfig *config)- GetTransmitterParameter(i, MODEL_STRING_TX, config->m_XmtrPartInfo->modelString, 11)"); 
+        return 0;
+      }
+    }
+    // update the serial number.
+    std::stringstream snStream;
+    snStream << "ATC-PN" << config->m_XmtrPartInfo->partNumber 
+      <<"-SN" << config->m_XmtrConfig->serialNumber;
+    this->SetSerialNumber(snStream.str().c_str());
+  }
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
 int vtkAscension3DGTracker::InternalStartTracking()
 {
+  int nRet = 1;
+
   if (this->IsTracking)
   {
-    return 1;
+    return nRet;
   }
 
   std::cout << "Initializing system... ";
-  errorCode = InitializeBIRDSystem();
-  if(errorCode != BIRD_ERROR_SUCCESS) 
-  { 
-    errorHandler(errorCode, "vtkAscension3DGTracker::InternalStartTracking() - InitializeBIRDSystem()"); 
+  if( !this->InternalInitializeBIRDSystem() )
     return 0;
+
+  // always use metric.
+  this->InternalSetMetric(true);
+
+  // set the new settings if needed.
+  if( !this->m_bUseDefaultSystemSettings )
+  {
+    if( !this->InternalSetPowerLineFrequency(this->m_TrackerCurrentConfig->m_SystemConfig->powerLineFrequency) )
+      return 0;
+    if( !this->InternalSetAGCMode(this->m_TrackerCurrentConfig->m_SystemConfig->agcMode) )
+      return 0;
+    if( !this->InternalSetMeasurementRate(this->m_TrackerCurrentConfig->m_SystemConfig->measurementRate) )
+      return 0;
+    if( !this->InternalSetMaximumRange(this->m_TrackerCurrentConfig->m_SystemConfig->maximumRange) )
+      return 0;
   }
 
-  if( !this->GetCurrentSettings()) 
-  {
-    return 0;
-  }
+  // update the current settings structure.
+  this->GetCurrentSettings(this->m_TrackerCurrentConfig);
+
+  // enable the transmitter and tool ports.
   this->EnableTransmitter();
   this->EnableToolPorts();
 
   DATA_FORMAT_TYPE type = DOUBLE_ALL_TIME_STAMP_Q;
-  for(sensorID=0;sensorID<System.numberSensors;sensorID++)
+  for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
   {
     if( !this->SetSensorDataFormat(sensorID,type)) {return 0;}
   }
-  //QUALITY_PARAMETERS quality = this->GetSensorQuality(1);
-  //printf("%u, %u, %u, %u\n", quality.error_slope,quality.error_offset,quality.error_sensitivity,quality.filter_alpha);
 
   this->IsTracking = 1;
 
   return 1;
 }
 
-int  vtkAscension3DGTracker::GetCurrentSettings()
-{
-  int i;
-  errorCode = GetBIRDSystemConfiguration(&System);
-  if(errorCode!=BIRD_ERROR_SUCCESS) 
-  { 
-    errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings() - GetBIRDSystemConfiguration(&System)"); 
-    return 0;
-  }
 
-  pBoard = new BOARD_CONFIGURATION[System.numberBoards];
-  for(i=0;i<System.numberBoards;i++)
-  {
-    errorCode = GetBoardConfiguration(i, &pBoard[i]);
-    if(errorCode!=BIRD_ERROR_SUCCESS) 
-    { 
-      errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings() - GetBoardConfiguration(i, &pBoard[i])"); 
-      return 0;
-    }
-  }
-
-  if( pSensor ) {delete[] pSensor;}
-  pSensor = new SENSOR_CONFIGURATION[System.numberSensors];
-  for(i=0;i<System.numberSensors;i++)
-  {
-    errorCode = GetSensorConfiguration(i, &pSensor[i]);
-    if(errorCode!=BIRD_ERROR_SUCCESS) 
-    { 
-      errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings() - GetSensorConfiguration(i, &pSensor[i])"); 
-      return 0;
-    }
-  }
-
-  if( pXmtr ) {delete[] pXmtr;}
-  pXmtr = new TRANSMITTER_CONFIGURATION[System.numberTransmitters];
-  for(i=0;i<System.numberTransmitters;i++)
-  {
-    errorCode = GetTransmitterConfiguration(i, &pXmtr[i]);
-    if(errorCode!=BIRD_ERROR_SUCCESS) 
-    { 
-      errorHandler(errorCode, "vtkAscension3DGTracker::GetCurrentSettings() - GetTransmitterConfiguration(i, &pXmtr[i])"); 
-      return 0;
-    }
-  }
-
-  // set to use metric.
-  this->SetMetric(true);
-
-  // update the serial number.
-  std::stringstream snStream;
-  //TODO: do not use device type, use get transmitter part number.
-  snStream << "ATC-SN" << pXmtr->serialNumber << "-DT" << pXmtr->type;
-  this->SetSerialNumber(snStream.str().c_str());
-  return 1;
-}
 
 //----------------------------------------------------------------------------
 int vtkAscension3DGTracker::InternalStopTracking()
@@ -271,13 +389,9 @@ int vtkAscension3DGTracker::InternalStopTracking()
   this->DisableTransmitter();
   this->UpdateMutex->Unlock();
   this->IsTracking = 0;
-  if( CloseBIRDSystem()!=BIRD_ERROR_SUCCESS) 
-  { 
-    errorHandler(errorCode, "vtkAscension3DGTracker::InternalStopTracking() - CloseBIRDSystem()"); 
-    return 0;
-  }
-
-  return 1;
+  
+  // close the system.
+  return this->InternalCloseBIRDSystem();
 }
 
 void vtkAscension3DGTracker::InternalUpdate()
@@ -300,6 +414,8 @@ void vtkAscension3DGTracker::InternalUpdate()
     vtkWarningMacro( << "called Update() when 3DG was not tracking");
     return;
   }
+
+
   if( this->m_bUseAllSensors )
   {
     
@@ -309,7 +425,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     //use all sensors.
     if(this->m_bUseSynchronous)
     {
-      errorCode = GetSynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[0]));
+      errorCode = GetSynchronousRecord(-1, pRecord, this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors*sizeof(record[0]));
       
       // debug:
       //curr = clock();
@@ -323,7 +439,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     }
     else
     {
-      errorCode = GetAsynchronousRecord(-1, pRecord, System.numberSensors*sizeof(record[0]));
+      errorCode = GetAsynchronousRecord(-1, pRecord, this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors*sizeof(record[0]));
       
       // debug:
       //curr = clock();
@@ -336,7 +452,7 @@ void vtkAscension3DGTracker::InternalUpdate()
       }
     }
 
-    for(sensorID=0;sensorID<System.numberSensors;sensorID++)
+    for(sensorID=0; sensorID<this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
     {
       // check the sensor status.
       DEVICE_STATUS status = GetSensorStatus(sensorID);
@@ -377,7 +493,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   else //do each sensor individual.
   {
     // scan the sensors and request a record if the sensor is physically attached
-    for(sensorID=0;sensorID<System.numberSensors;sensorID++)
+    for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
     {
       // check the sensor status.
       DEVICE_STATUS status = GetSensorStatus(sensorID);
@@ -401,37 +517,22 @@ void vtkAscension3DGTracker::InternalUpdate()
         // debug:
         //start = clock();
 
-        // TODO: remove - doesn't work.
         if(this->m_bUseSynchronous)
         {
-          errorCode = GetSynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
-          
-          // debug:
-          //curr = clock();
-          //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-          //std::cout << "GetSynchronous - sensorID time elapsed: " << tElapsed << std::endl;
-
-          if(errorCode!=BIRD_ERROR_SUCCESS) 
-          {
-            errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetSynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]))");
-          }
+          vtkWarningMacro("3DG Guidance Known Issue: GetSynchronousRecord(...) does not work with ALL_SENSORS -- using AsynchronousRecord(...) instead.");  
         }
-        else
+
+        errorCode = GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
+
+        // debug:
+        //curr = clock();
+        //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
+        //std::cout << "GetAsynchronous - sensorID time elapsed: " << tElapsed << std::endl;
+
+        if(errorCode!=BIRD_ERROR_SUCCESS) 
         {
-
-          errorCode = GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]));
-          
-          // debug:
-          //curr = clock();
-          //tElapsed = ((double)(curr - start)) / CLOCKS_PER_SEC;
-          //std::cout << "GetAsynchronous - sensorID time elapsed: " << tElapsed << std::endl;
-
-          if(errorCode!=BIRD_ERROR_SUCCESS) 
-          {
-            errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]))");
-          }
+          errorHandler(errorCode, "vtkAscension3DGTracker::InternalUpdate() - GetAsynchronousRecord(sensorID, (pRecord+sensorID), sizeof(record[sensorID]))");
         }
-        
 
         // Not absent.
         absent[sensorID] = 0;
@@ -712,24 +813,30 @@ void vtkAscension3DGTracker::TransformToMatrixd(const DOUBLE_ALL_TIME_STAMP_Q_RE
 
 void vtkAscension3DGTracker::EnableToolPorts()
 {
-  char temp[20];
-  for(sensorID=0;sensorID<System.numberSensors;sensorID++)
+  char serNum[20];
+  char partNum[20];
+  char modelString[20];
+  for(sensorID=0; sensorID < this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++)
   {
-    if(pSensor[sensorID].attached)
+    if(this->m_TrackerCurrentConfig->m_SensorConfig[sensorID].attached)
     {
 #if defined(macintosh)
-      _itoa(pSensor[sensorID].serialNumber,temp,15);
+      _itoa(this->m_TrackerCurrentConfig->m_SensorConfig[sensorID].serialNumber,serNum,15);
+      //TODO: fix this for mac for part number and model string.
 #else
-      snprintf(temp, sizeof(temp), "%d",pSensor[sensorID].serialNumber);
+      snprintf(serNum, sizeof(serNum), "%d",this->m_TrackerCurrentConfig->m_SensorConfig[sensorID].serialNumber);
+      snprintf(partNum, sizeof(partNum), "%s",this->m_TrackerCurrentConfig->m_SensorPartInfo[sensorID].partNumber);
+      snprintf(modelString, sizeof(modelString), "%s",this->m_TrackerCurrentConfig->m_SensorPartInfo[sensorID].modelString);
 #endif
-      temp[19] = '\0';
-      this->Tools[sensorID]->SetToolSerialNumber(temp);
+      serNum[19] = '\0';
+      this->Tools[sensorID]->SetToolSerialNumber(serNum);
       this->Tools[sensorID]->SetToolManufacturer("Ascension 3DG");
-      this->Tools[sensorID]->SetToolPartNumber(temp);
-      this->Tools[sensorID]->SetToolType(temp);
+      this->Tools[sensorID]->SetToolPartNumber(partNum);
+      this->Tools[sensorID]->SetToolType(modelString);
       PortEnabled[sensorID] = 1;
     }
-    else {
+    else 
+    {
       //this->Tools[sensorID]->SetToolSerialNumber("");
       //this->Tools[sensorID]->SetToolManufacturer("");
       //this->Tools[sensorID]->SetToolPartNumber("");
@@ -739,7 +846,8 @@ void vtkAscension3DGTracker::EnableToolPorts()
 }
 void vtkAscension3DGTracker::DisableToolPorts()
 { 
-  for(sensorID=0;sensorID<System.numberSensors;sensorID++) {
+  for(sensorID=0; sensorID<this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; sensorID++) 
+  {
     this->Tools[sensorID]->SetToolSerialNumber("");
     this->Tools[sensorID]->SetToolManufacturer("");
     this->Tools[sensorID]->SetToolPartNumber("");
@@ -749,9 +857,9 @@ void vtkAscension3DGTracker::DisableToolPorts()
 
 void vtkAscension3DGTracker::EnableTransmitter()
 {
-  for(short id=0;id<System.numberTransmitters;id++)
+  for(short id=0; id < this->m_TrackerCurrentConfig->m_SystemConfig->numberTransmitters; id++)
   {
-    if((pXmtr+id)->attached)
+    if( (this->m_TrackerCurrentConfig->m_XmtrConfig+id)->attached)
     {
       errorCode = SetSystemParameter(SELECT_TRANSMITTER, &id, sizeof(id));
       if(errorCode!=BIRD_ERROR_SUCCESS) 
@@ -787,7 +895,14 @@ int  vtkAscension3DGTracker::SaveConfiguration(char * filename)
   return 1;
 }
 
-int  vtkAscension3DGTracker::SetPowerLineFrequency(double pl)
+int vtkAscension3DGTracker::SetPowerLineFrequency( double pl )
+{
+  this->m_TrackerCurrentConfig->m_SystemConfig->powerLineFrequency = pl;
+  this->m_bUseDefaultSystemSettings = false;
+  return 1;
+}
+
+int  vtkAscension3DGTracker::InternalSetPowerLineFrequency(double pl)
 {
   errorCode = SetSystemParameter(POWER_LINE_FREQUENCY, &pl, sizeof(pl));
   if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
@@ -804,6 +919,13 @@ int vtkAscension3DGTracker::GetPowerLineFrequency()
 
 int vtkAscension3DGTracker::SetAGCMode(AGC_MODE_TYPE agc)
 {
+  this->m_TrackerCurrentConfig->m_SystemConfig->agcMode = agc;
+  this->m_bUseDefaultSystemSettings = false;
+  return 1;
+}
+
+int vtkAscension3DGTracker::InternalSetAGCMode(AGC_MODE_TYPE agc)
+{
   errorCode = SetSystemParameter(AGC_MODE, &agc, sizeof(agc));
   if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
   return 1;
@@ -817,7 +939,14 @@ AGC_MODE_TYPE vtkAscension3DGTracker::GetAGCMode()
   return agc;
 }
 
-int vtkAscension3DGTracker::SetMeasurementRate(double rate)
+int vtkAscension3DGTracker::SetMeasurementRate( double rate )
+{
+  this->m_TrackerCurrentConfig->m_SystemConfig->measurementRate = rate;
+  this->m_bUseDefaultSystemSettings = false;
+  return 1;
+}
+
+int vtkAscension3DGTracker::InternalSetMeasurementRate(double rate)
 {
   errorCode = SetSystemParameter(MEASUREMENT_RATE, &rate, sizeof(rate));
   if(errorCode != BIRD_ERROR_SUCCESS) 
@@ -842,7 +971,14 @@ double vtkAscension3DGTracker::GetMeasurementRate()
   return rate;
 }
 
-int  vtkAscension3DGTracker::SetMaximumRange(double range)
+int vtkAscension3DGTracker::SetMaximumRange( double range )
+{
+  this->m_TrackerCurrentConfig->m_SystemConfig->maximumRange = range;
+  this->m_bUseDefaultSystemSettings = false;
+  return 1;
+}
+
+int vtkAscension3DGTracker::InternalSetMaximumRange(double range)
 {
   errorCode = SetSystemParameter(MAXIMUM_RANGE, &range, sizeof(range));
   if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
@@ -857,14 +993,27 @@ double  vtkAscension3DGTracker::GetMaximumRange()
   return range;
 }
 
-int  vtkAscension3DGTracker::SetMetric(bool metric)
+int vtkAscension3DGTracker::SetMetric( bool metric )
 {
   BOOL metricBOOL = 0;
-  if (metric == true) {
+  if (metric == true) 
+  {
+    metricBOOL = 1;
+  }
+  this->m_TrackerCurrentConfig->m_SystemConfig->metric = metricBOOL;
+  this->m_bUseDefaultSystemSettings = false;
+  return 1;
+}
+
+int vtkAscension3DGTracker::InternalSetMetric(bool metric)
+{
+  BOOL metricBOOL = 0;
+  if (metric == true) 
+  {
     metricBOOL = 1;
   }
   errorCode = SetSystemParameter(METRIC, &metricBOOL, sizeof(metricBOOL));
-  if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
+  if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode, "vtkAscension3DGTracker::InternalSetMetric(bool metric)"); return 0; }
   return 1;
 }
 
@@ -879,7 +1028,7 @@ bool vtkAscension3DGTracker::GetMetric()
     return false;
 }
 
-int  vtkAscension3DGTracker::SetTransmitter(short tx)
+int  vtkAscension3DGTracker::InternalSetTransmitter(short tx)
 {
   errorCode = SetSystemParameter(SELECT_TRANSMITTER, &tx, sizeof(tx));
   if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
@@ -895,23 +1044,23 @@ short  vtkAscension3DGTracker::GetTransmitter( )
 }
 
 char * vtkAscension3DGTracker::GetBoardModel() {
-  return pBoard->modelString;
+  return this->m_TrackerCurrentConfig->m_BoardConfig->modelString;
 }
 
 unsigned short vtkAscension3DGTracker::GetBoardFirmwareRevision() {
-  return pBoard->firmwareRevision;
+  return this->m_TrackerCurrentConfig->m_BoardConfig->firmwareRevision;
 }
 
 unsigned short vtkAscension3DGTracker::GetBoardRevision() {
-  return pBoard->revision;
+  return this->m_TrackerCurrentConfig->m_BoardConfig->revision;
 }
 
 unsigned short vtkAscension3DGTracker::GetBoardFirmwareNumber() {
-  return pBoard->firmwareNumber;
+  return this->m_TrackerCurrentConfig->m_BoardConfig->firmwareNumber;
 }
 
 DEVICE_TYPES vtkAscension3DGTracker::GetSensorType() {
-  return pSensor->type;
+  return this->m_TrackerCurrentConfig->m_SensorConfig->type;
 }
 
 // SET SENSOR CONFIGURATION

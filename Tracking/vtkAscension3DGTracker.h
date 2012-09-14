@@ -38,16 +38,16 @@ POSSIBILITY OF SUCH DAMAGES.
 #define __vtkAscension3DGTracker_h
 
 #include "vtkTracker.h"
-#ifdef Ascension3DG_MedSafe
-#include "ATC3DGm.h"
-#else /* Ascension3DG_MedSafe */
-#include "ATC3DG.h"
-#endif /* Ascension3DG_MedSafe */
+//#ifdef Ascension3DG_MedSafe
+//#include "ATC3DGm.h"
+//#else /* Ascension3DG_MedSafe */
+//#include "ATC3DG.h"
+//#endif /* Ascension3DG_MedSafe */
 
-class vtkFrameToTimeConverter;
+#include "vtkAscension3DGConfig.h"
 
-// the number of tools the polaris can handle
-#define VTK_3DG_NTOOLS 4
+// the number of tools the ascension can handle
+
 #define VTK_3DG_REPLY_LEN 2048
 
 class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
@@ -74,21 +74,29 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   // to the tools.  This should only be used within vtkTracker.cxx.
   void InternalUpdate();
 
-
+  //***************************************************************************
   // SYSTEM CONFIGURATION
-  int  GetCurrentSettings();
+  //***************************************************************************
+  int  GetCurrentSettings( vtkAscension3DGConfig *config);
   int  RestoreConfiguration(char * filename);
   int  SaveConfiguration(char * filename);
-
 
   int  SetPowerLineFrequency(double pl);
   int  SetAGCMode(AGC_MODE_TYPE agc);
   int  SetMeasurementRate(double rate);
   int  SetMaximumRange(double range);
   int  SetMetric(bool metric);
-  int  SetTransmitter(short tx);
+  //int  SetTransmitter(short tx);
 
+protected:
+  int  InternalSetPowerLineFrequency(double pl);
+  int  InternalSetAGCMode(AGC_MODE_TYPE agc);
+  int  InternalSetMeasurementRate(double rate);
+  int  InternalSetMaximumRange(double range);
+  int  InternalSetMetric(bool metric);
+  int  InternalSetTransmitter(short tx);
 
+public: 
   int			GetPowerLineFrequency();
   AGC_MODE_TYPE GetAGCMode();
   double		GetMeasurementRate( );
@@ -96,13 +104,16 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   bool			GetMetric();
   short			GetTransmitter( );
 
+  //***************************************************************************
+  // BOARD CONFIGURATION
+  //***************************************************************************
+  int  GetNumberOfBoards() { return this->m_TrackerCurrentConfig->m_SystemConfig->numberBoards; }
+  int  GetNumberOfSensors() { return  this->m_TrackerCurrentConfig->m_SystemConfig->numberSensors; }
+  int  GetNumberOfTransmitter() { return  this->m_TrackerCurrentConfig->m_SystemConfig->numberTransmitters; }
 
-  // Board Configuration
-  int  GetNumberOfBoards() { return this->System.numberBoards; }
-  int  GetNumberOfSensors() { return this->System.numberSensors; }
-  int  GetNumberOfTransmitter() { return this->System.numberTransmitters; }
-
-  // Sensor Configuration
+  //***************************************************************************
+  // SENSOR CONFIGURATION
+  //***************************************************************************
   int  SetSensorFilterACWideNotch(int sensorID, BOOL buffer);
   int  SetSensorFilterACNarrowNotch(int sensorID, BOOL buffer);
   int  SetSensorFilterDCAdaptive(int sensorID,double buffer);
@@ -137,8 +148,9 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   // DEVICE_STATUS GetBoardStatus(unsigned short boardID);
   // DEVICE_STATUS GetSystemStatus();
 
-
-  // Transmitter Configuration
+  //***************************************************************************
+  // TRANSMITTER CONFIGURATION
+  //***************************************************************************
   int  SetTransmitterXYZReferenceFrame(int transmitterID,BOOL buffer);
   int  SetTransmitterReferenceFrame(int transmitterID, DOUBLE_ANGLES_RECORD buffer);
 
@@ -179,6 +191,8 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   int SetTransmitterXYZReferenceFrame(int transmitterID, bool buffer);
   int SetSensorFilterLargeChange(int sensorID, bool buffer);
 
+  // Data collection options.
+  inline void SetUseDefaultSettings(bool bUseDefault) {this->m_bUseDefaultSystemSettings = bUseDefault;}
   inline void SetUseSynchronousRecord(bool bSync) {this->m_bUseSynchronous = bSync;}
   inline void SetUseAllSensors(bool bUseAllSensors) {this->m_bUseAllSensors = bUseAllSensors;}
 
@@ -188,6 +202,15 @@ protected:
   void errorHandler(int error, char* func=0);
   void TransformToMatrixd(const DOUBLE_ALL_TIME_STAMP_Q_RECORD trans, double matrix[16]);
   void RelativeTransform(const DOUBLE_ALL_TIME_STAMP_Q_RECORD aRecord, const DOUBLE_ALL_TIME_STAMP_Q_RECORD *bRecord, DOUBLE_ALL_TIME_STAMP_Q_RECORD cRecord);
+
+  // Description:
+  // Initialize the Ascension system.  We do this a bunch of times.
+  int InternalInitializeBIRDSystem();
+
+  // Description:
+  // Close the Ascension system.  Useful if we have 
+  // an error and want to quit in the middle of a function.
+  int InternalCloseBIRDSystem();
 
   // Description:
   // Set the version information.
@@ -206,44 +229,35 @@ protected:
   int InternalStopTracking();
 
   // Description:
-  // Set the specified tool LED to the specified state.
-  // int InternalSetToolLED(int tool, int led, int state);
-
-  // Description:
-  // This is a low-level method for loading a virtual SROM.
-  // You must halt the tracking thread and take the MICROBIRD
-  // out of tracking mode before you use it.
-  // void InternalLoadVirtualSROM(int tool, const unsigned char data[1024]);
-  // void InternalClearVirtualSROM(int tool);
-
-  // Description:
   // Methods for detecting which ports have tools in them, and
   // auto-enabling those tools.
   void EnableToolPorts();
   void DisableToolPorts();
 
+  // Description:
+  // Methods for enabling and disabling the transmitter.
   void EnableTransmitter();
   void DisableTransmitter();
 
+  // use probe() to fill in the tracker default values.
+  vtkAscension3DGConfig *m_TrackerCurrentConfig;
+  // copy defaults to here and then edit these for custom configs.
+  vtkAscension3DGConfig *m_TrackerCustomConfig;
+  
 
-
-  // Description:
-  // Class for updating the virtual clock that accurately times the
-  // arrival of each transform, more accurately than is possible with
-  // the system clock alone because the virtual clock averages out the
-  // jitter.
-
-  SYSTEM_CONFIGURATION			System;		// a pointer to a single instance of the system class	
-  SENSOR_CONFIGURATION			*pSensor;		// a pointer to an array of sensor objects
-  TRANSMITTER_CONFIGURATION		*pXmtr;			// a pointer to an array of transmitter objects
+  //*********************REMOVE THESE****************************************
+  //SYSTEM_CONFIGURATION			System;		// a pointer to a single instance of the system class	
+  //SENSOR_CONFIGURATION			*pSensor;		// a pointer to an array of sensor objects
+  //TRANSMITTER_CONFIGURATION		*pXmtr;			// a pointer to an array of transmitter objects
 
 	// Note the following is not normally needed but is provided for completeness
 	// The board configurations that are acquired from the system provide the user
 	// with informaton on board type and serial number
-  BOARD_CONFIGURATION			*pBoard;		// a pointer to an array of board objects
+  //BOARD_CONFIGURATION			*pBoard;		// a pointer to an array of board objects
+  //*********************REMOVE THESE****************************************
 
-  int				errorCode;		// used to hold error code returned from procedure call
-  int				sensorID;
+  int				errorCode;		// used to hold error code returned from procedure call -- is this needed globally or should it be local to a function.
+  int				sensorID; // is this needed?
   int				transmitterID;
   short				id;
   int				records;	// default
@@ -260,6 +274,9 @@ protected:
 
   char CommandReply[VTK_3DG_REPLY_LEN];
 
+  // to simplify the start.
+  bool m_bUseDefaultSystemSettings;
+  bool m_bUseDefaultSensorSettings;
   // for changing the different data collection types.
   bool m_bUseSynchronous;  // if true use GetSynchronousRecord, otherwise use GetAsynchronousRecord
   bool m_bUseAllSensors;  // if true use ALL_SENSORS, otherwise loop through each sensor.

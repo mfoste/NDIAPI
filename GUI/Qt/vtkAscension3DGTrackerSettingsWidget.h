@@ -61,7 +61,8 @@ public:
   void WriteTrackerSettings();
 
 public slots:
-  
+  void OnUseAllSensors(bool useAllSensors);
+
 private:
   // some helper functions.
   void CreateActions();

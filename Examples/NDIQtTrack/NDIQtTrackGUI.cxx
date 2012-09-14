@@ -160,8 +160,8 @@ void NDIQtTrackGUI::OnTrackerStarted()
   for(int tool=0; tool < this->m_GUI->TrackerWidget->getTracker()->GetNumberOfTools(); tool++)
   {
     // create the string
-    toolInfo = QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolPartNumber())
-      + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolSerialNumber());
+    toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolPartNumber())
+      + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolSerialNumber());
     switch(tool) 
     {
     case 0:

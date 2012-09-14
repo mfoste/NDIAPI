@@ -318,6 +318,7 @@ void vtkTrackerWidget::ConfigureTracker()
   if( !m_Tracker->Probe() )
   {
     this->PopUpError("The tracking system you specified is not attached. Please check your connections and retry." );
+    this->RemoveTracker();
     return;
   }
 
@@ -381,8 +382,6 @@ void vtkTrackerWidget::OnStartTracker()
   m_StartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(true);
 
-  m_Tracker->StartTracking();
-
 #if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
   if( this->m_TrackerSettingsDialog->getSystem() == ASCENSION_3DG )
   {
@@ -391,6 +390,8 @@ void vtkTrackerWidget::OnStartTracker()
 #endif
   this->m_VolumeSelectionComboBox->setEnabled(false);
    
+  m_Tracker->StartTracking();
+
   // check the serial number.
   //TODO: emit the serial number. this->setSerialNumber( QString(m_Tracker->GetSerialNumber()) );
   m_Timer->start((int)(1000/(this->m_TrackerUpdateFrequency*2)));

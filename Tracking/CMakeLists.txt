@@ -61,8 +61,10 @@ ENDIF (AIGS_USE_FLOCK)
 
 IF (AIGS_USE_3DG)
   SET ( Kit_HDRS ${Kit_HDRS}
+    vtkAscension3DGConfig.h
 	vtkAscension3DGTracker.h)
   SET ( Kit_SRCS ${Kit_SRCS}
+    vtkAscension3DGConfig.cxx
     vtkAscension3DGTracker.cxx)
   INCLUDE_DIRECTORIES( ${ATC_INCLUDE_DIRECTORY} )
   SET (KIT_EXTRA_LIBS ${KIT_EXTRA_LIBS} ${ATC_LIBRARY})

@@ -54,16 +54,19 @@
              </layout>
             </item>
             <item>
-             <widget class="QCheckBox" name="useSynchronousAscension3DGCheckBox">
+             <widget class="QCheckBox" name="useAllSensorsAscension3DGCheckBox">
               <property name="text">
-               <string>Use Synchronous</string>
+               <string>Use ALL_SENSORS</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="useAllSensorsAscension3DGCheckBox">
+             <widget class="QCheckBox" name="useSynchronousAscension3DGCheckBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
-               <string>Use ALL_SENSORS</string>
+               <string>Use Synchronous</string>
               </property>
              </widget>
             </item>

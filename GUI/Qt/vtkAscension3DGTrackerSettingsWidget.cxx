@@ -44,6 +44,7 @@ vtkAscension3DGTrackerSettingsWidget::vtkAscension3DGTrackerSettingsWidget( QWid
   this->m_Settings = settings;
   // set up the GUI.
   m_Widget.setupUi(this);
+  this->CreateActions();
 
   // set validators on port line edits.
   this->m_Widget.updateFrequencyAscension3DGLineEdit->setValidator(new QDoubleValidator(0.1, 40, 1, this) );
@@ -60,7 +61,20 @@ vtkAscension3DGTrackerSettingsWidget::~vtkAscension3DGTrackerSettingsWidget()
 
 void vtkAscension3DGTrackerSettingsWidget::CreateActions()
 {
-  
+  connect( this->m_Widget.useAllSensorsAscension3DGCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnUseAllSensors(bool)) );
+}
+
+void vtkAscension3DGTrackerSettingsWidget::OnUseAllSensors(bool useAllSensors)
+{
+  if( useAllSensors )
+  {
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(true);
+  }
+  else
+  {
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(false);
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(false);
+  }
 }
 
 void vtkAscension3DGTrackerSettingsWidget::ReadTrackerSettings()
@@ -76,6 +90,17 @@ void vtkAscension3DGTrackerSettingsWidget::ReadTrackerSettings()
   // update the GUI.
   this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseSynchronousRecord);
   this->m_Widget.useAllSensorsAscension3DGCheckBox->setChecked(this->m_Ascension3DGSettings.bUseAllSensors);
+  
+  // check to make sure that correct combinations are used due known issue with Ascension.
+  if( this->m_Ascension3DGSettings.bUseAllSensors )
+  {
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(true);
+  }
+  else
+  {
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setEnabled(false);
+    this->m_Widget.useSynchronousAscension3DGCheckBox->setChecked(false);
+  }
   this->m_Widget.updateFrequencyAscension3DGLineEdit->setText(QString("%1").arg(this->m_Ascension3DGSettings.updateFrequency));
 }
 
