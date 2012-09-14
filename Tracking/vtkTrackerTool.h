@@ -122,6 +122,7 @@ public:
   int IsSwitch1On() {return ((this->Flags & TR_SWITCH1_IS_ON) != 0); };
   int IsSwitch2On() {return ((this->Flags & TR_SWITCH2_IS_ON) != 0); };
   int IsSwitch3On() {return ((this->Flags & TR_SWITCH3_IS_ON) != 0); };
+  int IsBadFit()    {return ((this->Flags & TR_BAD_FIT) != 0); };
 
   // Description:
   // Get the timestamp (in seconds since 1970) for the last update to

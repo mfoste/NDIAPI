@@ -87,10 +87,11 @@ enum {
   TR_MISSING       = 0x0001,  // tool or tool port is not available
   TR_OUT_OF_VIEW   = 0x0002,  // cannot obtain transform for tool
   TR_OUT_OF_VOLUME = 0x0004,  // tool is not within the sweet spot of system
-  TR_BROKEN_SENSOR = 0x0008,  // for Aurora only
+  TR_BROKEN_SENSOR = 0x0008,  // broken sensor bit on Aurora or BAD_EEPROM or HARWARE on Ascension.
   TR_SWITCH1_IS_ON = 0x0010,  // various buttons/switches on tool
   TR_SWITCH2_IS_ON = 0x0020,
-  TR_SWITCH3_IS_ON = 0x0040
+  TR_SWITCH3_IS_ON = 0x0040, 
+  TR_BAD_FIT       = 0x0080   // for algorithm fit issues with magnetic tracking.
 };
 
 // flags for tool LEDs (specifically for the POLARIS)

@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2011-2012, Northern Digital Inc. All rights reserved.
- 
+
 All Northern Digital Inc. (“NDI”) Media and/or Sample Code and/or Sample Code
 Documentation (collectively referred to as “Sample Code”) is licensed and provided "as
 is” without warranty of any kind. The licensee, by use of the Sample Code, warrants to
@@ -101,9 +101,13 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     {
       // do nothing do not send.
     }
-	else if( tool->IsBrokenSensor() )
+    else if( tool->IsBrokenSensor() )
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
+    }
+    else if (tool->IsBadFit() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("Tool algorithm fit is bad.") );
     }
     else if( tool->IsOutOfView() ) // at NDI, this is equivalent to missing.
     {
@@ -117,7 +121,7 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     {
       double pos[3], quat[4];
       double rotMat[3][3];
-	  double quality = 0.0;
+      double quality = 0.0;
 
       // extract the rotation matrix
       rotMat[0][0] = tool->GetTransform()->GetMatrix()->GetElement(0,0);
@@ -141,11 +145,11 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       xfrm.translation.x = pos[0];
       xfrm.translation.y = pos[1];
       xfrm.translation.z = pos[2];
-	  
-	  quality = tool->GetErrorValue();
+
+      quality = tool->GetErrorValue();
 
       // send out.
-	  m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, quality);
+      m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, quality);
     }  
   }
 }
