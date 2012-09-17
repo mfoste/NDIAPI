@@ -5,7 +5,6 @@
 #else /* Ascension3DG_MedSafe */
 #include "ATC3DG.h"
 #endif /* Ascension3DG_MedSafe */
-#include "ATC3DG.h"
 
 typedef struct ATCPartInfoStruct
 {

@@ -107,38 +107,22 @@ IF (AIGS_USE_TRACKING)
 	OPTION (AIGS_USE_3DG "Provide support for the Ascension 3D Guidance trakStar, medSafe or driveBay" OFF)
 	IF( AIGS_USE_3DG )
 		OPTION (AIGS_USE_3DG_MEDSAFE "Provide support for the Ascension 3D Guidance medSafe" OFF)
-		OPTION (AIGS_USE_3DG_TRAKSTAR "Provide support for the Ascension 3D Guidance trakStar" OFF)
-		OPTION (AIGS_USE_3DG_TRAKSTAR2 "Provide support for the Ascension 3D Guidance trakStar 2" OFF)
-		OPTION (AIGS_USE_3DG_DRIVEBAY "Provide support for the Ascension 3D Guidance driveBay" OFF)
+		OPTION (AIGS_USE_3DG_TRAKSTAR_DRIVEBAY "Provide support for the Ascension 3D Guidance trakSTAR, trakSTAR2, driveBAY, driveBAY2 (works with all versions of firmware)" ON)
 		# check to make sure only one is selected, we cannot use more than one as they link to the same named dll.
-		IF( AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_DRIVEBAY )
+		IF( AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR_DRIVEBAY )
 			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSafe/3D Guidance API/" 
-			CACHE PATH "Directory where the ATC3DGm.h file is located for the medSAFE" )
+			CACHE PATH "Directory where the ATC3DGm.h file is located for the medSAFE" FORCE)
 			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSAFE/3D Guidance API/ATC3DGm.lib" 
-			CACHE FILEPATH "Full path to the ATC3DGm.lib file for the medSAFE")
+			CACHE FILEPATH "Full path to the ATC3DGm.lib file for the medSAFE" FORCE)
 			ADD_DEFINITIONS( /DAscension3DG_MedSafe)
 			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/medSafe/3D Guidance API")
-	    ELSEIF( AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_DRIVEBAY )
-			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API/" 
-			CACHE PATH "Directory where the ATC3DG.h file is located for the trakSTAR" )
-			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API/ATC3DG.lib" 
-			CACHE FILEPATH "Full path to the ATC3DG.lib file for the trakStar")
-			ADD_DEFINITIONS( /DAscension3DG_TrakStar)
-			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar/3D Guidance API")
-		ELSEIF( AIGS_USE_3DG_TRAKSTAR2 AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_DRIVEBAY )
-			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API/" 
-			CACHE PATH "Directory where the ATC3DG.h file is located for the trakSTAR2" )
-			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API/ATC3DG.lib" 
-			CACHE FILEPATH "Full path to the ATC3DG.lib file for the trakSTAR2")
-			ADD_DEFINITIONS( /DAscension3DG_TrakStar2)
-			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar2/3DG API")
-		ELSEIF( AIGS_USE_3DG_DRIVEBAY AND NOT AIGS_USE_3DG_MEDSAFE AND NOT AIGS_USE_3DG_TRAKSTAR AND NOT AIGS_USE_3DG_TRAKSTAR2 )
-			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API/" 
-			CACHE PATH "Directory where the ATC3DG.h file is located for the driveBay" )
-			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API/ATC3DG.lib" 
-			CACHE FILEPATH "Full path to the ATC3DG.lib file for the driveBay")
-			ADD_DEFINITIONS( /DAscension3DG_DriveBay)
-			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/driveBay/3D Guidance API")
+	    ELSEIF( AIGS_USE_3DG_TRAKSTAR_DRIVEBAY AND NOT AIGS_USE_3DG_MEDSAFE )
+			SET( ATC_INCLUDE_DIRECTORY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar_driveBay/3DG API/" 
+			CACHE PATH "Directory where the ATC3DG.h file is located for the trakSTAR, trakSTAR2, driveBAY and driveBAY2" FORCE )
+			SET( ATC_LIBRARY "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar_driveBay/3DG API/ATC3DG.lib" 
+			CACHE FILEPATH "Full path to the ATC3DG.lib file for the trakSTAR, trakSTAR2, driveBAY and driveBAY2" FORCE)
+			ADD_DEFINITIONS( /DAscension3DG_TrakStar_DriveBay)
+			SET(AIGS_INCLUDE_DIRS ${AIGS_INCLUDE_DIRS} "${AIGS_SOURCE_DIR}/Utilities/ascension3DGapi/trakStar_driveBay/3DG API")
 		ELSE()
 			MESSAGE( FATAL_ERROR "Can only use one of the 3DG tracker types.  Please only select one 3DG tracker type." )
 		ENDIF()

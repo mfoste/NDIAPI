@@ -43,11 +43,11 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkFakeTracker.h"
 #include "vtkNDITracker.h"
 
-#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
-#include "ATC3DG.h"
-#include "vtkAscension3DGTracker.h"
-#elif defined (Ascension3DG_MedSafe)
+#if defined (Ascension3DG_MedSafe)
 #include "ATC3DGm.h"
+#include "vtkAscension3DGTracker.h"
+#else
+#include "ATC3DG.h"
 #include "vtkAscension3DGTracker.h"
 #endif
 
@@ -256,7 +256,7 @@ void vtkTrackerWidget::ConfigureTracker()
     }
     break;
 // Ascension Tracker Settings.
-#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+#if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
   case ASCENSION_3DG:
     m_Tracker = vtkAscension3DGTracker::New();
     dynamic_cast<vtkAscension3DGTracker*>(m_Tracker)->SetUseSynchronousRecord(this->m_TrackerSettingsDialog->getAscension3DGSettings()->bUseSynchronousRecord);
@@ -382,7 +382,7 @@ void vtkTrackerWidget::OnStartTracker()
   m_StartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(true);
 
-#if defined (Ascension3DG_DriveBay) || defined (Ascension3DG_MedSafe) || defined (Ascension3DG_TrakStar) || defined (Ascension3DG_TrakStar2)
+#if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
   double freq;
   if( this->m_TrackerSettingsDialog->getSystem() == ASCENSION_3DG )
   {

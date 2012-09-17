@@ -44,7 +44,7 @@ or property, arising from the Sample Code or any use thereof.
 #include "vtkTrackerSettingsDialog.h"
 #include "vtkFakeTrackerSettingsWidget.h"
 #include "vtkAuroraTrackerSettingsWidget.h"
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
+#if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
 #include "vtkAscension3DGTrackerSettingsWidget.h"
 #endif
 #include "vtkSpectraTrackerSettingsWidget.h"
@@ -69,7 +69,7 @@ public:
   inline Ui::TrackerSettingsDialog* getGUI() {return m_GUI;}
   inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
   inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
+#if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
   inline ascension3DGSettings* getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
 #endif
   inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
@@ -92,7 +92,7 @@ private:
   Ui::TrackerSettingsDialog       *m_GUI;
   vtkFakeTrackerSettingsWidget    *m_FakeTrackerSettingsWidget;
   vtkAuroraTrackerSettingsWidget  *m_AuroraSettingsWidget;
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
+#if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
   vtkAscension3DGTrackerSettingsWidget *m_Ascension3DGSettingsWidget;
 #endif
   vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;

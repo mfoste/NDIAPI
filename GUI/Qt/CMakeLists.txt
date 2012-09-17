@@ -96,12 +96,8 @@ if(AIGS_USE_3DG)
 		Ascension3DGTrackerSettingsWidget.ui )
 	IF(AIGS_USE_3DG_MEDSAFE) # Use MedSafe version
 		ADD_DEFINITIONS(-DAscension3DG_MedSafe)
-	ELSEIF( AIGS_USE_3DG_DRIVEBAY )
-       ADD_DEFINITIONS(-DAscension3DG_DriveBay)
-	ELSEIF( AIGS_USE_3DG_TRAKSTAR )
-	   ADD_DEFINITIONS(-DAscension3DG_TrakStar)
-	ELSE() # trakStar2 is the default
-       ADD_DEFINITIONS(-DAscension3DG_TrakStar2)
+	ELSE() # trakStar is the default
+       ADD_DEFINITIONS(-DAscension3DG_TrakStar_DriveBay)
 	ENDIF()     	
    INCLUDE_DIRECTORIES( ${ATC_INCLUDE_DIRECTORY} )
 endif()

@@ -73,7 +73,7 @@ struct ndiAuroraSettings
   int baudRate;
 };
 
-#if defined(Ascension3DG_DriveBay) || defined(Ascension3DG_MedSafe) || defined(Ascension3DG_TrakStar) || defined(Ascension3DG_TrakStar2)
+#if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
 struct ascension3DGSettings
 {
   bool bUseSynchronousRecord;
