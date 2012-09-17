@@ -75,4 +75,4 @@ target_link_libraries( vtkTrackerWidgetPlugin
 #${QT_QTDESIGNER_LIBRARY}
 #${QT_QTDESIGNERCOMPONENTS_LIBRARY}
 
-install( TARGETS vtkTrackerWidgetPlugin DESTINATION ${QT_PLUGINS_DIR}/designer )
+install( TARGETS vtkTrackerWidgetPlugin DESTINATION ${QT_PLUGINS_DIR}/designer CONFIGURATIONS Release )
