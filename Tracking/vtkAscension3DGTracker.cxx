@@ -48,6 +48,9 @@ POSSIBILITY OF SUCH DAMAGES.
 #include "vtkFrameToTimeConverter.h"
 #include "vtkObjectFactory.h"
 
+// declare the helper function.
+static char *vtkStripWhitespace(char *text);
+
 //----------------------------------------------------------------------------
 vtkAscension3DGTracker* vtkAscension3DGTracker::New()
 {
@@ -321,7 +324,7 @@ int  vtkAscension3DGTracker::ReadCurrentSettings(vtkAscension3DGConfig *config)
     }
     // update the serial number.
     std::stringstream snStream;
-    snStream << "ATC-PN" << config->m_XmtrPartInfo->partNumber 
+    snStream << "ATC-PN" << vtkStripWhitespace(config->m_XmtrPartInfo->partNumber) 
       <<"-SN" << config->m_XmtrConfig->serialNumber;
     this->SetSerialNumber(snStream.str().c_str());
   }
@@ -399,7 +402,7 @@ void vtkAscension3DGTracker::InternalUpdate()
   int errorCode, tool;
   DOUBLE_ALL_TIME_STAMP_Q_RECORD *referenceTransform = 0;
   double nextcount = 0;
-  int i;
+  
   // for the sensor status.
   bool attached, 
     saturated,
@@ -410,8 +413,7 @@ void vtkAscension3DGTracker::InternalUpdate()
     wrong_sensor,
     transmitterAttached, 
     inMotionBox,
-    badfit,
-    globalError;
+    badfit;
   
   if (!this->IsTracking) 
   {
@@ -473,15 +475,15 @@ void vtkAscension3DGTracker::InternalUpdate()
     // bit 1
     attached = !(status & NOT_ATTACHED);
     // bit 2
-    saturated = status & SATURATED;
+    saturated = status & SATURATED ? true : false;
     // bit 3 & 4
-    broken = (status & (BAD_EEPROM | HARDWARE));
+    broken = (status & (BAD_EEPROM | HARDWARE)) ? true : false;
     // bit 5
     //TODO: do something with this.
-    invalid = status & NON_EXISTENT;
+    invalid = status & NON_EXISTENT ? true : false;
     // bit 6
     //TODO: do something with this.
-    uninitialized = status & UNINITIALIZED;
+    uninitialized = status & UNINITIALIZED ? true : false;
 
 #if !defined (Ascension3DG_MedSafe)
     // TODO: clarify these.
@@ -491,13 +493,13 @@ void vtkAscension3DGTracker::InternalUpdate()
     // bit 9 - N/A for 3DG.
     // bit 10 
     //TODO: do something with this.
-    wrong_sensor = status & INVALID_DEVICE;
+    wrong_sensor = status & INVALID_DEVICE ? true : false;
     // bit 11
     transmitterAttached = !(status & NO_TRANSMITTER_ATTACHED);
     // bit 12
     inMotionBox = !(status & OUT_OF_MOTIONBOX); // not implemented with the MedSafe.  Always true.
     // bit 13
-    badfit = status & ALGORITHM_INITIALIZING;
+    badfit = status & ALGORITHM_INITIALIZING ? true : false;
 #else
     inMotionBox[sensorID] = 1;
     transmitterRunning = true;
@@ -788,10 +790,10 @@ void vtkAscension3DGTracker::InternalUpdate()
         snprintf(modelString, sizeof(modelString), "%s",this->m_TrackerCurrentConfig->m_SensorPartInfo[sensorID].modelString);
 #endif
         serNum[19] = '\0';
-        this->Tools[sensorID]->SetToolSerialNumber(serNum);
+        this->Tools[sensorID]->SetToolSerialNumber(vtkStripWhitespace(serNum));
         this->Tools[sensorID]->SetToolManufacturer("Ascension 3DG");
-        this->Tools[sensorID]->SetToolPartNumber(partNum);
-        this->Tools[sensorID]->SetToolType(modelString);
+        this->Tools[sensorID]->SetToolPartNumber(vtkStripWhitespace(partNum));
+        this->Tools[sensorID]->SetToolType(vtkStripWhitespace(modelString));
         PortEnabled[sensorID] = 1;
       }
       else 
