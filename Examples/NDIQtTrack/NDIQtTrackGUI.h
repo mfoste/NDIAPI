@@ -92,6 +92,15 @@ private:
   ndQuatTransformation m_Port02Xfrm;
   ndQuatTransformation m_Port03Xfrm;
   ndQuatTransformation m_Port04Xfrm;
+  ndQuatTransformation m_Port05Xfrm;
+  ndQuatTransformation m_Port06Xfrm;
+  ndQuatTransformation m_Port07Xfrm;
+  ndQuatTransformation m_Port08Xfrm;
+  ndQuatTransformation m_Port09Xfrm;
+  ndQuatTransformation m_Port10Xfrm;
+  ndQuatTransformation m_Port11Xfrm;
+  ndQuatTransformation m_Port12Xfrm;
+
 
 };
 #endif

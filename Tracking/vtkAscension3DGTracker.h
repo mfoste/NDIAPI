@@ -90,6 +90,7 @@ class VTK_EXPORT vtkAscension3DGTracker : public vtkTracker
   //int  SetTransmitter(short tx);
 
 protected:
+  int  InternalSetSystemAutoconfig(BYTE config);
   int  InternalSetPowerLineFrequency(double pl);
   int  InternalSetAGCMode(AGC_MODE_TYPE agc);
   int  InternalSetMeasurementRate(double rate);

@@ -1,4 +1,4 @@
-#define VTK_3DG_NTOOLS 4
+#define VTK_3DG_NTOOLS 12
 
 #ifdef Ascension3DG_MedSafe
 #include "ATC3DGm.h"

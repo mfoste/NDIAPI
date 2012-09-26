@@ -29,7 +29,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #define snprintf sprintf_s
 #endif
 
-#define USE_EULER 0
+#define USE_EULER 1
 
 #include <limits.h>
 #include <float.h>
@@ -131,10 +131,13 @@ int vtkAscension3DGTracker::Probe()
     return 1;
   }
 
-  // are there any parameters we want to set before we intialize?
-  // TODO: look into the preamble parms.
+  // set the AUTOCONFIG to the number of ports.
+  std::cout << "Setting AUTOCONFIG to " << VTK_3DG_NTOOLS << "..." << std::endl;
+  if( !this->InternalSetSystemAutoconfig(VTK_3DG_NTOOLS) )
+    return 0;
 
   // start by initializing the ascension system.
+  std::cout << "Probe - Initializing system..." << std::endl;
   if( !this->InternalInitializeBIRDSystem() )
     return 0;
 
@@ -342,7 +345,11 @@ int vtkAscension3DGTracker::InternalStartTracking()
     return nRet;
   }
 
-  std::cout << "Initializing system... ";
+  std::cout << "Setting AUTOCONFIG to " << VTK_3DG_NTOOLS << "..." << std::endl;
+  if( !this->InternalSetSystemAutoconfig(VTK_3DG_NTOOLS) )
+    return 0;
+
+  std::cout << "Initializing system... " << std::endl;
   if( !this->InternalInitializeBIRDSystem() )
     return 0;
 
@@ -855,6 +862,13 @@ void vtkAscension3DGTracker::InternalUpdate()
   int  vtkAscension3DGTracker::SaveConfiguration(char * filename)
   {
     int errorCode = SaveSystemConfiguration(filename);
+    if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
+    return 1;
+  }
+
+  int vtkAscension3DGTracker::InternalSetSystemAutoconfig( BYTE config )
+  {
+    int errorCode = SetSystemParameter(AUTOCONFIG, &config, sizeof(config));
     if(errorCode != BIRD_ERROR_SUCCESS) { errorHandler(errorCode); return 0; }
     return 1;
   }

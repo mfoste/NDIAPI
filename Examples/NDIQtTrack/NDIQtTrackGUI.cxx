@@ -192,6 +192,26 @@ void NDIQtTrackGUI::OnTrackerStarted()
       // update the tool info - port 7/D.
       this->m_GUI->port07DataLabel->setText( toolInfo );
       break;
+    case 7:
+      // update the tool info - port 8/E.
+      this->m_GUI->port08DataLabel->setText( toolInfo );
+      break;
+    case 8:
+      // update the tool info - port 9/F.
+      this->m_GUI->port09DataLabel->setText( toolInfo );
+      break;
+    case 9:
+      // update the tool info - port 10/G.
+      this->m_GUI->port10DataLabel->setText( toolInfo );
+      break;
+    case 10:
+      // update the tool info - port 11/H.
+      this->m_GUI->port11DataLabel->setText( toolInfo );
+      break;
+    case 11:
+      // update the tool info - port 12/I.
+      this->m_GUI->port12DataLabel->setText( toolInfo );
+      break;
     default:
       std::cout << "Port " << tool << " exists but will not be updated in this app." << std::endl;
       break;
@@ -222,6 +242,46 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status)
     this->m_GUI->port04XfrmLabel->setText(status);
     ndSetXfrmMissing(&this->m_Port04Xfrm);
     break;
+  case 4:
+    // Port 5
+    this->m_GUI->port05XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port05Xfrm);
+    break;
+  case 5:
+    // Port 6
+    this->m_GUI->port06XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port06Xfrm);
+    break;
+  case 6:
+    // Port 7
+    this->m_GUI->port07XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port07Xfrm);
+    break;
+  case 7:
+    // Port 8
+    this->m_GUI->port08XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port08Xfrm);
+    break;
+  case 8:
+    // Port 9
+    this->m_GUI->port09XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port09Xfrm);
+    break;
+  case 9:
+    // Port 10
+    this->m_GUI->port10XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port10Xfrm);
+    break;
+  case 10:
+    // Port 11
+    this->m_GUI->port11XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port11Xfrm);
+    break;
+  case 11:
+    // Port 12
+    this->m_GUI->port12XfrmLabel->setText(status);
+    ndSetXfrmMissing(&this->m_Port12Xfrm);
+    break;
   default:
     //do nothing for now.
     break;
@@ -250,6 +310,46 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, ndQuatTransformation xfrm)
     // Port 4
     this->m_GUI->port04XfrmLabel->setText(this->GetXfrmString(xfrm));
     ndCopyTransform(&xfrm, &this->m_Port04Xfrm);
+    break;
+  case 4:
+    // Port 5
+    this->m_GUI->port05XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port05Xfrm);
+    break;
+  case 5:
+    // Port 6
+    this->m_GUI->port06XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port06Xfrm);
+    break;
+  case 6:
+    // Port 7
+    this->m_GUI->port07XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port07Xfrm);
+    break;
+  case 7:
+    // Port 8
+    this->m_GUI->port08XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port08Xfrm);
+    break;
+  case 8:
+    // Port 9
+    this->m_GUI->port09XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port09Xfrm);
+    break;
+  case 9:
+    // Port 10
+    this->m_GUI->port10XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port10Xfrm);
+    break;
+  case 10:
+    // Port 11
+    this->m_GUI->port11XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port11Xfrm);
+    break;
+  case 11:
+    // Port 12
+    this->m_GUI->port12XfrmLabel->setText(this->GetXfrmString(xfrm));
+    ndCopyTransform(&xfrm, &this->m_Port12Xfrm);
     break;
   default:
     //do nothing for now.
@@ -287,6 +387,26 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
   case 6:
     // Port 7
     this->m_GUI->port07EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 7:
+    // Port 8
+    this->m_GUI->port08EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 8:
+    // Port 9
+    this->m_GUI->port09EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 9:
+    // Port 10
+    this->m_GUI->port10EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 10:
+    // Port 11
+    this->m_GUI->port11EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+    break;
+  case 11:
+    // Port 12
+    this->m_GUI->port12EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     break;
   default:
     //do nothing for now.
@@ -340,6 +460,26 @@ void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
   case 6:
     // Port 7
     this->m_GUI->port07QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  case 7:
+    // Port 8
+    this->m_GUI->port08QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  case 8:
+    // Port 9
+    this->m_GUI->port09QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  case 9:
+    // Port 10
+    this->m_GUI->port10QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  case 10:
+    // Port 11
+    this->m_GUI->port11QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
+    break;
+  case 11:
+    // Port 12
+    this->m_GUI->port12QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
     break;
   default:
     //do nothing for now.
