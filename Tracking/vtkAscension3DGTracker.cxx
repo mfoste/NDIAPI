@@ -29,7 +29,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #define snprintf sprintf_s
 #endif
 
-#define USE_EULER 1
+#define USE_EULER 0
 
 #include <limits.h>
 #include <float.h>
@@ -691,28 +691,27 @@ void vtkAscension3DGTracker::InternalUpdate()
   void vtkAscension3DGTracker::TransformToMatrixd(const DOUBLE_ALL_TIME_STAMP_Q_RECORD trans, double matrix[16])
   {
 #if USE_EULER
-    double sinRoll, sinPitch, sinYaw, cosRoll, cosPitch, cosYaw;
+    double sinRoll, sinElevation, sinAzimuth, cosRoll, cosElevation, cosAzimuth;
 
     sinRoll  = sin(vtkMath::RadiansFromDegrees(trans.r));
-    sinPitch = sin(vtkMath::RadiansFromDegrees(trans.e));
-    sinYaw   = sin(vtkMath::RadiansFromDegrees(trans.a));
+    sinElevation = sin(vtkMath::RadiansFromDegrees(trans.e));
+    sinAzimuth   = sin(vtkMath::RadiansFromDegrees(trans.a));
     cosRoll  = cos(vtkMath::RadiansFromDegrees(trans.r));
-    cosPitch = cos(vtkMath::RadiansFromDegrees(trans.e));
-    cosYaw   = cos(vtkMath::RadiansFromDegrees(trans.a));
+    cosElevation = cos(vtkMath::RadiansFromDegrees(trans.e));
+    cosAzimuth   = cos(vtkMath::RadiansFromDegrees(trans.a));
 
-
-    // Fill in the matrix using the description from pg. 128 of Ascension guide.
-    matrix[0]  = cosPitch * cosYaw;  // rotMatrix[0][0]
-    matrix[1]  = cosPitch * sinYaw; // rotMatrix[0][1]
-    matrix[2]  = - sinPitch; // rotMatrix[0][2]
+    // Fill in the matrix using the description from pg. 152 of Ascension trakStar 2 guide.
+    matrix[0]  = cosElevation * cosAzimuth;  // rotMatrix[0][0]
+    matrix[1]  = cosElevation * sinAzimuth; // rotMatrix[0][1]
+    matrix[2]  = - sinElevation; // rotMatrix[0][2]
     matrix[3]  = 0; 
-    matrix[4]  = sinRoll * sinPitch * cosYaw - cosRoll * sinYaw; // rotMatrix[1][0]
-    matrix[5]  = sinRoll * sinPitch * sinYaw + cosRoll * cosYaw; // rotMatrix[1][1]
-    matrix[6]  = sinRoll * cosPitch; // rotMatrix[1][2]
+    matrix[4]  = sinRoll * sinElevation * cosAzimuth - cosRoll * sinAzimuth; // rotMatrix[1][0]
+    matrix[5]  = sinRoll * sinElevation * sinAzimuth + cosRoll * cosAzimuth; // rotMatrix[1][1]
+    matrix[6]  = sinRoll * cosElevation; // rotMatrix[1][2]
     matrix[7]  = 0; 
-    matrix[8]  = cosRoll * sinPitch * cosYaw + sinRoll * sinYaw; // rotMatrix[2][0] 
-    matrix[9]  = cosRoll * sinPitch * sinYaw - sinRoll * cosYaw; // rotMatrix[2][1]
-    matrix[10] = cosRoll * cosPitch; // rotMatrix[2][2]
+    matrix[8]  = cosRoll * sinElevation * cosAzimuth + sinRoll * sinAzimuth; // rotMatrix[2][0] 
+    matrix[9]  = cosRoll * sinElevation * sinAzimuth - sinRoll * cosAzimuth; // rotMatrix[2][1]
+    matrix[10] = cosRoll * cosElevation; // rotMatrix[2][2]
     matrix[11] = 0;
     matrix[12] = trans.x;
     matrix[13] = trans.y;
@@ -721,18 +720,13 @@ void vtkAscension3DGTracker::InternalUpdate()
 #else
     double ww, xx, yy, zz, wx, wy, wz, xy, xz, yz, ss, rr, f;
 
-    // Note: There is a bug in the Ascension quat code.  The quaternion returned is the 
-    //       of the orientation returned via euler angles.  i.e. the vector portion of 
-    //       the quat is multiplied by -1.  We fix this here:
-    double q[4];
-    q[0] = trans.q[0];
-    q[1] = trans.q[1] * -1;
-    q[2] = trans.q[2] * -1;
-    q[3] = trans.q[3] * -1;
-
-
+    // Note: The Ascension orientation returned is body-fixed (opposite of NDI).  
+    //       The quaternion returned is the inverse of what would be expected from NDI.
+    //       You may want to fix that in your code or by using the code below.
+    
+#if 1
     // Determine some calculations done more than once.
-    /*ww = trans.q[0] * trans.q[0];
+    ww = trans.q[0] * trans.q[0];
     xx = trans.q[1] * trans.q[1];
     yy = trans.q[2] * trans.q[2];
     zz = trans.q[3] * trans.q[3];
@@ -741,9 +735,16 @@ void vtkAscension3DGTracker::InternalUpdate()
     wz = trans.q[0] * trans.q[3];
     xy = trans.q[1] * trans.q[2];
     xz = trans.q[1] * trans.q[3];
-    yz = trans.q[2] * trans.q[3];*/
+    yz = trans.q[2] * trans.q[3];
 
-    ww = q[0] * q[0];
+#else
+    //double q[4];
+    //q[0] = trans.q[0];
+    //q[1] = trans.q[1] * -1;
+    //q[2] = trans.q[2] * -1;
+    //q[3] = trans.q[3] * -1;
+
+    /*ww = q[0] * q[0];
     xx = q[1] * q[1];
     yy = q[2] * q[2];
     zz = q[3] * q[3];
@@ -752,7 +753,8 @@ void vtkAscension3DGTracker::InternalUpdate()
     wz = q[0] * q[3];
     xy = q[1] * q[2];
     xz = q[1] * q[3];
-    yz = q[2] * q[3];
+    yz = q[2] * q[3];*/
+#endif
 
     rr = xx + yy + zz;
     ss = (ww - rr)*0.5;

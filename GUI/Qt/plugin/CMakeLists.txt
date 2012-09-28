@@ -76,4 +76,4 @@ target_link_libraries( vtkTrackerWidgetPlugin
 #${QT_QTDESIGNERCOMPONENTS_LIBRARY}
 
 install( TARGETS vtkTrackerWidgetPlugin DESTINATION ${QT_PLUGINS_DIR}/designer CONFIGURATIONS Release )
-install( TARGETS vtkTrackerWidgetPlugin DESTINATION bin CONFIGURATIONS RelWithDebInfo MinSizeRel Debug  )
+install( TARGETS vtkTrackerWidgetPlugin DESTINATION bin CONFIGURATIONS Release RelWithDebInfo MinSizeRel Debug  )
