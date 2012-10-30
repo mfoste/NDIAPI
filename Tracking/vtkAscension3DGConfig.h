@@ -1,5 +1,7 @@
 #define VTK_3DG_NTOOLS 12
 
+#include "vtkObject.h"
+
 #ifdef Ascension3DG_MedSafe
 #include "ATC3DGm.h"
 #else /* Ascension3DG_MedSafe */
@@ -12,12 +14,16 @@ typedef struct ATCPartInfoStruct
   char partNumber[16];
 } ATCPartInfo;
 
-class vtkAscension3DGConfig
+class VTK_EXPORT vtkAscension3DGConfig : public vtkObject
 {
 public:
+  static vtkAscension3DGConfig *New();
+  vtkTypeMacro(vtkAscension3DGConfig,vtkObject);
+  //TODO:void PrintSelf(ostream& os, vtkIndent indent);
+protected:
   vtkAscension3DGConfig();
   ~vtkAscension3DGConfig();
-
+public:
   void Copy(vtkAscension3DGConfig *src);
 
   // System configuration - no part numbers or model strings.

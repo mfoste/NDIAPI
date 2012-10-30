@@ -71,7 +71,7 @@ vtkAscension3DGTracker::vtkAscension3DGTracker()
   this->IsTracking = 0;
   this->SetNumberOfTools(VTK_3DG_NTOOLS);
 
-  this->m_TrackerCurrentConfig = new vtkAscension3DGConfig();
+  this->m_TrackerCurrentConfig = vtkAscension3DGConfig::New();
 
   this->m_bUseDefaultSystemSettings = true;
   this->m_bUseDefaultSensorSettings = true;

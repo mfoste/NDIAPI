@@ -1,4 +1,19 @@
+#include "vtkObject.h"
+#include "vtkObjectFactory.h"
 #include "vtkAscension3DGConfig.h"
+
+
+vtkAscension3DGConfig* vtkAscension3DGConfig::New()
+{
+  // First try to create the object from the vtkObjectFactory
+  vtkObject* ret = vtkObjectFactory::CreateInstance("vtkAscension3DGConfig");
+  if(ret)
+  {
+    return (vtkAscension3DGConfig*)ret;
+  }
+  // If the factory was unable to create the object, then create it here.
+  return new vtkAscension3DGConfig;
+}
 
 vtkAscension3DGConfig::vtkAscension3DGConfig()
 {
