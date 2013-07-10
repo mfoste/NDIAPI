@@ -291,12 +291,12 @@ void ndiSetErrorCallback(ndicapi *pol, NDIErrorCallback callback,
   to executing the IRCHK() command.  Diagnostic mode is only useful on
   the POLARIS
 */
-#define ndiDSTART(p) ndiCommand((p),"DSTART:")
+/*#define ndiDSTART(p) ndiCommand((p),"DSTART:") OBSOLETE */
 
 /*!
   Take the device out of diagnostic mode.
 */
-#define ndiDSTOP(p) ndiCommand((p),"DSTOP:")
+/* #define ndiDSTOP(p) ndiCommand((p),"DSTOP:") OBSOLETE */
 
 /*!
   Initialize the device.  The device must be
@@ -1573,8 +1573,8 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 #define NDI_PINIT_FAIL      0x13  /*!<\brief Failure to initialize tool in port */
 #define NDI_CAMERA          0x14  /*!<\brief Invalid camera parameters */
 #define NDI_INIT_FAIL       0x15  /*!<\brief Failure to initialize */
-#define NDI_DSTART_FAIL     0x16  /*!<\brief Failure to start diagnostic mode */
-#define NDI_DSTOP_FAIL      0x17  /*!<\brief Failure to stop diagnostic mode */
+#define NDI_DSTART_FAIL     0x16  /*!<\brief Failure to start diagnostic mode - OBSOLETE */
+#define NDI_DSTOP_FAIL      0x17  /*!<\brief Failure to stop diagnostic mode - OBSOLETE */
 #define NDI_IRCHK_FAIL      0x18  /*!<\brief Failure to determine environmental IR */
 #define NDI_FIRMWARE        0x19  /*!<\brief Failure to read firmware version */
 #define NDI_INTERNAL        0x1a  /*!<\brief Internal device error */
