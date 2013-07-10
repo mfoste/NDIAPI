@@ -100,6 +100,10 @@ public:
   vtkGetStringMacro(Version);
 
   // Description:
+  // Get the API revision.
+  vtkGetStringMacro(APIRevision);
+
+  // Description:
   // Set which serial port to use, 1 through 4.
   vtkSetMacro(SerialPort, int);
   vtkGetMacro(SerialPort, int);
@@ -159,6 +163,11 @@ protected:
   vtkSetStringMacro(Version);
 
   // Description:
+  // Read in the API revision and set it.
+  vtkSetStringMacro(APIRevision);
+  void ReadAPIRevision();
+
+  // Description:
   // Parse the serial number.
   void ParseSerialNumber();
   void ParseFGSerialNumber(std::string scuSerialNo);
@@ -209,6 +218,7 @@ protected:
 
   ndicapi *Device;
   char *Version;
+  char *APIRevision;
   char *SerialDevice;
 
   vtkMatrix4x4 *SendMatrix;

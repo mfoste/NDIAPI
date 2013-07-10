@@ -102,6 +102,9 @@ struct ndicapi {
   void (*error_callback)(int code, char *description, void *data);
   void *error_callback_data;              /* user data for callback */
 
+  /* APIREV command reply data */
+  char apirev_reply[7];
+
   /* PSTAT command reply data */
 
   char pstat_basic[3][32];                /* basic pstat info */
@@ -350,6 +353,13 @@ void *ndiHexDecode(void *data, const char *cp, int n)
   return data;
 }
 
+/***********************************************************************
+                             API Specific Calls
+***********************************************************************/
+
+/*---------------------------------------------------------------------*/
+
+
 /*---------------------------------------------------------------------*/
 int ndiPVWRFromFile(ndicapi *pol, int port, char *filename)
 {
@@ -392,58 +402,83 @@ int ndiGetError(ndicapi *pol)
 /*---------------------------------------------------------------------*/
 char *ndiErrorString(int errnum)
 {
-  static char *textarray_low[] = /* values from 0x01 to 0x21 */ 
+  static char *textarray_low[] = /* values from 0x01 to 0x42 */ 
   {
-    "No error",
-    "Invalid command",
-    "Command too long",
-    "Command too short",
-    "Invalid CRC calculated for command",
-    "Time-out on command execution",
-    "Unable to set up new communication parameters",
-    "Incorrect number of command parameters",
-    "Invalid port handle selected",
-    "Invalid tracking priority selected (must be S, D or B)",
-    "Invalid LED selected",
-    "Invalid LED state selected (must be B, F or S)",
-    "Command is invalid while in the current mode",
-    "No tool assigned to the selected port handle",
-    "Selected port handle not initialized",
-    "Selected port handle not enabled",
-    "System not initialized",
-    "Unable to stop tracking",
-    "Unable to start tracking",
-    "Unable to initialize Tool-in-Port",
-    "Invalid Position Sensor or Field Generator characterization parameters",
-    "Unable to initialize the Measurement System",
-    "Unable to start diagnostic mode",
-    "Unable to stop diagnostic mode",
-    "Unable to determine environmental infrared or magnetic interference",
-    "Unable to read device's firmware version information",
-    "Internal Measurement System error",
-    "Unable to initialize for environmental infrared diagnostics",
-    "Unable to set marker firing signature",
-    "Unable to search for SROM IDs",
-    "Unable to read SROM data",
-    "Unable to write SROM data",
-    "Unable to select SROM",
-    "Unable to perform tool current test",
-    "Unable to find camera parameters from the selected volume for the"
-    " wavelength of a tool enabled for tracking",
-    "Command parameter out of range",
-    "Unable to select parameters by volume",
-    "Unable to determine Measurement System supported features list",
-    "Reserved - Unrecognized Error 0x26",
-    "Reserved - Unrecognized Error 0x27",
-    "SCU hardware has changed state; a card has been removed or added",
-    "Main processor firmware corrupt",
-    "No memory available for dynamic allocation (heap is full)",
-    "Requested handle has not been allocated",
-    "Requested handle has become unoccupied",
-    "All handles have been allocated",
-    "Invalid port description",
-    "Requested port already assigned to a port handle",
-    "Invalid input or output state",    
+    "No error", // 0x00
+    "Invalid command", // 0x01
+    "Command too long", // 0x02
+    "Command too short", // 0x03
+    "Invalid CRC calculated for command", // 0x04
+    "Time-out on command execution", // 0x05
+    "Unable to set up new communication parameters, one or more parameter out of range", // 0x06
+    "Incorrect number of command parameters", // 0x07
+    "Invalid port handle selected", // 0x08
+    "Invalid tracking priority selected (must be S, D or B)", // 0x09
+    "Invalid LED selected", // 0x0A
+    "Invalid LED state selected (must be B, F or S)", // 0x0B
+    "Command is invalid while in the current mode", // 0x0C
+    "No tool assigned to the selected port handle", // 0x0D
+    "Selected port handle not initialized", // 0x0E
+    "Selected port handle not enabled", // 0x0F
+    "System not initialized", // 0x10
+    "Unable to stop tracking", // 0x11
+    "Unable to start tracking", // 0x12
+    "Hardware Error: unable to read the SROM device", // 0x13
+    "Invalid Position Sensor or Field Generator characterization parameters", // 0x14
+    "Unable to initialize the Measurement System", // 0x15
+    "Unable to start diagnostic mode", // 0x16
+    "Unable to stop diagnostic mode", // 0x17
+    "Reserved - Unrecognized Error 0x18", // 0x18
+    "Unable to read device's firmware version information", // 0x19
+    "Internal Measurement System error: too much IR or systems processing error", // 0x1A
+    "Reserved - Unrecognized Error 0x1B", // 0x1B
+    "Unable to set marker firing signature - Polaris Only", // 0x1C
+    "Unable to search for SROM IDs", // 0x1D
+    "Unable to read SROM data", // 0x1E
+    "Unable to write SROM data", // 0x1F
+    "Unable to select SROM", // 0x20
+    "Unable to perform tool current test - Polaris Only", // 0x21
+    "Unable to enable tools for the selected volume parameters, e.g. wrong wavelength"
+    " enabled for tracking", // 0x22
+    "Command parameter out of range",// 0x23
+    "Unable to select parameters by volume", // 0x24
+    "Unable to determine Measurement System supported features list", // 0x25
+    "Reserved - Unrecognized Error 0x26", // 0x26
+    "Reserved - Unrecognized Error 0x27", // 0x27
+    "Too many tools are enabled - Polaris Only", // 0x28
+    "Main processor firmware corrupt - Aurora Only", // 0x29
+    "No memory available for dynamic allocation (heap is full)", // 0x2A
+    "Requested handle has not been allocated", // 0x2B
+    "Requested handle has become unoccupied", // 0x2C
+    "All handles have been allocated", // 0x2D
+    "Incompatible firware versions", // 0x2E
+    "Incompatible port description - Polaris only", // 0x2F
+    "Requested port already assigned to a port handle - Polaris Only", // 0x30
+    "Invalid input or output state", // 0x31
+    "Invalid operation for device associated with the specified port handle", // 0x32
+    "Feature not available", // 0x33
+    "User parameter does not exist", // 0x34
+    "Invalid value type (e.g. string instead of integer)", // 0x35
+    "User parameter value set is  out of valid range", // 0x36
+    "User parameter array index is out of valid range", // 0x37
+    "User parameter size is incorrect", // 0x38
+    "Permission denied; file or user parameter is read-only", // 0x39
+    "Reserved - Unrecognized Error 0x3A", // 0x3A
+    "File not found", // 0x3B
+    "Error writing to file", // 0x3C
+    "Reserved - Unrecognized Error 0x3D", // 0x3D
+    "Reserved - Unrecognized Error 0x3E", // 0x3E
+    "Reserved - Unrecognized Error 0x3F", // 0x3F
+    "Tool definition file error, bad CRC or file format", // 0x40
+    "Tool characteristics not supported, e.g. num markers or faces", // 0x41
+    "Device not present.", // 0x42
+  };
+
+  static char *textarray_mid[] = /* values from 0xC2 to C4 */
+  {
+    "Command not supported by proxy - Aurora only", // 0xC2
+    "Offline fit not possible, e.g. no or imcompatible DLL - Aurora only", // 0xC3
+    "Incompatible replies from two SCUs, eg. different firmware revisions - Aurora only", // 0xC4
   };
 
   static char *textarray_high[] = /* values from 0xf6 to 0xf4 */
@@ -451,9 +486,9 @@ char *ndiErrorString(int errnum)
     "Too much environmental infrared",
     "Unrecognized error code",
     "Unrecognized error code",
-    "Unable to read Flash EPROM",
-    "Unable to write Flash EPROM",
-    "Unable to erase Flash EPROM"
+    "Unable to read Flash EPROM", // 0xF6
+    "Unable to write Flash EPROM", // 0xF5
+    "Unable to erase Flash EPROM" // 0xF4
   };
 
   static char *textarray_api[] = /* values specific to the API */
@@ -468,7 +503,7 @@ char *ndiErrorString(int errnum)
     "Measurement System not found on specified port"
   };
 
-  if (errnum >= 0x00 && errnum <= 0x31) {
+  if (errnum >= 0x00 && errnum <= 0x42) {
     return textarray_low[errnum];
   }
   else if (errnum <= 0xf6 && errnum >= 0xf1) {
@@ -793,6 +828,7 @@ static const int oddparity[16] =    { 0, 1, 1, 0, 1, 0, 0, 1,
   crp -> the reply from the Measurement System, but with the CRC hacked off 
 */
 
+static void ndi_APIREV_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_COMM_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PHINF_helper(ndicapi *pol, const char *cp, const char *crp);
 static void ndi_PHSR_helper(ndicapi *pol, const char *cp, const char *crp);
@@ -1038,8 +1074,10 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
 
   /*----------------------------------------*/
   /* special behavior for specific commands */
-
-  if (cp[0] == 'T' && cp[1] == 'X' && nc == 2) { /* the TX command */
+  if (cp[0] == 'A' && nc == 6 && strncmp(cp, "APIREV", nc) == 0) {
+    ndi_APIREV_helper(pol, cp, crp);
+  }
+  else if (cp[0] == 'T' && cp[1] == 'X' && nc == 2) { /* the TX command */
     ndi_TX_helper(pol, cp, crp);
   }
   else if (cp[0] == 'C' && nc == 4 && strncmp(cp, "COMM", nc) == 0) {
@@ -1072,6 +1110,21 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
 
   /* return the Measurement System reply, but with the CRC hacked off */
   return crp;
+}
+
+/*---------------------------------------------------------------------*/
+int ndiGetAPIRevision(ndicapi *pol, char revision[9])
+{
+  char *dp;
+  int i;
+
+  dp = pol->apirev_reply;
+
+  for (i=0; i<9; i++) {
+    revision[i] = *dp++;
+  }
+
+  return NDI_OKAY;
 }
 
 /*---------------------------------------------------------------------*/
@@ -1797,6 +1850,30 @@ int ndiGetIRCHKSourceXY(ndicapi *pol, int side, int i, double xy[2])
   xy[1] = ndiSignedToLong(&dp[3], 3)*0.01;
 
   return NDI_OKAY;
+}
+
+/**********************************************************************
+                         API HELPER FUNCTIONS
+**********************************************************************/
+
+/*---------------------------------------------------------------------
+Copy all the APIREV reply info into the ndicapy structure 
+
+This function is called every time a APIREV command is sent to the
+  Measurement System.
+
+  This information can be later extracted through one of the ndiGetAPIRevision()
+  functions.
+*/
+static void ndi_APIREV_helper(ndicapi *pol, const char *cp, const char *crp)
+{
+  char *dp;
+  int j;
+
+  dp = pol->apirev_reply;
+  for (j = 0; j < 9; j++) {
+    *dp++ = *crp++;
+  }
 }
 
 /*---------------------------------------------------------------------

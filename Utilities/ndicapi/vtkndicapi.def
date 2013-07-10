@@ -14,7 +14,8 @@ EXPORTS ndiDeviceName
         ndiGetThreadMode
         ndiGetErrorCallback
         ndiGetErrorCallbackData
-	ndiGetPHRQHandle
+        ndiGetAPIRevision
+	      ndiGetPHRQHandle
         ndiGetPHSRNumberOfHandles
         ndiGetPHSRHandle
         ndiGetPHSRInformation
@@ -41,20 +42,20 @@ EXPORTS ndiDeviceName
         ndiGetPSTATPartNumber
         ndiGetPSTATAccessories
         ndiGetPSTATMarkerType
-		ndiGetSFLISTNumberVolumes
-		ndiGetSFLISTVolumeParameters
-		ndiGetSFLISTActivePortsAvailable
-		ndiGetSFLISTPassivePortsAvailable
-		ndiGetSFLISTMultipleVolumesSupported
-		ndiGetSFLISTToolInPortAvailable
-		ndiGetSFLISTActiveWirelessPortsAvailable
-		ndiGetSFLISTMagneticPortsAvailable
-		ndiGetSFLISTMagneticFGAvailable
-		ndiGetSFLISTNumberActivePorts
-		ndiGetSFLISTNumberWirelessPorts
-		ndiGetSFLISTNumberTIPPorts
-		ndiGetSFLISTNumberActiveWirelessPorts
-		ndiGetSFLISTNumberMagneticPorts
+		    ndiGetSFLISTNumberVolumes
+		    ndiGetSFLISTVolumeParameters
+		    ndiGetSFLISTActivePortsAvailable
+		    ndiGetSFLISTPassivePortsAvailable
+		    ndiGetSFLISTMultipleVolumesSupported
+		    ndiGetSFLISTToolInPortAvailable
+		    ndiGetSFLISTActiveWirelessPortsAvailable
+		    ndiGetSFLISTMagneticPortsAvailable
+		    ndiGetSFLISTMagneticFGAvailable
+		    ndiGetSFLISTNumberActivePorts
+		    ndiGetSFLISTNumberWirelessPorts
+		    ndiGetSFLISTNumberTIPPorts
+		    ndiGetSFLISTNumberActiveWirelessPorts
+		    ndiGetSFLISTNumberMagneticPorts
         ndiGetSSTATControl
         ndiGetSSTATSensors
         ndiGetSSTATTIU

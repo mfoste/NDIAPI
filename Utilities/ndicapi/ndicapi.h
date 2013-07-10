@@ -255,6 +255,11 @@ void ndiSetErrorCallback(ndicapi *pol, NDIErrorCallback callback,
 #define ndi3D(p,ph,mode) ndiCommand((p),"3D:%02X%d",(ph),(mode))
 
 /*!
+  Get the API revision of the tracking system.
+*/
+#define ndiAPIREV(p) ndiCommand((p),"APIREV:")
+
+/*!
   Cause the device to beep.
 
   \param n   the number of times to beep, an integer between 1 and 9
@@ -703,6 +708,11 @@ NDIErrorCallback ndiGetErrorCallback(ndicapi *pol);
   Get the current error callback data, or NULL if there is none.
 */
 void *ndiGetErrorCallbackData(ndicapi *pol);
+
+/*! \ingroup GetMethods
+  Get the API revision string.
+*/
+int ndiGetAPIRevision(ndicapi *pol, char revision[9]);
 
 /*! \ingroup GetMethods
   Get the port handle returned by a PHRQ command.

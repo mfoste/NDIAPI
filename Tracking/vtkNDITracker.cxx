@@ -82,6 +82,7 @@ vtkNDITracker::vtkNDITracker()
 {
   this->Device = 0;
   this->Version = NULL;
+  this->APIRevision = NULL;
   this->CommandReply[0] = '\0';
   this->SendMatrix = vtkMatrix4x4::New();
   this->IsDeviceTracking = 0;
@@ -401,6 +402,17 @@ void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
   }
   serialNo = strStream.str();
   this->SetSerialNumber(serialNo.c_str());
+}
+
+//----------------------------------------------------------------------------
+void vtkNDITracker::ReadAPIRevision()
+{
+  char api_rev[10];
+
+  ndiAPIREV(this->Device);
+  ndiGetAPIRevision(this->Device, api_rev);
+  api_rev[9] = '\0';
+  this->SetAPIRevision(api_rev);
 }
 
 //----------------------------------------------------------------------------
@@ -811,6 +823,8 @@ int vtkNDITracker::InternalStartTracking()
   this->SetVersion(ndiVER(this->Device,0));
   // update the serial number.
   this->ParseSerialNumber();
+  // read the API revision.
+  this->ReadAPIRevision();
 
   for (tool = 0; tool < VTK_NDI_NTOOLS; tool++)
   {
