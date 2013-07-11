@@ -217,41 +217,9 @@ int vtkNDITracker::Probe()
   // if probe was okay, then send VER:0 to identify device
   if (errnum == NDI_OKAY)
   {
-    this->Device = ndiOpen(devicename);
-    if (this->Device)
+    if( this->InternalInitSystem() )
     {
-      // todo: move this to ndicapi
-      this->SetVersion(ndiVER(this->Device,0));
-      // get the serial number.
-      this->ParseSerialNumber();
-
-      // call sflist, get features.
-      ndiSFLIST(this->Device, NDI_FEATURES_SUMMARY);
-      errnum = ndiGetError(this->Device);
-      if (errnum) 
-      {
-        vtkErrorMacro(<< ndiErrorString(errnum));
-        ndiClose(this->Device);
-        this->Device = 0;
-        return 0;
-      }
-      // call sflist, get volume info.
-      ndiSFLIST(this->Device, NDI_VOLUME_INFO);
-      errnum = ndiGetError(this->Device);
-      if (errnum) 
-      {
-        vtkErrorMacro(<< ndiErrorString(errnum));
-        ndiClose(this->Device);
-        this->Device = 0;
-        return 0;
-      }
-
-      // todo: update the volume info here.
-      this->NumTrackingVolumes = ndiGetSFLISTNumberVolumes(this->Device);
-      for(int i=0; i < this->NumTrackingVolumes; i++)
-      {
-        ndiGetSFLISTVolumeParameters(this->Device, i, &this->TrackingVolumeShapeTypes[i], this->TrackingVolumeParameters[i]);
-      }
+      this->InternalGetSystemInfo();      
 
       // close the device.  we'll open it again later.
       ndiClose(this->Device);
@@ -717,16 +685,11 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
 
 	return NULL;
 }
-//----------------------------------------------------------------------------
-int vtkNDITracker::InternalStartTracking()
-{
-  int errnum, tool;
-  int baud;
 
-  if (this->IsDeviceTracking)
-  {
-    return 1;
-  }
+//----------------------------------------------------------------------------
+int vtkNDITracker::InternalInitSystem()
+{
+  int errnum, baud;
 
   switch (this->BaudRate)
   {
@@ -819,12 +782,60 @@ int vtkNDITracker::InternalStartTracking()
 	  }
   }
 
+  // all good, return true.
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkNDITracker::InternalGetSystemInfo()
+{
+  int errnum, tool;
+
   // get information about the device
   this->SetVersion(ndiVER(this->Device,0));
   // update the serial number.
   this->ParseSerialNumber();
   // read the API revision.
   this->ReadAPIRevision();
+
+  // call sflist, get features.
+  ndiSFLIST(this->Device, NDI_FEATURES_SUMMARY);
+  errnum = ndiGetError(this->Device);
+  if (errnum) 
+  {
+    vtkErrorMacro(<< ndiErrorString(errnum));
+    ndiClose(this->Device);
+    this->Device = 0;
+    return 0;
+  }
+  // call sflist, get volume info.
+  ndiSFLIST(this->Device, NDI_VOLUME_INFO);
+  errnum = ndiGetError(this->Device);
+  if (errnum) 
+  {
+    vtkErrorMacro(<< ndiErrorString(errnum));
+    ndiClose(this->Device);
+    this->Device = 0;
+    return 0;
+  }
+
+  // todo: update the volume info here.
+  this->NumTrackingVolumes = ndiGetSFLISTNumberVolumes(this->Device);
+  for(int i=0; i < this->NumTrackingVolumes; i++)
+  {
+    ndiGetSFLISTVolumeParameters(this->Device, i, &this->TrackingVolumeShapeTypes[i], this->TrackingVolumeParameters[i]);
+  }
+
+  this->InternalInitTools();
+
+  // all good, return true.
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkNDITracker::InternalInitTools()
+{
+  int tool; 
 
   for (tool = 0; tool < VTK_NDI_NTOOLS; tool++)
   {
@@ -835,6 +846,29 @@ int vtkNDITracker::InternalStartTracking()
     }
   }
   this->EnableToolPorts();
+
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkNDITracker::InternalStartTracking()
+{
+  int errnum, tool;
+
+  if (this->IsDeviceTracking)
+  {
+    return 1;
+  }
+
+  if( !this->InternalInitSystem() )
+  {
+    return 0;
+  }
+
+  if( !this->InternalInitTools())
+  { 
+      return 0;
+  }
 
   // if Polaris Spectra crank up to 60Hz, no point in using the legacy default of 20Hz.
   if( this->NDISystemType & NDI_POLARIS_SPECTRA_SYSTEM )
@@ -861,7 +895,6 @@ int vtkNDITracker::InternalStartTracking()
     this->Device = 0;
     return 0;
   }
-
 
   ndiCommand(this->Device,"TSTART:");
 

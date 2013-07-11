@@ -173,6 +173,19 @@ protected:
   void ParseFGSerialNumber(std::string scuSerialNo);
 
   // Description:
+  // Find the optimal baud rate and Init the system.
+  int InternalInitSystem();
+
+  // Description:
+  // Get all the info for the tracking system before we start tracking.
+  // This gets called during Probe() and InternalStartTracking()
+  int InternalGetSystemInfo();
+
+  // Description:
+  // Initialize the tools, load the Virtual ROMs and Enable the tools.
+  int InternalInitTools();
+
+  // Description:
   // Start the tracking system.  The tracking system is brought from
   // its ground state into full tracking mode.  The device will
   // only be reset if communication cannot be established without
