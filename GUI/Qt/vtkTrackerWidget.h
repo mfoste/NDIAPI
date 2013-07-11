@@ -68,6 +68,7 @@ public:
 
   inline vtkTracker* getTracker() {return m_Tracker;}
   int getTrackerSystemType();
+  void UpdateToolInfo(int port);
   void UpdateToolTransform(int port, QString status);
   void UpdateToolTransform(int port, ndQuatTransformation xfrm);
   void UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality);
@@ -89,6 +90,7 @@ signals:
   void TrackerConfigured(QString SerialNumber);
   void TrackerStarted();
   void TrackerStopped();
+  void ToolInfoUpdated(int port);
   void ToolTransformUpdated(int port, QString status);
   void ToolTransformUpdated(int port, ndQuatTransformation xfrm);
   void ToolEffectiveFrequencyUpdated(int port, double freq);

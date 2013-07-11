@@ -123,6 +123,7 @@ public:
   int IsSwitch2On() {return ((this->Flags & TR_SWITCH2_IS_ON) != 0); };
   int IsSwitch3On() {return ((this->Flags & TR_SWITCH3_IS_ON) != 0); };
   int IsBadFit()    {return ((this->Flags & TR_BAD_FIT) != 0); };
+  int IsToolInfoUpdated() { return this->ToolInfoUpdated;};
 
   // Description:
   // Get the timestamp (in seconds since 1970) for the last update to
@@ -171,6 +172,7 @@ public:
   vtkSetStringMacro(ToolManufacturer);
   vtkSetStringMacro(ToolPartNumber);
   vtkSetStringMacro(ToolSerialNumber);
+  vtkSetMacro(ToolInfoUpdated, int);
   void Update();
   //ETX
 
@@ -209,6 +211,8 @@ protected:
   char *ToolSerialNumber;
   char *ToolPartNumber;
   char *ToolManufacturer;
+
+  int ToolInfoUpdated;
 
   vtkTrackerBuffer *Buffer;
 

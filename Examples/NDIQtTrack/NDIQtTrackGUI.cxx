@@ -84,6 +84,7 @@ void NDIQtTrackGUI::CreateActions()
   connect(m_GUI->actionAboutQt, SIGNAL(triggered()), this, SLOT(AboutQt()));
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerStarted()), this, SLOT(OnTrackerStarted()) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolInfoUpdated(int)), this, SLOT(OnToolInfoUpdated(int)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,QString)), this, SLOT(OnToolTransformUpdated(int,QString)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,ndQuatTransformation)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,double)) );
@@ -155,14 +156,20 @@ void NDIQtTrackGUI::OnTrackerConfigured(QString systemInfo)
 }
 
 void NDIQtTrackGUI::OnTrackerStarted()
-{
-  QString toolInfo;
+{  
   for(int tool=0; tool < this->m_GUI->TrackerWidget->getTracker()->GetNumberOfTools(); tool++)
   {
-    // create the string
-    toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolPartNumber())
-      + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(tool)->GetToolSerialNumber());
-    switch(tool) 
+    this->OnToolInfoUpdated(tool);    
+  }
+}
+
+void NDIQtTrackGUI::OnToolInfoUpdated(int port)
+{
+  QString toolInfo;
+  // create the string
+    toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolPartNumber())
+      + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolSerialNumber());
+    switch(port) 
     {
     case 0:
       // update the tool info - port 1.
@@ -213,10 +220,9 @@ void NDIQtTrackGUI::OnTrackerStarted()
       this->m_GUI->port12DataLabel->setText( toolInfo );
       break;
     default:
-      std::cout << "Port " << tool << " exists but will not be updated in this app." << std::endl;
+      std::cout << "Port " << port << " exists but will not be updated in this app." << std::endl;
       break;
     }
-  }
 }
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status) 

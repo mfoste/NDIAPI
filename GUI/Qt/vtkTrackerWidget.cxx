@@ -431,6 +431,11 @@ int vtkTrackerWidget::getTrackerSystemType()
   return this->m_TrackerSettingsDialog->getSystem();
 }
 
+void vtkTrackerWidget::UpdateToolInfo(int port)
+{
+  emit ToolInfoUpdated(port);
+}
+
 void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
 {
   ndSetXfrmMissing(&this->m_xfrms[port]);

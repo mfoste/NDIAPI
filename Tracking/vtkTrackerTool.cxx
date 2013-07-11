@@ -92,6 +92,8 @@ vtkTrackerTool::vtkTrackerTool()
   this->SetToolPartNumber("");
   this->SetToolManufacturer("");
 
+  this->ToolInfoUpdated = 0;
+
   this->TempMatrix = vtkMatrix4x4::New();
   this->RawMatrix = vtkMatrix4x4::New();
 
@@ -182,6 +184,13 @@ void vtkTrackerTool::Update()
 
     this->Modified();
   }
+  
+  // push out an event update if this is modified.
+  if( this->ToolInfoUpdated )
+  {
+    this->Modified();
+  }
+
   this->Buffer->Unlock();
 
   // move the modified into the if structure above. 

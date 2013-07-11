@@ -68,6 +68,7 @@ public slots:
   virtual void AboutQt();
   void OnTrackerConfigured( QString systemInfo );
   void OnTrackerStarted();
+  void OnToolInfoUpdated(int port);
   void OnToolTransformUpdated(int port, QString status);
   void OnToolTransformUpdated(int port, ndQuatTransformation xfrm );
   void OnToolEffectiveFrequencyUpdated(int port, double freq);

@@ -93,6 +93,16 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       this->m_effectiveFrequency = -1.0;
     }
 
+    if( tool->IsToolInfoUpdated() )
+    {
+      // launch the update events.
+      m_parent->UpdateToolInfo(this->m_port);
+      // reset the flag.
+      tool->SetToolInfoUpdated(0);
+      // debug:
+      // fprintf(stdout, "Port %d had its info updated in XfrmCallback.\n", this->m_port);
+    }
+
     if( tool->IsBrokenSensor() )
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );

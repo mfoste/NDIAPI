@@ -1027,8 +1027,8 @@ void vtkNDITracker::InternalUpdate()
   this->Timer->SetLastFrame(nextcount);
   double timestamp = this->Timer->GetTimeStampForFrame(nextcount);
 
-  // check to see if any tools have been plugged in
-  if (ndiGetTXSystemStatus(this->Device) & NDI_PORT_OCCUPIED)
+  // check to see if any tools have been plugged in or unplugged.
+  if (ndiGetTXSystemStatus(this->Device) & (NDI_PORT_OCCUPIED | NDI_PORT_UNOCCUPIED) )
   { // re-configure, a new tool has been plugged in
     this->EnableToolPorts();
   }
@@ -1269,7 +1269,7 @@ void vtkNDITracker::EnableToolPorts()
   for (tool = 0; tool < ntools; tool++)
   {
     ph = ndiGetPHSRHandle(this->Device,tool);
-    // ADW: is the next line neccessary?:
+    // get the port to reset the descriptions:
     port = this->GetToolFromHandle(ph);
     // free the port.
     ndiCommand(this->Device,"PHF:%02X",ph);
@@ -1279,6 +1279,16 @@ void vtkNDITracker::EnableToolPorts()
     { 
       vtkErrorMacro(<< ndiErrorString(errnum));
     }
+    // reset the tool descriptions.
+    this->Tools[port]->SetToolSerialNumber("");
+    this->Tools[port]->SetToolRevision("");
+    this->Tools[port]->SetToolManufacturer("");
+    this->Tools[port]->SetToolType("");
+    this->Tools[port]->SetToolPartNumber("");
+    // update the flag that the values were updated.
+    this->Tools[port]->SetToolInfoUpdated(1);
+    // debug
+    //fprintf(stderr, "Port %d was updated in vtkNDITracker...\n", port);
   }
 
   // initialize ports waiting to be initialized
@@ -1384,6 +1394,8 @@ void vtkNDITracker::EnableToolPorts()
       ndiGetPHINFPartNumber(this->Device, partNumber);
       partNumber[20] = '\0';
       this->Tools[port]->SetToolPartNumber(vtkStripWhitespace(partNumber));
+      // update the flag that the values were updated.
+      this->Tools[port]->SetToolInfoUpdated(1);
     }
     status = ndiGetPHINFPortStatus(this->Device);
 
