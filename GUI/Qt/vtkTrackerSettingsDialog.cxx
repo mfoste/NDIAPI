@@ -40,7 +40,7 @@ or property, arising from the Sample Code or any use thereof.
 #if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
 #include "vtkAscension3DGTrackerSettingsWidget.h"
 #endif
-#include "vtkSpectraTrackerSettingsWidget.h"
+#include "vtkSpectraVicraTrackerSettingsWidget.h"
 
 #include "vtkTrackerSettingsDialog.h"
 
@@ -94,8 +94,8 @@ void vtkTrackerSettingsDialog::Initialize(QString settingsFile)
   this->m_GUI->stackedWidget->insertWidget(ASCENSION_3DG, this->m_Ascension3DGSettingsWidget );
 #endif
   // add the SpectraTrackerSettingsWidget to the stackedWidget
-  this->m_SpectraSettingsWidget = new vtkSpectraTrackerSettingsWidget(this, this->m_Settings);
-  this->m_GUI->stackedWidget->insertWidget(NDI_SPECTRA, this->m_SpectraSettingsWidget );
+  this->m_SpectraVicraSettingsWidget = new vtkSpectraVicraTrackerSettingsWidget(this, this->m_Settings);
+  this->m_GUI->stackedWidget->insertWidget(NDI_SPECTRA, this->m_SpectraVicraSettingsWidget );
   
   // set up the connections in the GUI.
   this->CreateActions();
@@ -108,7 +108,10 @@ void vtkTrackerSettingsDialog::Initialize(QString settingsFile)
 #elif defined (Ascension3DG_MedSafe)
   this->m_GUI->trackingSystemComboBox->addItem("Ascension 3DG medSAFE", ASCENSION_3DG );
 #endif
-  this->m_GUI->trackingSystemComboBox->addItem("Spectra", NDI_SPECTRA);
+  this->m_GUI->trackingSystemComboBox->addItem("Polaris Spectra Passive", NDI_SPECTRA);
+  this->m_GUI->trackingSystemComboBox->addItem("Polaris Spectra Hybrid", NDI_SPECTRA_HYBRID);
+  this->m_GUI->trackingSystemComboBox->addItem("Polaris Vicra", NDI_VICRA);
+
 
   // read the tracker settings in. 
   this->ReadTrackerSettings();
@@ -138,7 +141,7 @@ void vtkTrackerSettingsDialog::ReadTrackerSettings()
   this->m_Ascension3DGSettingsWidget->ReadTrackerSettings();
 #endif
   // Spectra Tracker Settings.
-  this->m_SpectraSettingsWidget->ReadTrackerSettings();
+  this->m_SpectraVicraSettingsWidget->ReadTrackerSettings();
 }
 
 void vtkTrackerSettingsDialog::WriteTrackerSettings()
@@ -155,7 +158,7 @@ void vtkTrackerSettingsDialog::WriteTrackerSettings()
   this->m_Ascension3DGSettingsWidget->WriteTrackerSettings();
 #endif
   // Spectra Tracker Settings.
-  this->m_SpectraSettingsWidget->WriteTrackerSettings();
+  this->m_SpectraVicraSettingsWidget->WriteTrackerSettings();
 }
 
 void vtkTrackerSettingsDialog::OnTrackingSystemChanged(int index)
@@ -163,7 +166,25 @@ void vtkTrackerSettingsDialog::OnTrackingSystemChanged(int index)
   
   // change the system ID.
   this->m_System = this->m_GUI->trackingSystemComboBox->itemData(index).toInt();
-  this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
+  
+  switch(this->m_System)
+  {
+  case NDI_SPECTRA:
+    this->m_GUI->stackedWidget->setCurrentIndex(NDI_SPECTRA);
+    this->m_SpectraVicraSettingsWidget->UseSpectra();
+    break;
+  case NDI_SPECTRA_HYBRID:
+    this->m_GUI->stackedWidget->setCurrentIndex(NDI_SPECTRA);
+    this->m_SpectraVicraSettingsWidget->UseSpectraHybrid();
+    break;
+  case NDI_VICRA:
+    this->m_GUI->stackedWidget->setCurrentIndex(NDI_SPECTRA);
+    this->m_SpectraVicraSettingsWidget->UseVicra();
+    break; 
+  default:
+    this->m_GUI->stackedWidget->setCurrentIndex(this->m_System);
+    break;    
+  }
 }
 
 void vtkTrackerSettingsDialog::accept()

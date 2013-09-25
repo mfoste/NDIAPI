@@ -47,7 +47,7 @@ or property, arising from the Sample Code or any use thereof.
 #if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
 #include "vtkAscension3DGTrackerSettingsWidget.h"
 #endif
-#include "vtkSpectraTrackerSettingsWidget.h"
+#include "vtkSpectraVicraTrackerSettingsWidget.h"
 #include "ui_vtkTrackerSettingsDialog.h"
 
 class VTKTRACKERWIDGET_EXPORT vtkTrackerSettingsDialog : public QDialog
@@ -72,7 +72,7 @@ public:
 #if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
   inline ascension3DGSettings* getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
 #endif
-  inline ndiSpectraSettings getSpectraSettings() {return this->m_SpectraSettingsWidget->GetSpectraSettings();}
+  inline ndiSpectraVicraSettings getSpectraVicraSettings() {return this->m_SpectraVicraSettingsWidget->GetSpectraVicraSettings();}
 
   void ReadTrackerSettings();
   void WriteTrackerSettings();
@@ -95,7 +95,10 @@ private:
 #if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
   vtkAscension3DGTrackerSettingsWidget *m_Ascension3DGSettingsWidget;
 #endif
-  vtkSpectraTrackerSettingsWidget *m_SpectraSettingsWidget;
+  vtkSpectraVicraTrackerSettingsWidget *m_SpectraVicraSettingsWidget;
+  //vtkSpectraVicraTrackerSettingsWidget *m_SpectraHybridSettingsWidget;
+  //vtkSpectraVicraTrackerSettingsWidget *m_VicraSettingsWidget;
+
   
   // settings.
   QSettings *m_Settings; 

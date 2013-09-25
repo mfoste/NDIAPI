@@ -32,8 +32,8 @@ NDI be liable for any claims, losses, damages, judgments, costs, awards, expense
 liabilities of any kind whatsoever arising directly or indirectly from any injury to person
 or property, arising from the Sample Code or any use thereof.
 */
-#ifndef __vtkSpectraTrackerSettingsWidget_h
-#define __vtkSpectraTrackerSettingsWidget_h
+#ifndef __vtkSpectraVicraTrackerSettingsWidget_h
+#define __vtkSpectraVicraTrackerSettingsWidget_h
 
 //#include "vtkTrackerWidget_global.h"
 
@@ -42,23 +42,26 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "vtkTrackerSettingsStructures.h"
 
-#include "ui_SpectraTrackerSettingsWidget.h"
+#include "ui_SpectraVicraTrackerSettingsWidget.h"
 
-class vtkSpectraTrackerSettingsWidget : public QWidget
+class vtkSpectraVicraTrackerSettingsWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  vtkSpectraTrackerSettingsWidget( QWidget *parent, QSettings *settings);
-  vtkSpectraTrackerSettingsWidget( QWidget *parent);
-  ~vtkSpectraTrackerSettingsWidget();
+  vtkSpectraVicraTrackerSettingsWidget( QWidget *parent, QSettings *settings);
+  vtkSpectraVicraTrackerSettingsWidget( QWidget *parent);
+  ~vtkSpectraVicraTrackerSettingsWidget();
 
   inline Ui::SpectraTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline ndiSpectraSettings GetSpectraSettings() {return this->m_SpectraSettings;}
+  inline ndiSpectraVicraSettings GetSpectraVicraSettings() {return this->m_SpectraVicraSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
+  void UseSpectraHybrid();
+  void UseSpectra();
+  void UseVicra();
 
 public slots:
   virtual void OnLoadRomFile();
@@ -77,7 +80,8 @@ private:
 
   //settings
   QSettings *m_Settings;
-  ndiSpectraSettings m_SpectraSettings;
+  ndiSpectraVicraSettings m_SpectraVicraSettings;
+  int m_SystemType;
 };
 
-#endif //__vtkSpectraTrackerSettingsWidget_h
+#endif //__vtkSpectraVicraTrackerSettingsWidget_h

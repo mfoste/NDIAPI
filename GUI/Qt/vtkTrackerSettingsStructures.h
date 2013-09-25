@@ -53,7 +53,9 @@ enum TRACKER_SYSTEM_TYPES
   FAKE_TRACKER = 0,
   NDI_AURORA,
   ASCENSION_3DG,
-  NDI_SPECTRA = 3
+  NDI_SPECTRA = 3,
+  NDI_SPECTRA_HYBRID,
+  NDI_VICRA
 };
 
 // fake tracker
@@ -84,7 +86,7 @@ struct ascension3DGSettings
 #endif
 
 // NDI Spectra tracker settings.
-struct ndiSpectraSettings
+struct ndiSpectraVicraSettings
 {
   QStringList romFiles; // wired 0-2, wireless 3-17
   double updateFrequency;

@@ -268,25 +268,27 @@ void vtkTrackerWidget::ConfigureTracker()
     break;
 #endif
   case NDI_SPECTRA:
+  case NDI_SPECTRA_HYBRID:
+  case NDI_VICRA:
     m_Tracker = vtkNDITracker::New();
-    if( this->m_TrackerSettingsDialog->getSpectraSettings().bUseManual )
+    if( this->m_TrackerSettingsDialog->getSpectraVicraSettings().bUseManual )
     {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getSpectraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getSpectraSettings().commPort);
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(this->m_TrackerSettingsDialog->getSpectraVicraSettings().baudRate); // this needs to be changed to Auto when it is implemented.
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(this->m_TrackerSettingsDialog->getSpectraVicraSettings().commPort);
     }
     else
     {
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
     }
-    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraSettings().updateFrequency;
+    this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraVicraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 12; i++ )
     {
-      if( !this->m_TrackerSettingsDialog->getSpectraSettings().romFiles[i].isEmpty() )
+      if( !this->m_TrackerSettingsDialog->getSpectraVicraSettings().romFiles[i].isEmpty() )
       {
         dynamic_cast<vtkNDITracker*>(m_Tracker)->LoadVirtualSROM(i, 
-          this->m_TrackerSettingsDialog->getSpectraSettings().romFiles[i].toLatin1());
+          this->m_TrackerSettingsDialog->getSpectraVicraSettings().romFiles[i].toLatin1());
       }
     }
     break;
