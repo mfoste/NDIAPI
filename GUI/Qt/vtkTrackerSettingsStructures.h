@@ -95,6 +95,10 @@ struct ndiSpectraVicraSettings
   bool bUseManual;
   int commPort;
   int baudRate;
+
+  // other settings.
+  bool logComm;
+  bool hardwareSync;
 };
 
 #endif

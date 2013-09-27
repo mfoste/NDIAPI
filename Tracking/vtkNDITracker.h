@@ -83,6 +83,10 @@ public:
   // Description:
   // Log the communication stream to the NDI system to screen.
   void LogCommunication(int bLog) {this->bLogCommunication = bLog;}
+
+  // Description:
+  // Set the system to be a slave in hardware sync.
+  void SetHardwareSync(int bSync) {this->bHardwareSync = bSync;}
   
   // Description:
   // Probe to see if the tracking system is present on the
@@ -249,6 +253,7 @@ protected:
   int BaudRate;
   int IsDeviceTracking;
   int bLogCommunication;
+  int bHardwareSync; // this is Polaris Spectra only where the Spectra must be a slave.
 
   int PortEnabled[VTK_NDI_NTOOLS];
   int PortHandle[VTK_NDI_NTOOLS];

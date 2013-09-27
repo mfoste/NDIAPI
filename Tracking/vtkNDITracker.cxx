@@ -87,6 +87,7 @@ vtkNDITracker::vtkNDITracker()
   this->SendMatrix = vtkMatrix4x4::New();
   this->IsDeviceTracking = 0;
   this->bLogCommunication = 0;
+  this->bHardwareSync =0;
   this->SerialPort = -1; // default is to probe
   this->SerialDevice = 0;
   this->Volume = 0;

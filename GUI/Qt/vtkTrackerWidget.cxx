@@ -281,6 +281,24 @@ void vtkTrackerWidget::ConfigureTracker()
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(115200); // this needs to be changed to Auto when it is implemented.
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
     }
+    // communication log.
+    if( this->m_TrackerSettingsDialog->getSpectraVicraSettings().logComm )
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->LogCommunication(1);
+    }
+    else
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->LogCommunication(0);
+    }
+    // hardware sync.
+    if( this->m_TrackerSettingsDialog->getSpectraVicraSettings().hardwareSync )
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetHardwareSync(1);
+    }
+    else
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetHardwareSync(0);
+    }
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraVicraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 12; i++ )
