@@ -121,6 +121,15 @@ int ndiProbe(const char *device);
 ndicapi *ndiOpen(const char *device);
 
 /*! \ingroup NDIMethods
+  Set the flag to log the communication stream to the NDI tracker.  
+  Communication sent to stdout.
+  \param device name of valid serial port device
+  \param flag to turn on (non-zero) an off (zero)
+  
+*/
+void ndiLogCommunication(ndicapi *pol, int nLog);
+
+/*! \ingroup NDIMethods
   Close communication with the NDI device.  You should send
   a "COMM:00000" command before you close communication so that you
   can resume communication on a subsequent call to ndiOpen() without

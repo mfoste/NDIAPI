@@ -2,6 +2,7 @@ LIBRARY vtkndicapi
 EXPORTS ndiDeviceName
         ndiProbe
         ndiOpen
+        ndiLogCommunication
         ndiClose
         ndiSetThreadMode
         ndiCommand

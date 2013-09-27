@@ -86,6 +86,7 @@ vtkNDITracker::vtkNDITracker()
   this->CommandReply[0] = '\0';
   this->SendMatrix = vtkMatrix4x4::New();
   this->IsDeviceTracking = 0;
+  this->bLogCommunication = 0;
   this->SerialPort = -1; // default is to probe
   this->SerialDevice = 0;
   this->Volume = 0;
@@ -222,6 +223,13 @@ int vtkNDITracker::Probe()
       this->InternalGetSystemInfo();      
 
       // close the device.  we'll open it again later.
+      // return to default comm settings
+      ndiCommand(this->Device,"COMM:00000");
+      errnum = ndiGetError(this->Device);
+      if (errnum) 
+      {
+        vtkErrorMacro(<< ndiErrorString(errnum));
+      }
       ndiClose(this->Device);
       this->Device = 0;
     }
@@ -717,6 +725,8 @@ int vtkNDITracker::InternalInitSystem()
     vtkErrorMacro(<< ndiErrorString(NDI_OPEN_ERROR));
     return 0;
   }
+  // set the communication log frame.
+  ndiLogCommunication(this->Device, this->bLogCommunication);
   // initialize Device
   ndiCommand(this->Device,"INIT:");
   if (ndiGetError(this->Device))
@@ -842,6 +852,7 @@ int vtkNDITracker::InternalInitTools()
     this->PortHandle[tool] = 0;
     if (this->VirtualSROM[tool])
     {
+      fprintf(stdout, "Loading virtual tool for port: %d\n", tool);
       this->InternalLoadVirtualSROM(tool,this->VirtualSROM[tool]);
     }
   }
@@ -865,7 +876,7 @@ int vtkNDITracker::InternalStartTracking()
     return 0;
   }
 
-  if( !this->InternalInitTools())
+  if( !this->InternalGetSystemInfo())
   { 
       return 0;
   }
@@ -1294,9 +1305,11 @@ void vtkNDITracker::EnableToolPorts()
       vtkErrorMacro(<< ndiErrorString(errnum));
     }    
   }
+  
   // free ports that are waiting to be freed
   // create a list of port handles that need to be freed.
   ndiCommand(this->Device,"PHSR:01");
+  
   // loop through that list and free the ports needing to be freed.
   ntools = ndiGetPHSRNumberOfHandles(this->Device);
   for (tool = 0; tool < ntools; tool++)
@@ -1329,7 +1342,8 @@ void vtkNDITracker::EnableToolPorts()
   {
     // create a list of port handles that need to be initialized.
     ndiCommand(this->Device,"PHSR:02");
-    // loop through that list and initialiee the ports not initialized.
+    
+    // loop through that list and initialise the ports not initialized.
     ntools = ndiGetPHSRNumberOfHandles(this->Device);
     for (tool = 0; tool < ntools; tool++)
     {
@@ -1748,7 +1762,7 @@ void vtkNDITracker::InternalLoadVirtualSROM(int tool,
 
   for ( i = 0; i < 1024; i += 64)
   {
-    ndiCommand(this->Device," VER 0");
+    //ndiCommand(this->Device," VER 0");
     ndiCommand(this->Device, "PVWR:%02X%04X%.128s",
       ph, i, ndiHexEncode(hexbuffer, &data[i], 64));
   }  

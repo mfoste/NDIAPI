@@ -79,6 +79,9 @@ struct ndicapi {
 
   int tracking;                           /* 'is tracking' flag */
 
+  /* set this to log the communication to screen */
+  int logcomm;                            /* log communication flag */
+
   /* low-level threading information */
 
   int thread_mode;                        /* flag for threading mode */
@@ -746,6 +749,8 @@ ndicapi *ndiOpen(const char *device)
   memset(pol->serial_reply, 0, 2048);
   memset(pol->command_reply, 0, 2048);
 
+  pol->logcomm = 0;
+
   return pol;
 }
 
@@ -759,6 +764,14 @@ char *ndiGetDeviceName(ndicapi *pol)
 NDIFileHandle ndiGetDeviceHandle(ndicapi *pol)
 {
   return pol->serial_device;
+}
+
+
+
+/*---------------------------------------------------------------------*/
+void ndiLogCommunication(ndicapi *pol, int nLog)
+{
+  pol->logcomm = nLog;
 }
 
 /*---------------------------------------------------------------------*/
@@ -1064,6 +1077,12 @@ char *ndiCommandVA(ndicapi *pol, const char *format, va_list ap)
   if (CRC16 != ndiHexToUnsignedLong(&rp[m], 4)) {
     ndi_set_error(pol, NDI_BAD_CRC);
     return crp;
+  }
+
+  /* debug to log the communication */
+  if(pol->logcomm)
+  {
+    fprintf(stdout, "command: %s\nreply:  %s\n", cp, rp);
   }
 
   /* check for error code */

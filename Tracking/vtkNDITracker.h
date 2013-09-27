@@ -81,6 +81,10 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
  
   // Description:
+  // Log the communication stream to the NDI system to screen.
+  void LogCommunication(int bLog) {this->bLogCommunication = bLog;}
+  
+  // Description:
   // Probe to see if the tracking system is present on the
   // specified serial port.  If the SerialPort is set to -1,
   // then all serial ports will be checked.
@@ -244,6 +248,7 @@ protected:
   vtkSmartPointer<vtkPolyData> VolumePolyData;
   int BaudRate;
   int IsDeviceTracking;
+  int bLogCommunication;
 
   int PortEnabled[VTK_NDI_NTOOLS];
   int PortHandle[VTK_NDI_NTOOLS];
