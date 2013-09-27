@@ -107,7 +107,7 @@ void vtkSpectraVicraTrackerSettingsWidget::CreateActions()
   connect(this->m_Widget.baudRateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnBaudRateChanged(int)) );
   // other settings
   connect(this->m_Widget.logCommunicationsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnLogCommunicationChanged(bool)) );
-  connect(this->m_Widget.hardwareSyncCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnHardwareSyncChanged(bool bSync)) );
+  connect(this->m_Widget.hardwareSyncCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnHardwareSyncChanged(bool)) );
 }
 
 void vtkSpectraVicraTrackerSettingsWidget::ReadTrackerSettings()
