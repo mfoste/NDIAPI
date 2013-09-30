@@ -32,10 +32,15 @@ NDI be liable for any claims, losses, damages, judgments, costs, awards, expense
 liabilities of any kind whatsoever arising directly or indirectly from any injury to person
 or property, arising from the Sample Code or any use thereof.
 */
+#define MAX_TRACKED_PORTS 12
 
 #include <QtGui>
 
 #include <vtkVersion.h>
+#include <vtkSmartPointer.h>
+#include <vtkAxesActor.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
 
 #include "ndXfrms.h"
 
@@ -68,12 +73,92 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
   m_GUI->setupUi(this);
   this->m_GUI->TrackerWidget->Initialize();
 
+  // set-up the tracked objects.
+  this->m_TrackedObjects.resize(MAX_TRACKED_PORTS);
+  for(int i=0; i<MAX_TRACKED_PORTS; i++)
+  {
+    this->m_TrackedObjects[i].object = vtkTrackedObject::New();
+    this->m_TrackedObjects[i].xfrm = new ndQuatTransformation;
+  }
+  // add the labels manually, need to figure out a way to loop this. Maybe.
+  // data labels.
+  this->m_TrackedObjects[0].datalabel = this->m_GUI->port01DataLabel;
+  this->m_TrackedObjects[1].datalabel = this->m_GUI->port02DataLabel;
+  this->m_TrackedObjects[2].datalabel = this->m_GUI->port03DataLabel;
+  this->m_TrackedObjects[3].datalabel = this->m_GUI->port04DataLabel;
+  this->m_TrackedObjects[4].datalabel = this->m_GUI->port05DataLabel;
+  this->m_TrackedObjects[5].datalabel = this->m_GUI->port06DataLabel;
+  this->m_TrackedObjects[6].datalabel = this->m_GUI->port07DataLabel;
+  this->m_TrackedObjects[7].datalabel = this->m_GUI->port08DataLabel;
+  this->m_TrackedObjects[8].datalabel = this->m_GUI->port09DataLabel;
+  this->m_TrackedObjects[9].datalabel = this->m_GUI->port10DataLabel;
+  this->m_TrackedObjects[10].datalabel = this->m_GUI->port11DataLabel;
+  this->m_TrackedObjects[11].datalabel = this->m_GUI->port12DataLabel;
+  // xfrm labels.
+  this->m_TrackedObjects[0].xfrmlabel = this->m_GUI->port01XfrmLabel;
+  this->m_TrackedObjects[1].xfrmlabel = this->m_GUI->port02XfrmLabel;
+  this->m_TrackedObjects[2].xfrmlabel = this->m_GUI->port03XfrmLabel;
+  this->m_TrackedObjects[3].xfrmlabel = this->m_GUI->port04XfrmLabel;
+  this->m_TrackedObjects[4].xfrmlabel = this->m_GUI->port05XfrmLabel;
+  this->m_TrackedObjects[5].xfrmlabel = this->m_GUI->port06XfrmLabel;
+  this->m_TrackedObjects[6].xfrmlabel = this->m_GUI->port07XfrmLabel;
+  this->m_TrackedObjects[7].xfrmlabel = this->m_GUI->port08XfrmLabel;
+  this->m_TrackedObjects[8].xfrmlabel = this->m_GUI->port09XfrmLabel;
+  this->m_TrackedObjects[9].xfrmlabel = this->m_GUI->port10XfrmLabel;
+  this->m_TrackedObjects[10].xfrmlabel = this->m_GUI->port11XfrmLabel;
+  this->m_TrackedObjects[11].xfrmlabel = this->m_GUI->port12XfrmLabel;
+  // effective frequency line edits.
+  this->m_TrackedObjects[0].effFreqLineEdit = this->m_GUI->port01EffFreqLineEdit;
+  this->m_TrackedObjects[1].effFreqLineEdit = this->m_GUI->port02EffFreqLineEdit;
+  this->m_TrackedObjects[2].effFreqLineEdit = this->m_GUI->port03EffFreqLineEdit;
+  this->m_TrackedObjects[3].effFreqLineEdit = this->m_GUI->port04EffFreqLineEdit;
+  this->m_TrackedObjects[4].effFreqLineEdit = this->m_GUI->port05EffFreqLineEdit;
+  this->m_TrackedObjects[5].effFreqLineEdit = this->m_GUI->port06EffFreqLineEdit;
+  this->m_TrackedObjects[6].effFreqLineEdit = this->m_GUI->port07EffFreqLineEdit;
+  this->m_TrackedObjects[7].effFreqLineEdit = this->m_GUI->port08EffFreqLineEdit;
+  this->m_TrackedObjects[8].effFreqLineEdit = this->m_GUI->port09EffFreqLineEdit;
+  this->m_TrackedObjects[9].effFreqLineEdit = this->m_GUI->port10EffFreqLineEdit;
+  this->m_TrackedObjects[10].effFreqLineEdit = this->m_GUI->port11EffFreqLineEdit;
+  this->m_TrackedObjects[11].effFreqLineEdit = this->m_GUI->port12EffFreqLineEdit;
+  // quality value line edits.
+  this->m_TrackedObjects[0].qualityLineEdit = this->m_GUI->port01QualityLineEdit;
+  this->m_TrackedObjects[1].qualityLineEdit = this->m_GUI->port02QualityLineEdit;
+  this->m_TrackedObjects[2].qualityLineEdit = this->m_GUI->port03QualityLineEdit;
+  this->m_TrackedObjects[3].qualityLineEdit = this->m_GUI->port04QualityLineEdit;
+  this->m_TrackedObjects[4].qualityLineEdit = this->m_GUI->port05QualityLineEdit;
+  this->m_TrackedObjects[5].qualityLineEdit = this->m_GUI->port06QualityLineEdit;
+  this->m_TrackedObjects[6].qualityLineEdit = this->m_GUI->port07QualityLineEdit;
+  this->m_TrackedObjects[7].qualityLineEdit = this->m_GUI->port08QualityLineEdit;
+  this->m_TrackedObjects[8].qualityLineEdit = this->m_GUI->port09QualityLineEdit;
+  this->m_TrackedObjects[9].qualityLineEdit = this->m_GUI->port10QualityLineEdit;
+  this->m_TrackedObjects[10].qualityLineEdit = this->m_GUI->port11QualityLineEdit;
+  this->m_TrackedObjects[11].qualityLineEdit = this->m_GUI->port12QualityLineEdit;
+
+  // set-up viewer items.
+  this->m_Renderer = vtkSmartPointer<vtkRenderer>::New();
+  this->m_axesActor = vtkSmartPointer<vtkAxesActor>::New();
+
+  // configure viewer items.
+  m_GUI->view3DQVTKWidget->GetRenderWindow()->AddRenderer(this->m_Renderer);
+  this->m_axesActor->SetTotalLength(100.0,100.0,100.0);
+  //this->m_Renderer->AddActor(this->m_axesActor);
+  // add the tool actors.
+  for(int i=0; i<12; i++)
+  {
+    this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetActor());
+  }
+
   // set up the connections.
   this->CreateActions();
 }
 
 NDIQtTrackGUI::~NDIQtTrackGUI()
 {
+  for(int i; i<MAX_TRACKED_PORTS; i++)
+  {    
+    delete this->m_TrackedObjects[0].xfrm;
+  }
+  this->m_TrackedObjects.clear();
   delete m_mutex;
   delete m_GUI;
 }
@@ -89,6 +174,11 @@ void NDIQtTrackGUI::CreateActions()
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,ndQuatTransformation)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,double)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolQualityNumberUpdated(int,double)), this, SLOT(OnToolQualityUpdated(int,double)) );
+  // hook up the tracked objects.
+  for(int i=0; i<12; i++)
+  {
+    connect(this->m_TrackedObjects[i].object, SIGNAL(TrackedObjectUpdated()), this, SLOT(OnTrackedObjectUpdated()) );
+  }
 }
 
 void NDIQtTrackGUI::About()
@@ -167,256 +257,56 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
 {
   QString toolInfo;
   // create the string
-    toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolPartNumber())
-      + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolSerialNumber());
-    switch(port) 
-    {
-    case 0:
-      // update the tool info - port 1.
-      this->m_GUI->port01DataLabel->setText( toolInfo );
-      break;
-    case 1:
-      // update the tool info - port 2.
-      this->m_GUI->port02DataLabel->setText( toolInfo );
-      break;
-    case 2:
-      // update the tool info - port 3.
-      this->m_GUI->port03DataLabel->setText( toolInfo );
-      break;
-    case 3:
-      // update the tool info - port 4/A.
-      this->m_GUI->port04DataLabel->setText( toolInfo );
-      break;
-    case 4:
-      // update the tool info - port 5/B.
-      this->m_GUI->port05DataLabel->setText( toolInfo );
-      break;
-    case 5:
-      // update the tool info - port 6/C.
-      this->m_GUI->port06DataLabel->setText( toolInfo );
-      break;
-    case 6:
-      // update the tool info - port 7/D.
-      this->m_GUI->port07DataLabel->setText( toolInfo );
-      break;
-    case 7:
-      // update the tool info - port 8/E.
-      this->m_GUI->port08DataLabel->setText( toolInfo );
-      break;
-    case 8:
-      // update the tool info - port 9/F.
-      this->m_GUI->port09DataLabel->setText( toolInfo );
-      break;
-    case 9:
-      // update the tool info - port 10/G.
-      this->m_GUI->port10DataLabel->setText( toolInfo );
-      break;
-    case 10:
-      // update the tool info - port 11/H.
-      this->m_GUI->port11DataLabel->setText( toolInfo );
-      break;
-    case 11:
-      // update the tool info - port 12/I.
-      this->m_GUI->port12DataLabel->setText( toolInfo );
-      break;
-    default:
-      std::cout << "Port " << port << " exists but will not be updated in this app." << std::endl;
-      break;
-    }
+  toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolPartNumber())
+    + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolSerialNumber());
+
+  if( port < MAX_TRACKED_PORTS)
+  {
+    this->m_TrackedObjects[port].datalabel->setText(toolInfo);
+    this->m_TrackedObjects[port].object->SetVisibility(true);
+  }
+  else
+  {
+    //default:
+    std::cout << "Port " << port << " exists but will not be updated in this app." << std::endl;
+  }
 }
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status) 
 {
-  switch(port){
-  case 0:
-    // Port 1
-    this->m_GUI->port01XfrmLabel->setText( status );
-    ndSetXfrmMissing(&this->m_Port01Xfrm);
-    break;
-  case 1:
-    // Port 2
-    this->m_GUI->port02XfrmLabel->setText( status );
-    ndSetXfrmMissing(&this->m_Port02Xfrm);
-    break;
-  case 2:
-    // Port 3
-    this->m_GUI->port03XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port03Xfrm);
-    break;
-  case 3:
-    // Port 4
-    this->m_GUI->port04XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port04Xfrm);
-    break;
-  case 4:
-    // Port 5
-    this->m_GUI->port05XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port05Xfrm);
-    break;
-  case 5:
-    // Port 6
-    this->m_GUI->port06XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port06Xfrm);
-    break;
-  case 6:
-    // Port 7
-    this->m_GUI->port07XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port07Xfrm);
-    break;
-  case 7:
-    // Port 8
-    this->m_GUI->port08XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port08Xfrm);
-    break;
-  case 8:
-    // Port 9
-    this->m_GUI->port09XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port09Xfrm);
-    break;
-  case 9:
-    // Port 10
-    this->m_GUI->port10XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port10Xfrm);
-    break;
-  case 10:
-    // Port 11
-    this->m_GUI->port11XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port11Xfrm);
-    break;
-  case 11:
-    // Port 12
-    this->m_GUI->port12XfrmLabel->setText(status);
-    ndSetXfrmMissing(&this->m_Port12Xfrm);
-    break;
-  default:
-    //do nothing for now.
-    break;
+  if( port < MAX_TRACKED_PORTS )
+  {
+    this->m_TrackedObjects[port].xfrmlabel->setText( status );
+  }
+  else
+  {
+    // do nothing for now.
   }
 }
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, ndQuatTransformation xfrm)
 {
-  switch(port){
-  case 0:
-    // Port 1
-    this->m_GUI->port01XfrmLabel->setText( this->GetXfrmString(xfrm) );
-    ndCopyTransform(&xfrm, &this->m_Port01Xfrm);
-    break;
-  case 1:
-    // Port 2
-    this->m_GUI->port02XfrmLabel->setText( this->GetXfrmString(xfrm) );
-    ndCopyTransform(&xfrm, &this->m_Port02Xfrm);
-    break;
-  case 2:
-    // Port 3
-    this->m_GUI->port03XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port03Xfrm);
-    break;
-  case 3:
-    // Port 4
-    this->m_GUI->port04XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port04Xfrm);
-    break;
-  case 4:
-    // Port 5
-    this->m_GUI->port05XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port05Xfrm);
-    break;
-  case 5:
-    // Port 6
-    this->m_GUI->port06XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port06Xfrm);
-    break;
-  case 6:
-    // Port 7
-    this->m_GUI->port07XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port07Xfrm);
-    break;
-  case 7:
-    // Port 8
-    this->m_GUI->port08XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port08Xfrm);
-    break;
-  case 8:
-    // Port 9
-    this->m_GUI->port09XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port09Xfrm);
-    break;
-  case 9:
-    // Port 10
-    this->m_GUI->port10XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port10Xfrm);
-    break;
-  case 10:
-    // Port 11
-    this->m_GUI->port11XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port11Xfrm);
-    break;
-  case 11:
-    // Port 12
-    this->m_GUI->port12XfrmLabel->setText(this->GetXfrmString(xfrm));
-    ndCopyTransform(&xfrm, &this->m_Port12Xfrm);
-    break;
-  default:
-    //do nothing for now.
-    break;
+  if( port < MAX_TRACKED_PORTS)
+  {
+    this->m_TrackedObjects[port].xfrmlabel->setText( this->GetXfrmString(xfrm) );
+    ndCopyTransform(&xfrm, this->m_TrackedObjects[port].xfrm);
+    this->m_TrackedObjects[port].object->UpdateXfrm(&xfrm);
+  }
+  else
+  {
+    // do nothing for now.
   }
 }
 
 void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
 {
-  switch(port){
-  case 0:
-    // Port 1
-    this->m_GUI->port01EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 1:
-    // Port 2
-    this->m_GUI->port02EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 2:
-    // Port 3
-    this->m_GUI->port03EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 3:
-    // Port 4
-    this->m_GUI->port04EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 4:
-    // Port 5
-    this->m_GUI->port05EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 5:
-    // Port 6
-    this->m_GUI->port06EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 6:
-    // Port 7
-    this->m_GUI->port07EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 7:
-    // Port 8
-    this->m_GUI->port08EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 8:
-    // Port 9
-    this->m_GUI->port09EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 9:
-    // Port 10
-    this->m_GUI->port10EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 10:
-    // Port 11
-    this->m_GUI->port11EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  case 11:
-    // Port 12
-    this->m_GUI->port12EffFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-    break;
-  default:
-    //do nothing for now.
-    break;
+  if( port < MAX_TRACKED_PORTS)
+  {
+    this->m_TrackedObjects[port].effFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
+  }
+  else
+  {
+    // do nothing for now.
   }
 }
 
@@ -438,60 +328,21 @@ void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
     break;
   }
 
-  switch(port){
-  case 0:
-    // Port 1
-    this->m_GUI->port01QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 1:
-    // Port 2
-    this->m_GUI->port02QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 2:
-    // Port 3
-    this->m_GUI->port03QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 3:
-    // Port 4
-    this->m_GUI->port04QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 4:
-    // Port 5
-    this->m_GUI->port05QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 5:
-    // Port 6
-    this->m_GUI->port06QualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-    break;
-  case 6:
-    // Port 7
-    this->m_GUI->port07QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  case 7:
-    // Port 8
-    this->m_GUI->port08QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  case 8:
-    // Port 9
-    this->m_GUI->port09QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  case 9:
-    // Port 10
-    this->m_GUI->port10QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  case 10:
-    // Port 11
-    this->m_GUI->port11QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  case 11:
-    // Port 12
-    this->m_GUI->port12QualityLineEdit->setText(QString("%1").arg(quality, 1 , 'f', prec));
-    break;
-  default:
-    //do nothing for now.
-    break;
+  if( port < MAX_TRACKED_PORTS)
+  {
+    this->m_TrackedObjects[port].qualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+  }
+  else
+  {
+    // do nothing for now.
   }
 }
+
+void NDIQtTrackGUI::OnTrackedObjectUpdated()
+{
+  this->m_GUI->view3DQVTKWidget->GetRenderWindow()->Render();
+}
+
 
 QString NDIQtTrackGUI::GetXfrmString(ndQuatTransformation xfrm)
 {

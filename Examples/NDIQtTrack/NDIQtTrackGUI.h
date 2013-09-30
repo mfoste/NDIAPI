@@ -40,12 +40,26 @@ or property, arising from the Sample Code or any use thereof.
 #include <QSettings>
 
 #include <vtkSmartPointer.h>
+#include <vtkAxesActor.h>
+#include <vtkRenderer.h>
+
+#include "vtkTrackedObject.h"
 
 #include "ui_NDIQtTrackGUI.h"
 
 namespace Ui {
   class NDIQtTrackMainWindow;
 }
+
+// consider moving this to the vtkTrackedObjects.h, for use elsewhere.
+typedef struct TrackedObjectTypes {
+  QLabel *datalabel;
+  QLabel *xfrmlabel;
+  QLineEdit *effFreqLineEdit;
+  QLineEdit *qualityLineEdit;
+  vtkTrackedObject *object;
+  ndQuatTransformation *xfrm;
+} TrackedObject;
 
 
 class NDIQtTrackGUI : public QMainWindow
@@ -73,6 +87,7 @@ public slots:
   void OnToolTransformUpdated(int port, ndQuatTransformation xfrm );
   void OnToolEffectiveFrequencyUpdated(int port, double freq);
   void OnToolQualityUpdated(int port, double freq);
+  void OnTrackedObjectUpdated();
   
 signals:
   
@@ -89,6 +104,9 @@ private:
   // mutex lock for threading.
   QMutex *m_mutex;
 
+  // tracked objects.
+  QVector<TrackedObject> m_TrackedObjects;
+
   ndQuatTransformation m_Port01Xfrm;
   ndQuatTransformation m_Port02Xfrm;
   ndQuatTransformation m_Port03Xfrm;
@@ -101,6 +119,11 @@ private:
   ndQuatTransformation m_Port10Xfrm;
   ndQuatTransformation m_Port11Xfrm;
   ndQuatTransformation m_Port12Xfrm;
+
+  // items for the 3D viewer.
+  
+  vtkSmartPointer<vtkRenderer> m_Renderer;
+  vtkSmartPointer<vtkAxesActor> m_axesActor;
 
 
 };

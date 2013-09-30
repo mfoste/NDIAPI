@@ -16,6 +16,14 @@ FIND_PACKAGE(Qt REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 # find VTK.
+FIND_PACKAGE(CTK)
+IF (CTK_USE_FILE)
+  INCLUDE (${CTK_USE_FILE})
+ELSE (CTK_USE_FILE)
+  MESSAGE( FATAL_ERROR "This application requires CTK. One of these components is missing. Please verify configuration")
+ENDIF (CTK_USE_FILE)
+
+# find VTK.
 FIND_PACKAGE(VTK)
 IF (VTK_USE_FILE)
   INCLUDE (${VTK_USE_FILE})
@@ -27,10 +35,13 @@ INCLUDE_DIRECTORIES(
     ${NDIQtTrack_SOURCE_DIR}
     ${NDIQtTrack_BINARY_DIR}
     ${TRACKING_SOURCE_DIR}
+    ${vtkTrackerWidget_SOURCE_DIR}/utilities
+    ${CTK_INCLUDE_DIRS}
     ${vtkTrackerWidget_SOURCE_DIR} )
 
-link_directories( 
+LINK_DIRECTORIES( 
 	${QT_LIBRARY_DIR}
+  ${CTK_LIBRARY_DIR}
 )
 
 SET(NDIQtTrack_GUI_SRCS
@@ -50,6 +61,8 @@ QT4_WRAP_CPP( NDIQtTrack_GEN_MOC_UI_SRCS ${NDIQtTrack_GEN_UI_SRCS})
 
 SET(NDIQtTrack_LIBS
     ${QT_LIBRARIES}
+    ${CTK_LIBRARIES}
+    QVTK
     vtkTrackerWidget )
 
 IF(AIGS_USE_NDI)
@@ -98,6 +111,9 @@ FOREACH(LIB QtCore QtGui QtNetwork QtXml QtTest QtSql QtWebKit phonon)
 		INSTALL(FILES "${QT_LIBRARY_DIR}/lib${LIB}.so" DESTINATION . COMPONENT Examples)
     ENDIF()
 ENDFOREACH(LIB)
+
+#CTK LIBRARIES
+#TODO: ADD CTK LIBRARIES to the install.
 
 #VTK Libraries
 #Depending on how you compile vtk, you might need some other libraries: vtkParallel VPIC Cosmo

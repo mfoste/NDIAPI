@@ -63,6 +63,7 @@ set( WIDGET_MOCHDR_FILES
 	vtkSpectraVicraTrackerSettingsWidget.h
     vtkTrackerWidgetXfrmCallback.h
     ndXfrms.h
+    ./utilities/vtkTrackedObject.h
 )
 
 # widget source files.
@@ -74,6 +75,7 @@ set( WIDGET_SRC_FILES
 	vtkSpectraVicraTrackerSettingsWidget.cxx
     vtkTrackerWidgetXfrmCallback.cxx
     ndXfrms.cxx
+    ./utilities/vtkTrackedObject.cxx
 )
 
 #widget ui
