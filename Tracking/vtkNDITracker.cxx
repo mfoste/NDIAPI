@@ -1147,7 +1147,7 @@ void vtkNDITracker::InternalUpdate()
     }
     // send the matrix and flags to the tool
 
-    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp, transform[tool][7]);   
+    this->ToolUpdate(tool,this->SendMatrix,flags,tooltimestamp, transform[tool][7], frame[tool]);   
   }
 }
 
@@ -1596,6 +1596,7 @@ void vtkNDITracker::DisableToolPorts()
   for (tool = 0; tool < VTK_NDI_NTOOLS; tool++)
   {
     this->PortEnabled[tool] = 0;
+    this->Tools[tool]->InitializeTool(true);
   }
 
   // re-start the tracking

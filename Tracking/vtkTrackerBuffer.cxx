@@ -70,12 +70,14 @@ vtkTrackerBuffer::vtkTrackerBuffer()
   this->FlagArray = vtkIntArray::New();
   this->TimeStampArray = vtkDoubleArray::New();
   this->ErrorArray = vtkDoubleArray::New();
+  this->FrameArray = vtkIntArray::New();
 
   this->BufferSize = 1000;
   this->MatrixArray->SetNumberOfTuples(this->BufferSize);
   this->FlagArray->SetNumberOfValues(this->BufferSize);
   this->TimeStampArray->SetNumberOfValues(this->BufferSize);
   this->ErrorArray->SetNumberOfValues(this->BufferSize);
+  this->FrameArray->SetNumberOfValues(this->BufferSize);
 
   this->NumberOfItems = 0;
   this->CurrentIndex = 0;
@@ -93,12 +95,13 @@ void vtkTrackerBuffer::DeepCopy(vtkTrackerBuffer *buffer)
   this->SetBufferSize(buffer->GetBufferSize());
 
   for (int i = 0; i < this->BufferSize; i++)
-    {
+  {
     this->MatrixArray->SetTuple(i, buffer->MatrixArray->GetTuple(i));
     this->FlagArray->SetValue(i, buffer->FlagArray->GetValue(i));
     this->TimeStampArray->SetValue(i, buffer->TimeStampArray->GetValue(i));
-	this->ErrorArray->SetValue(i, buffer->ErrorArray->GetValue(i));
-    }
+    this->ErrorArray->SetValue(i, buffer->ErrorArray->GetValue(i));
+    this->FrameArray->SetValue(i, buffer->FrameArray->GetValue(i));
+  }
 
   this->CurrentIndex = buffer->CurrentIndex;
   this->NumberOfItems = buffer->NumberOfItems;
@@ -121,6 +124,7 @@ vtkTrackerBuffer::~vtkTrackerBuffer()
   this->FlagArray->Delete();
   this->TimeStampArray->Delete();
   this->ErrorArray->Delete();
+  this->FrameArray->Delete();
 
   this->Mutex->Delete();
 
@@ -171,12 +175,13 @@ void vtkTrackerBuffer::SetBufferSize(int n)
   this->FlagArray->SetNumberOfValues(this->BufferSize);
   this->TimeStampArray->SetNumberOfValues(this->BufferSize);
   this->ErrorArray->SetNumberOfValues(this->BufferSize);
+  this->FrameArray->SetNumberOfValues(this->BufferSize);
 
   this->Modified();
 }  
 
 //----------------------------------------------------------------------------
-void vtkTrackerBuffer::AddItem(vtkMatrix4x4 *matrix, long flags, double time, double error)
+void vtkTrackerBuffer::AddItem(vtkMatrix4x4 *matrix, long flags, double time, double error, long frame)
 {
   if (time <= this->CurrentTimeStamp)
     {
@@ -199,6 +204,7 @@ void vtkTrackerBuffer::AddItem(vtkMatrix4x4 *matrix, long flags, double time, do
   this->FlagArray->SetValue(this->CurrentIndex, flags);
   this->TimeStampArray->SetValue(this->CurrentIndex, time);
   this->ErrorArray->SetValue(this->CurrentIndex, error);
+  this->FrameArray->SetValue(this->CurrentIndex, frame);
 
   this->Modified();
 }
@@ -269,6 +275,19 @@ double vtkTrackerBuffer::GetTimeStamp(int i)
     }
 
   return this->TimeStampArray->GetValue(i);
+}
+
+//----------------------------------------------------------------------------
+int vtkTrackerBuffer::GetFrame(int i)
+{
+  i = ((this->CurrentIndex - i) % this->BufferSize);
+
+  if (i < 0)
+    {
+    i += this->BufferSize;
+    }
+
+  return this->FrameArray->GetValue(i);
 }
 
 //----------------------------------------------------------------------------

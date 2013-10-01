@@ -56,6 +56,7 @@ typedef struct TrackedObjectTypes {
   QLabel *datalabel;
   QLabel *xfrmlabel;
   QLineEdit *effFreqLineEdit;
+  QLineEdit *frameLineEdit;
   QLineEdit *qualityLineEdit;
   vtkTrackedObject *object;
   ndQuatTransformation *xfrm;
@@ -83,10 +84,13 @@ public slots:
   void OnTrackerConfigured( QString systemInfo );
   void OnTrackerStarted();
   void OnToolInfoUpdated(int port);
-  void OnToolTransformUpdated(int port, QString status);
-  void OnToolTransformUpdated(int port, ndQuatTransformation xfrm );
-  void OnToolEffectiveFrequencyUpdated(int port, double freq);
-  void OnToolQualityUpdated(int port, double freq);
+  void OnToolTransformUpdated(int port, int frame, QString status);
+  /* older versions, link into single function now.
+  void OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm );
+  void OnToolEffectiveFrequencyUpdated(int port, int frame, double freq);
+  void OnToolQualityUpdated(int port, int frame, double quality);
+  */
+  void OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm, double freq, double quality);
   void OnTrackedObjectUpdated();
   
 signals:

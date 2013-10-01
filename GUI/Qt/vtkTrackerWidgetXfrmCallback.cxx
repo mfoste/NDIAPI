@@ -105,7 +105,7 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
 
     if( tool->IsBrokenSensor() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Tool sensor is broken.") );
     }
     else if( tool->IsMissing() ) // at NDI, this is equivalent to occupied.
     {
@@ -113,31 +113,31 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     }
     else if( tool->IsBrokenSensor() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Tool sensor is broken.") );
     }
     else if( tool->IsProcessingException() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Processing exception occurred.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Processing exception occurred.") );
     }
     else if (tool->IsBadFit() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool algorithm fit is bad.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Tool algorithm fit is bad.") );
     }
     else if( tool->IsTooFewMarkers() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Too few markers.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Too few markers.") );
     }
     else if( tool->IsTooMuchIR() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("IR Interference.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("IR Interference.") );
     }
     else if( tool->IsOutOfView() ) // at NDI, this is equivalent to missing.
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool is out of view.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Tool is out of view.") );
     }
     else if( tool->IsOutOfVolume() )
     {
-      m_parent->UpdateToolTransform(this->m_port, QString("Tool is out of volume.") );
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), QString("Tool is out of volume.") );
     }    
     else //if( !tool->IsMissing() && !tool->IsOutOfView() && !tool->IsOutOfVolume() )
     {
@@ -171,7 +171,7 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
       quality = tool->GetErrorValue();
 
       // send out.
-      m_parent->UpdateToolTransform(this->m_port, xfrm, this->m_effectiveFrequency, quality);
+      m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), xfrm, this->m_effectiveFrequency, quality);
     }  
   }
 }

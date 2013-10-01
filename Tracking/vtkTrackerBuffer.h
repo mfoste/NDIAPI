@@ -92,7 +92,8 @@ public:
   // Add a matrix plus flags to the list.  If the timestamp is
   // less than or equal to the previous timestamp, then nothing
   // will be done.
-  void AddItem(vtkMatrix4x4 *matrix, long flags, double timestamp, double error=0);
+  //void AddItem(vtkMatrix4x4 *matrix, long flags, double timestamp, double error=0);
+  void AddItem(vtkMatrix4x4 *matrix, long flags, double timestamp, double error=0, long frame=0);
 
   // Description:
   // Get a matrix from the list, where '0' is the most recent and
@@ -117,7 +118,7 @@ public:
   // Description:
   // Get the timestamp (in seconds since Jan 1, 1970) for the matrix.
   double GetTimeStamp(int i);
-
+  int GetFrame(int i);
   double GetErrorValue(int i);
 
   // Description:
@@ -158,6 +159,7 @@ protected:
   vtkDoubleArray *TimeStampArray;
   vtkIntArray *FlagArray;
   vtkDoubleArray *ErrorArray;
+  vtkIntArray *FrameArray; // keep track of the frames from NDI systems.
 
   vtkMatrix4x4 *ToolCalibrationMatrix;
   vtkMatrix4x4 *WorldCalibrationMatrix;

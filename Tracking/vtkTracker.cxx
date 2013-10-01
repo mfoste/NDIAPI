@@ -646,12 +646,12 @@ vtkMatrix4x4 *vtkTracker::GetWorldCalibrationMatrix()
 
 //----------------------------------------------------------------------------
 void vtkTracker::ToolUpdate(int tool, vtkMatrix4x4 *matrix, long flags,
-                            double timestamp, double error) 
+                            double timestamp, double error, long frame) 
 {
   vtkTrackerBuffer *buffer = this->Tools[tool]->GetBuffer();
   
   buffer->Lock();
-  buffer->AddItem(matrix, flags, timestamp, error);
+  buffer->AddItem(matrix, flags, timestamp, error, frame);
   buffer->Unlock();
 }
   

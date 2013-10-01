@@ -120,6 +120,19 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
   this->m_TrackedObjects[9].effFreqLineEdit = this->m_GUI->port10EffFreqLineEdit;
   this->m_TrackedObjects[10].effFreqLineEdit = this->m_GUI->port11EffFreqLineEdit;
   this->m_TrackedObjects[11].effFreqLineEdit = this->m_GUI->port12EffFreqLineEdit;
+  // effective frequency line edits.
+  this->m_TrackedObjects[0].frameLineEdit = this->m_GUI->port01FrameLineEdit;
+  this->m_TrackedObjects[1].frameLineEdit = this->m_GUI->port02FrameLineEdit;
+  this->m_TrackedObjects[2].frameLineEdit = this->m_GUI->port03FrameLineEdit;
+  this->m_TrackedObjects[3].frameLineEdit = this->m_GUI->port04FrameLineEdit;
+  this->m_TrackedObjects[4].frameLineEdit = this->m_GUI->port05FrameLineEdit;
+  this->m_TrackedObjects[5].frameLineEdit = this->m_GUI->port06FrameLineEdit;
+  this->m_TrackedObjects[6].frameLineEdit = this->m_GUI->port07FrameLineEdit;
+  this->m_TrackedObjects[7].frameLineEdit = this->m_GUI->port08FrameLineEdit;
+  this->m_TrackedObjects[8].frameLineEdit = this->m_GUI->port09FrameLineEdit;
+  this->m_TrackedObjects[9].frameLineEdit = this->m_GUI->port10FrameLineEdit;
+  this->m_TrackedObjects[10].frameLineEdit = this->m_GUI->port11FrameLineEdit;
+  this->m_TrackedObjects[11].frameLineEdit = this->m_GUI->port12FrameLineEdit;
   // quality value line edits.
   this->m_TrackedObjects[0].qualityLineEdit = this->m_GUI->port01QualityLineEdit;
   this->m_TrackedObjects[1].qualityLineEdit = this->m_GUI->port02QualityLineEdit;
@@ -155,7 +168,7 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
 
 NDIQtTrackGUI::~NDIQtTrackGUI()
 {
-  for(int i; i<MAX_TRACKED_PORTS; i++)
+  for(int i=0; i<MAX_TRACKED_PORTS; i++)
   {    
     delete this->m_TrackedObjects[i].xfrm;
   }
@@ -171,10 +184,13 @@ void NDIQtTrackGUI::CreateActions()
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
   connect(m_GUI->TrackerWidget, SIGNAL(TrackerStarted()), this, SLOT(OnTrackerStarted()) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolInfoUpdated(int)), this, SLOT(OnToolInfoUpdated(int)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,QString)), this, SLOT(OnToolTransformUpdated(int,QString)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,ndQuatTransformation)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,double)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolQualityNumberUpdated(int,double)), this, SLOT(OnToolQualityUpdated(int,double)) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,QString)), this, SLOT(OnToolTransformUpdated(int,int,QString)) );
+  /* older versions, link into the single function below now.
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,int,ndQuatTransformation)) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,int,double)) );
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolQualityNumberUpdated(int,int,double)), this, SLOT(OnToolQualityUpdated(int,int,double)) );
+  */
+  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,ndQuatTransformation,double,double)), this, SLOT(OnToolTransformUpdated(int,int,ndQuatTransformation,double,double)) );
   // hook up the tracked objects.
   for(int i=0; i<12; i++)
   {
@@ -276,10 +292,11 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
   }
 }
 
-void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status) 
+void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, QString status) 
 {
   if( port < MAX_TRACKED_PORTS )
   {
+    this->m_TrackedObjects[port].frameLineEdit->setText(QString("%1").arg(frame));
     this->m_TrackedObjects[port].xfrmlabel->setText( status );
   }
   else
@@ -288,7 +305,8 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, QString status)
   }
 }
 
-void NDIQtTrackGUI::OnToolTransformUpdated(int port, ndQuatTransformation xfrm)
+/* old versions, link into single function now.
+void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm)
 {
   if( port < MAX_TRACKED_PORTS)
   {
@@ -302,7 +320,7 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, ndQuatTransformation xfrm)
   }
 }
 
-void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
+void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, int frame, double freq)
 {
   if( port < MAX_TRACKED_PORTS)
   {
@@ -314,7 +332,9 @@ void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, double freq)
   }
 }
 
-void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
+
+
+void NDIQtTrackGUI::OnToolQualityUpdated(int port, int frame, double quality)
 {
   int prec;
 
@@ -334,6 +354,39 @@ void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
 
   if( port < MAX_TRACKED_PORTS)
   {
+    this->m_TrackedObjects[port].qualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
+  }
+  else
+  {
+    // do nothing for now.
+  }
+} */
+
+void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm, double freq, double quality)
+{
+  int prec;
+
+  switch(this->m_GUI->TrackerWidget->getTrackerSystemType())
+  {
+  case NDI_AURORA:
+  case NDI_SPECTRA:
+    prec = 4;
+    break;
+  case ASCENSION_3DG:
+    prec = 0;
+    break;
+  default:
+    prec = 4;
+    break;
+  }
+
+  if( port < MAX_TRACKED_PORTS)
+  {
+    this->m_TrackedObjects[port].frameLineEdit->setText(QString("%1").arg(frame));
+    this->m_TrackedObjects[port].xfrmlabel->setText( this->GetXfrmString(xfrm) );
+    ndCopyTransform(&xfrm, this->m_TrackedObjects[port].xfrm);
+    this->m_TrackedObjects[port].object->UpdateXfrm(&xfrm);
+    this->m_TrackedObjects[port].effFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
     this->m_TrackedObjects[port].qualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
   }
   else

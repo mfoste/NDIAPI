@@ -290,7 +290,7 @@ protected:
   // can communicate information back to the vtkTracker base class, which
   // will in turn relay the information to the appropriate vtkTrackerTool.
   void ToolUpdate(int tool, vtkMatrix4x4 *matrix, long flags, 
-      double timestamp, double error=0);
+      double timestamp, double error=0, long frame=0);
 
   // Description:
   // Set the number of tools for the tracker -- this method is

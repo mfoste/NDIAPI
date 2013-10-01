@@ -133,7 +133,7 @@ public:
   // Get the timestamp (in seconds since 1970) for the last update to
   // the tool Transform.
   double GetTimeStamp() { return this->TimeStamp; };
-
+  int GetFrame() { return this->Frame; };
   double GetErrorValue() { return this->Error; };
 
   // Description:
@@ -202,8 +202,8 @@ protected:
   int CollectToolTipCalibrationData;
 
   int Flags;
-
   double TimeStamp;
+  int Frame;
 
   int LED1;
   int LED2;

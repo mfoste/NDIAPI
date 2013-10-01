@@ -67,6 +67,7 @@ vtkTrackerTool::vtkTrackerTool()
   this->Transform = vtkTransform::New();
   this->Flags = TR_MISSING;
   this->TimeStamp = 0;
+  this->Frame = 0;
   this->CalibrationMatrix = vtkMatrix4x4::New();
 
   this->Minimizer = vtkAmoebaMinimizer::New();
@@ -164,6 +165,7 @@ void vtkTrackerTool::InitializeTool(bool bNotify)
 {
   this->Flags = TR_MISSING;
   this->TimeStamp = 0;
+  this->Frame = 0;
   this->CalibrationMatrix->Identity();
 
   this->CollectToolTipCalibrationData = 0;
@@ -215,11 +217,12 @@ void vtkTrackerTool::Update()
     } 
 
     this->TimeStamp = this->Buffer->GetTimeStamp(0);
-	this->Error = this->Buffer->GetErrorValue(0);
+    this->Frame = this->Buffer->GetFrame(0);
+    this->Error = this->Buffer->GetErrorValue(0);
 
     this->Modified();
   }
-  
+
   // push out an event update if this is modified.
   if( this->ToolInfoUpdated )
   {

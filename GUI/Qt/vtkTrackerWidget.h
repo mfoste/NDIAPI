@@ -69,9 +69,9 @@ public:
   inline vtkTracker* getTracker() {return m_Tracker;}
   int getTrackerSystemType();
   void UpdateToolInfo(int port);
-  void UpdateToolTransform(int port, QString status);
-  void UpdateToolTransform(int port, ndQuatTransformation xfrm);
-  void UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality);
+  void UpdateToolTransform(int port, int frame, QString status);
+  void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm);
+  void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm, double effFreq, double quality);
 
 public slots:
   virtual void OnConfigureTracker();
@@ -91,10 +91,11 @@ signals:
   void TrackerStarted();
   void TrackerStopped();
   void ToolInfoUpdated(int port);
-  void ToolTransformUpdated(int port, QString status);
-  void ToolTransformUpdated(int port, ndQuatTransformation xfrm);
-  void ToolEffectiveFrequencyUpdated(int port, double freq);
-  void ToolQualityNumberUpdated(int port, double quality);
+  void ToolTransformUpdated(int port, int frame, QString status);
+  void ToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm);
+  void ToolEffectiveFrequencyUpdated(int port, int frame, double freq);
+  void ToolQualityNumberUpdated(int port, int frame, double quality);
+  void ToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm, double freq, double quality);
   void PrePivotStarted(QString label, int maxtime);
   void ElapsedPrePivotTime(int elapsedTime);
   void PivotStarted(QString label, int maxtime);

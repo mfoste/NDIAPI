@@ -456,25 +456,26 @@ void vtkTrackerWidget::UpdateToolInfo(int port)
   emit ToolInfoUpdated(port);
 }
 
-void vtkTrackerWidget::UpdateToolTransform(int port, QString status)
+void vtkTrackerWidget::UpdateToolTransform(int port, int frame, QString status)
 {
   ndSetXfrmMissing(&this->m_xfrms[port]);
-  emit ToolTransformUpdated(port, status);
+  emit ToolTransformUpdated(port, frame, status);
 }
 
-void vtkTrackerWidget::UpdateToolTransform(int port, ndQuatTransformation xfrm)
+void vtkTrackerWidget::UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm)
 {
   ndCopyTransform(&xfrm, &this->m_xfrms[port]);
-  emit ToolTransformUpdated(port, xfrm);
+  emit ToolTransformUpdated(port, frame, xfrm);
 }
 
-void vtkTrackerWidget::UpdateToolTransform(int port, ndQuatTransformation xfrm, double effFreq, double quality)
+void vtkTrackerWidget::UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm, double effFreq, double quality)
 {
-  this->UpdateToolTransform(port, xfrm);
+  this->UpdateToolTransform(port, frame, xfrm);
   this->m_effectiveFrequencies[port] = effFreq;
-  emit this->ToolEffectiveFrequencyUpdated(port, effFreq);
+  emit this->ToolEffectiveFrequencyUpdated(port, frame, effFreq);
   this->m_quality[port] = quality;
-  emit this->ToolQualityNumberUpdated(port, quality);
+  emit this->ToolQualityNumberUpdated(port, frame, quality);
+  emit this->ToolTransformUpdated(port, frame, xfrm, effFreq, quality);
 }
 
 void vtkTrackerWidget::UpdateData ()
