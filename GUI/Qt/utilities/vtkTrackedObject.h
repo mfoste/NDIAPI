@@ -6,11 +6,13 @@
 #include <QtGui>
 
 #include <vtkSmartPointer.h>
-#include <vtkAxes.h>
+#include <vtkSphereSource.h>
+//#include <vtkAxes.h>
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkAxesActor.h>
 
 #include "ndXfrms.h"
 
@@ -28,19 +30,25 @@ protected:
 public:
   void UpdateXfrm(ndQuatTransformation *xfrm);
   ndQuatTransformation* GetXfrm() {return this->m_Xfrm;}
-  vtkActor* GetActor() {return this->m_ObjectActor;}
-  void SetVisibility(bool bVisible) {this->m_ObjectActor->SetVisibility(bVisible);}
+  vtkActor* GetModelActor() {return this->m_ObjectActor;}
+  vtkAxesActor* GetAxesActor() {return this->m_ObjectAxesActor;}
+  void SetModelVisibility(bool bVisible) {this->m_ObjectActor->SetVisibility(bVisible);}
+  void SetAxesVisibility(bool bVisible) {this->m_ObjectAxesActor->SetVisibility(bVisible);}
 
 signals:
   void TrackedObjectUpdated();
 
 private:
   ndQuatTransformation *m_Xfrm;
-  vtkSmartPointer<vtkAxes> m_ObjectLocal;
+  //vtkSmartPointer<vtkAxes> m_ObjectLocal;
+  vtkSmartPointer<vtkSphereSource> m_SphereObject;
   vtkSmartPointer<vtkTransform> m_ObjectXfrm;
   vtkSmartPointer<vtkTransformPolyDataFilter> m_Object;
   vtkSmartPointer<vtkPolyDataMapper> m_ObjectMapper;
   vtkSmartPointer<vtkActor> m_ObjectActor;
+
+  // if we use axes instead of a poly data, we can do this here.
+  vtkSmartPointer<vtkAxesActor> m_ObjectAxesActor;
 
 
 };

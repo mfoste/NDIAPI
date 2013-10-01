@@ -141,11 +141,12 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
   // configure viewer items.
   m_GUI->view3DQVTKWidget->GetRenderWindow()->AddRenderer(this->m_Renderer);
   this->m_axesActor->SetTotalLength(100.0,100.0,100.0);
-  //this->m_Renderer->AddActor(this->m_axesActor);
+  this->m_Renderer->AddActor(this->m_axesActor);
   // add the tool actors.
   for(int i=0; i<12; i++)
   {
-    this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetActor());
+    this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetModelActor());
+    this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetAxesActor());
   }
 
   // set up the connections.
@@ -156,7 +157,7 @@ NDIQtTrackGUI::~NDIQtTrackGUI()
 {
   for(int i; i<MAX_TRACKED_PORTS; i++)
   {    
-    delete this->m_TrackedObjects[0].xfrm;
+    delete this->m_TrackedObjects[i].xfrm;
   }
   this->m_TrackedObjects.clear();
   delete m_mutex;
@@ -263,7 +264,10 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
   if( port < MAX_TRACKED_PORTS)
   {
     this->m_TrackedObjects[port].datalabel->setText(toolInfo);
-    this->m_TrackedObjects[port].object->SetVisibility(true);
+    // TODO: figure out how to determine if tool changes.
+    this->m_TrackedObjects[port].object->SetModelVisibility(true);
+    this->m_TrackedObjects[port].object->SetAxesVisibility(true);
+
   }
   else
   {
@@ -341,6 +345,7 @@ void NDIQtTrackGUI::OnToolQualityUpdated(int port, double quality)
 void NDIQtTrackGUI::OnTrackedObjectUpdated()
 {
   this->m_GUI->view3DQVTKWidget->GetRenderWindow()->Render();
+  //this->m_Renderer->ResetCamera();
 }
 
 

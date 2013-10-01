@@ -8,6 +8,7 @@
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkAxesActor.h>
 
 #include "ndXfrms.h"
 
@@ -26,21 +27,28 @@ vtkTrackedObject::vtkTrackedObject()
   this->m_Xfrm = new ndQuatTransformation;
 
   // initialize the objects.
-  this->m_ObjectLocal = vtkSmartPointer<vtkAxes>::New();
+  //this->m_ObjectLocal = vtkSmartPointer<vtkAxes>::New();
+  this->m_SphereObject = vtkSmartPointer<vtkSphereSource>::New();
   this->m_ObjectXfrm = vtkSmartPointer<vtkTransform>::New();
   this->m_Object = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
   this->m_ObjectMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
   this->m_ObjectActor = vtkSmartPointer<vtkActor>::New();
+  this->m_ObjectAxesActor = vtkSmartPointer<vtkAxesActor>::New();
 
   // hook them up.
-  this->m_ObjectLocal->SetScaleFactor(50.0);
+  //this->m_ObjectLocal->SetScaleFactor(50.0);
+  this->m_SphereObject->SetRadius(10.0);
   this->m_ObjectXfrm->Identity();
   this->m_Object->SetTransform(this->m_ObjectXfrm);
-  this->m_Object->SetInputConnection(this->m_ObjectLocal->GetOutputPort());
+  //this->m_Object->SetInputConnection(this->m_ObjectLocal->GetOutputPort());
+  this->m_Object->SetInputConnection(this->m_SphereObject->GetOutputPort());
   this->m_ObjectMapper->SetInputConnection(this->m_Object->GetOutputPort());
   this->m_ObjectActor->SetMapper(this->m_ObjectMapper);
+  this->m_ObjectAxesActor->SetTotalLength(50.0,50.0,50.0);
   // hide the actor to start.
   this->m_ObjectActor->SetVisibility(false);
+  this->m_ObjectAxesActor->SetVisibility(false);
+  this->m_ObjectAxesActor->SetAxisLabels(false);
 }
 
 vtkTrackedObject::~vtkTrackedObject()
@@ -86,6 +94,7 @@ void vtkTrackedObject::UpdateXfrm(ndQuatTransformation *xfrm)
   this->m_ObjectXfrm->SetMatrix(xfrm4x4);
   this->m_Object->Update();
   this->m_ObjectMapper->Update();
+  this->m_ObjectAxesActor->SetUserTransform(this->m_ObjectXfrm);
 
   emit this->TrackedObjectUpdated();
 }
