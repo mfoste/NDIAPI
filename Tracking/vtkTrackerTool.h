@@ -123,7 +123,11 @@ public:
   int IsSwitch2On() {return ((this->Flags & TR_SWITCH2_IS_ON) != 0); };
   int IsSwitch3On() {return ((this->Flags & TR_SWITCH3_IS_ON) != 0); };
   int IsBadFit()    {return ((this->Flags & TR_BAD_FIT) != 0); };
+  int IsProcessingException() {return ((this->Flags & TR_PROCESSING_EXCEPTION) != 0); };
+  int IsTooFewMarkers() {return ((this->Flags & TR_TOO_FEW_MARKERS) != 0); };
+  int IsTooMuchIR() {return ((this->Flags & TR_TOO_MUCH_IR) != 0); };
   int IsToolInfoUpdated() { return this->ToolInfoUpdated;};
+  
 
   // Description:
   // Get the timestamp (in seconds since 1970) for the last update to
@@ -173,6 +177,7 @@ public:
   vtkSetStringMacro(ToolPartNumber);
   vtkSetStringMacro(ToolSerialNumber);
   vtkSetMacro(ToolInfoUpdated, int);
+  void InitializeTool(bool bNotify); // reset to the defaults, disable tool if unplugged, etc.
   void Update();
   //ETX
 

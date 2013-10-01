@@ -91,7 +91,10 @@ enum {
   TR_SWITCH1_IS_ON = 0x0010,  // various buttons/switches on tool
   TR_SWITCH2_IS_ON = 0x0020,
   TR_SWITCH3_IS_ON = 0x0040, 
-  TR_BAD_FIT       = 0x0080   // for algorithm fit issues with magnetic tracking.
+  TR_BAD_FIT       = 0x0080,   // for algorithm fit issues with magnetic tracking.
+  TR_PROCESSING_EXCEPTION = 0x0100, // for NDI Trackers, bit 12 on port status.
+  TR_TOO_FEW_MARKERS = 0x0200, // for optical systems that need minimum number of markers
+  TR_TOO_MUCH_IR   = 0x0400 // for NDI Polaris to indicate an IR issue.
 };
 
 // flags for tool LEDs (specifically for the POLARIS)

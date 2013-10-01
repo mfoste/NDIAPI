@@ -998,6 +998,7 @@ void vtkNDITracker::InternalUpdate()
 {
   int errnum, tool, ph;
   int status[VTK_NDI_NTOOLS];
+  int info[VTK_NDI_NTOOLS];
   int absent[VTK_NDI_NTOOLS];
   unsigned long frame[VTK_NDI_NTOOLS];
   double transform[VTK_NDI_NTOOLS][8];
@@ -1021,7 +1022,7 @@ void vtkNDITracker::InternalUpdate()
   }
 
   // get the transforms for all tools from the NDI
-  ndiCommand(this->Device,"TX:0801");
+  ndiCommand(this->Device,"TX:0803");
   //fprintf(stderr,"TX:0001 %s\n",ndiCommand(this->Device,"TX:0001"));
   errnum = ndiGetError(this->Device);
 
@@ -1052,6 +1053,7 @@ void vtkNDITracker::InternalUpdate()
 
     absent[tool] = ndiGetTXTransform(this->Device, ph, transform[tool]);
     status[tool] = ndiGetTXPortStatus(this->Device, ph);
+    info[tool] = ndiGetTXToolInfo(this->Device, ph);
     frame[tool] = ndiGetTXFrame(this->Device, ph);
     if (!absent[tool] && frame[tool] > nextcount)
     { // 'nextcount' is max frame number returned
@@ -1094,6 +1096,7 @@ void vtkNDITracker::InternalUpdate()
   {
     // convert status flags from NDI to vtkTracker format
     int port_status = status[tool];
+    int tool_info = info[tool];
     flags = 0;
     if ((port_status & mflags) != mflags) 
     {
@@ -1107,6 +1110,11 @@ void vtkNDITracker::InternalUpdate()
       if (port_status & NDI_SWITCH_1_ON)  { flags |= TR_SWITCH1_IS_ON; }
       if (port_status & NDI_SWITCH_2_ON)  { flags |= TR_SWITCH2_IS_ON; }
       if (port_status & NDI_SWITCH_3_ON)  { flags |= TR_SWITCH3_IS_ON; }
+      if (port_status & NDI_IR_INTERFERENCE) { flags |= TR_TOO_MUCH_IR; }
+      if (port_status & NDI_PROCESSING_EXCEPTION) { flags |= TR_PROCESSING_EXCEPTION; }
+      if (tool_info & NDI_BAD_TRANSFORM_FIT) { flags |= TR_BAD_FIT; }
+      if (tool_info & NDI_NOT_ENOUGH_MARKERS) { flags |= TR_TOO_FEW_MARKERS; }
+      if (tool_info & NDI_TOOL_INFRARED_INTERFERENCE) { flags |= TR_TOO_MUCH_IR; }
     }
 
     // if tracking relative to another tool
@@ -1327,13 +1335,7 @@ void vtkNDITracker::EnableToolPorts()
       vtkErrorMacro(<< ndiErrorString(errnum));
     }
     // reset the tool descriptions.
-    this->Tools[port]->SetToolSerialNumber("");
-    this->Tools[port]->SetToolRevision("");
-    this->Tools[port]->SetToolManufacturer("");
-    this->Tools[port]->SetToolType("");
-    this->Tools[port]->SetToolPartNumber("");
-    // update the flag that the values were updated.
-    this->Tools[port]->SetToolInfoUpdated(1);
+    this->Tools[port]->InitializeTool(true);
     // debug
     //fprintf(stderr, "Port %d was updated in vtkNDITracker...\n", port);
   }

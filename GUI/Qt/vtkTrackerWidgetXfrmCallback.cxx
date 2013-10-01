@@ -115,9 +115,21 @@ void vtkTrackerWidgetXfrmCallback::Execute(vtkObject *caller, unsigned long even
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool sensor is broken.") );
     }
+    else if( tool->IsProcessingException() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("Processing exception occurred.") );
+    }
     else if (tool->IsBadFit() )
     {
       m_parent->UpdateToolTransform(this->m_port, QString("Tool algorithm fit is bad.") );
+    }
+    else if( tool->IsTooFewMarkers() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("Too few markers.") );
+    }
+    else if( tool->IsTooMuchIR() )
+    {
+      m_parent->UpdateToolTransform(this->m_port, QString("IR Interference.") );
     }
     else if( tool->IsOutOfView() ) // at NDI, this is equivalent to missing.
     {

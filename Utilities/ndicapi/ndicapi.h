@@ -1688,16 +1688,20 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 
 /* ndiGetTXPortStatus() and ndiGetPSTATPortStatus() return value bits */
 /*\{*/
-#define  NDI_TOOL_IN_PORT        0x01
-#define  NDI_SWITCH_1_ON         0x02
-#define  NDI_SWITCH_2_ON         0x04
-#define  NDI_SWITCH_3_ON         0x08
-#define  NDI_INITIALIZED         0x10
-#define  NDI_ENABLED             0x20
-#define  NDI_OUT_OF_VOLUME       0x40 /* only for ndiGetTXPortStatus() */
-#define  NDI_PARTIALLY_IN_VOLUME 0x80 /* only for ndiGetTXPortStatus() */ 
-#define  NDI_BROKEN_SENSOR       0x100
-#define  NDI_CURRENT_DETECT      0x80 /* only for ndiGetPSTATPortStatus() */
+#define  NDI_TOOL_IN_PORT            0x0001
+#define  NDI_SWITCH_1_ON             0x0002
+#define  NDI_SWITCH_2_ON             0x0004
+#define  NDI_SWITCH_3_ON             0x0008
+#define  NDI_INITIALIZED             0x0010
+#define  NDI_ENABLED                 0x0020
+#define  NDI_OUT_OF_VOLUME           0x0040 /* only for ndiGetTXPortStatus() */
+#define  NDI_PARTIALLY_IN_VOLUME     0x0080 /* only for ndiGetTXPortStatus() */ 
+#define  NDI_BROKEN_SENSOR           0x0100
+#define  NDI_IR_INTERFERENCE         0x0200
+#define  NDI_PROCESSING_EXCEPTION    0x1000
+#define  NDI_FELL_BEHIND             0x4000
+#define  NDI_DATA_BUFFER_LIMITATION  0x8000
+#define  NDI_CURRENT_DETECT          0x80 /* only for ndiGetPSTATPortStatus() */
 /*\}*/
 
 /* ndiGetTXSystemStatus() return value bits */
@@ -1714,17 +1718,22 @@ void *ndiHexDecode(void *data, const char *cp, int n);
 
 /* ndiGetTXToolInfo() return value bits */
 /*\{*/
-#define  NDI_BAD_TRANSFORM_FIT   0x01
-#define  NDI_NOT_ENOUGH_MARKERS  0x02
-#define  NDI_TOOL_FACE_USED      0x70
+#define  NDI_BAD_TRANSFORM_FIT             0x01
+#define  NDI_NOT_ENOUGH_MARKERS            0x02
+#define  NDI_TOOL_INFRARED_INTERFERENCE    0x04
+#define  NDI_FELL_BEHIND_WHILE_PROCESSING  0x08
+#define  NDI_TOOL_FACE_USED                0x70
+#define  NDI_TOOL_PROCESSING_EXCEPTION     0x80
 /*\}*/
 
 /* ndiGetTXMarkerInfo() return value bits */
 /*\{*/
-#define  NDI_MARKER_MISSING             0
-#define  NDI_MARKER_EXCEEDED_MAX_ANGLE  1
-#define  NDI_MARKER_EXCEEDED_MAX_ERROR  2
-#define  NDI_MARKER_USED                3
+#define  NDI_MARKER_MISSING                  0
+#define  NDI_MARKER_EXCEEDED_MAX_ANGLE       1
+#define  NDI_MARKER_EXCEEDED_MAX_ERROR       2
+#define  NDI_MARKER_USED                     3
+#define  NDI_MARKER_USED_BUT_OUT_OF_VOLUME   4
+#define  NDI_MARKER_OUT_OF_VOLUME_NOT_NEEDED 5
 /*\}*/
 
 /* ndiLED() states */

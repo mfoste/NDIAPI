@@ -159,6 +159,41 @@ void vtkTrackerTool::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
+// initialize the values to a base state. 
+void vtkTrackerTool::InitializeTool(bool bNotify)
+{
+  this->Flags = TR_MISSING;
+  this->TimeStamp = 0;
+  this->CalibrationMatrix->Identity();
+
+  this->CollectToolTipCalibrationData = 0;
+
+  this->LED1 = 0;
+  this->LED2 = 0;
+  this->LED3 = 0;
+
+  this->ToolType = 0;
+  this->ToolRevision = 0;
+  this->ToolSerialNumber = 0;
+  this->ToolPartNumber = 0;
+  this->ToolManufacturer = 0;
+
+  this->Error = 0;
+
+  this->SetToolType("");
+  this->SetToolRevision("");
+  this->SetToolSerialNumber("");
+  this->SetToolPartNumber("");
+  this->SetToolManufacturer("");
+
+  if( bNotify )
+  {
+    this->ToolInfoUpdated = 1;
+    this->Modified();
+  }
+}
+
+//----------------------------------------------------------------------------
 // the update copies the latest matrix from the buffer
 void vtkTrackerTool::Update()
 {
