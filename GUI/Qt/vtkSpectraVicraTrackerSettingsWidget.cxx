@@ -54,6 +54,8 @@ vtkSpectraVicraTrackerSettingsWidget::vtkSpectraVicraTrackerSettingsWidget( QWid
   this->m_SpectraVicraSettings.bUseManual = false;
   this->m_SpectraVicraSettings.baudRate = -1;
   this->m_SpectraVicraSettings.commPort = -1;
+  this->m_SpectraVicraSettings.logComm = false;
+  this->m_SpectraVicraSettings.hardwareSync = false;
 
   this->m_Widget.baudRateComboBox->addItem("Auto", -1);
   this->m_Widget.baudRateComboBox->addItem("9600", 9600);

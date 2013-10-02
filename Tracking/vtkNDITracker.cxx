@@ -885,8 +885,8 @@ int vtkNDITracker::InternalStartTracking()
   // if Polaris Spectra crank up to 60Hz, no point in using the legacy default of 20Hz.
   if( this->NDISystemType & NDI_POLARIS_SPECTRA_SYSTEM )
   {
-    // set some FG timings.
-    ndiCommand(this->Device, "set Param.Tracking.Illuminator Rate=2");
+    // set some illuminator timings.
+    ndiCommand(this->Device, "SET:Param.Tracking.Illuminator Rate=2");
     errnum = ndiGetError(this->Device);
     if (errnum) 
     {
@@ -894,6 +894,20 @@ int vtkNDITracker::InternalStartTracking()
       ndiClose(this->Device);
       this->Device = 0;
       return 0;
+    }
+
+    // set the hardware sync.
+    if( this->bHardwareSync )
+    {
+      ndiCommand(this->Device, "SET:Param.System Ext Sync Mode=1");
+      errnum = ndiGetError(this->Device);
+      if (errnum) 
+      {
+        vtkErrorMacro(<< ndiErrorString(errnum));
+        ndiClose(this->Device);
+        this->Device = 0;
+        return 0;
+      }
     }
   }
 
