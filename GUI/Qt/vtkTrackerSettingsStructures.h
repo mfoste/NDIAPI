@@ -73,6 +73,9 @@ struct ndiAuroraSettings
   bool bUseManual;
   int commPort;
   int baudRate;
+  
+  // other settings.
+  bool logComm;
 };
 
 #if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
@@ -98,7 +101,6 @@ struct ndiSpectraVicraSettings
 
   // other settings.
   bool logComm;
-  bool hardwareSync;
 };
 
 #endif
