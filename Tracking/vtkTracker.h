@@ -124,6 +124,11 @@ public:
   // full tracking mode.  This method calls InternalStartTracking()
   // after doing a bit of housekeeping.
   virtual void StartTracking();
+  // Description:
+  // Start the tracking system after a hardware sync signal.  
+  // A simple event is invoked which signals to the GUI to start the
+  // tracking using StartTracking() so that the GUI is all set-up.
+  virtual void StartHardwareSyncTracking();
 
   // Description:
   // Stop the tracking system and bring it back to its ground state.
