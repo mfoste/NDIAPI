@@ -409,16 +409,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item>
-                   <widget class="QCheckBox" name="hardwareSyncCheckBox">
-                    <property name="toolTip">
-                     <string>Set this tracker as the slave in a hardware sync</string>
-                    </property>
-                    <property name="text">
-                     <string>Hardware Sync</string>
-                    </property>
-                   </widget>
-                  </item>
                  </layout>
                 </item>
                </layout>
