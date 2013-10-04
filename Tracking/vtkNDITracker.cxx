@@ -899,7 +899,7 @@ int vtkNDITracker::InternalStartTracking()
     // set the hardware sync.
     if( this->bHardwareSync )
     {
-      ndiCommand(this->Device, "SET:Param.System Ext Sync Mode=1");
+      ndiCommand(this->Device, "SET:SCU-0.Param.System Ext Sync Mode=1");
       errnum = ndiGetError(this->Device);
       if (errnum) 
       {
