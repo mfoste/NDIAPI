@@ -65,6 +65,7 @@ public slots:
   virtual void OnUseManual(bool bUseManual);
   virtual void OnCommPortChanged(int index);
   virtual void OnBaudRateChanged(int index);
+  virtual void OnLogCommunicationChanged(bool bLogComm);
 
   
 private:

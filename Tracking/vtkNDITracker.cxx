@@ -87,13 +87,19 @@ vtkNDITracker::vtkNDITracker()
   this->SendMatrix = vtkMatrix4x4::New();
   this->IsDeviceTracking = 0;
   this->bLogCommunication = 0;
-  this->bHardwareSync =0;
   this->SerialPort = -1; // default is to probe
   this->SerialDevice = 0;
   this->Volume = 0;
   this->NumTrackingVolumes = 0;
   this->BaudRate = 9600;
   this->SetNumberOfTools(VTK_NDI_NTOOLS);
+
+  // hardware sync -- slave variables.
+  this->bHardwareSync = 0;
+  this->bHardwareSyncReady = 0;
+  // hardware sync -- master variables.
+  this->m_SlaveTracker = 0;
+  this->m_MasterTracker = 0;
 
   for (int i = 0; i < VTK_NDI_NTOOLS; i++)
   {
@@ -867,6 +873,13 @@ int vtkNDITracker::InternalStartTracking()
 {
   int errnum, tool;
 
+  if( this->m_MasterTracker )
+  {
+    fprintf(stderr, "Send signal to master from %s\n", this->GetSerialNumber());
+    //vtkWarningMacro(<< "send signal to master tracker...");
+    this->m_MasterTracker->StartHardwareSyncTracking();
+  }
+
   if (this->IsDeviceTracking)
   {
     return 1;
@@ -880,6 +893,17 @@ int vtkNDITracker::InternalStartTracking()
   if( !this->InternalGetSystemInfo())
   { 
       return 0;
+  }
+
+  // add VSEL command here.
+  ndiVSEL(this->Device, this->Volume+1); // note VSEL is 1-based not zero-based.
+  errnum = ndiGetError(this->Device);
+  if (errnum) 
+  {
+    vtkErrorMacro(<< ndiErrorString(errnum));
+    ndiClose(this->Device);
+    this->Device = 0;
+    return 0;
   }
 
   // if Polaris Spectra crank up to 60Hz, no point in using the legacy default of 20Hz.
@@ -899,35 +923,42 @@ int vtkNDITracker::InternalStartTracking()
     // set the hardware sync.
     if( this->bHardwareSync )
     {
+
+      // set the external hardware sync variables.
       ndiCommand(this->Device, "SET:SCU-0.Param.System Ext Sync Mode=1");
       errnum = ndiGetError(this->Device);
       if (errnum) 
       {
-        vtkErrorMacro(<< ndiErrorString(errnum));
-        ndiClose(this->Device);
-        this->Device = 0;
-        return 0;
+        vtkWarningMacro(<< ndiErrorString(errnum));
+        // try the Super-HUC command for early prototype hardware.
+        ndiCommand(this->Device, "SET:Config.Ext Device Syncing=1");
+        errnum = ndiGetError(this->Device);
+        if (errnum)
+        {
+          vtkErrorMacro(<< ndiErrorString(errnum));
+          ndiClose(this->Device);
+          this->Device = 0;
+          return 0;
+        }
       }
     }
   }
 
-  // add VSEL command here.
-  ndiVSEL(this->Device, this->Volume+1); // note VSEL is 1-based not zero-based.
-  errnum = ndiGetError(this->Device);
-  if (errnum) 
+  // hardware sync -- this is the master.
+  /*if( this->m_SlaveTracker )
   {
-    vtkErrorMacro(<< ndiErrorString(errnum));
-    ndiClose(this->Device);
-    this->Device = 0;
-    return 0;
-  }
+    vtkWarningMacro(<< "send signal to slave tracker...");
+    this->m_SlaveTracker->StartHardwareSyncTracking();
+    Sleep(1000);
+  }*/  
 
+  fprintf(stderr, "%s - TSTART\n", this->GetSerialNumber());
   ndiCommand(this->Device,"TSTART:");
-
+  
   errnum = ndiGetError(this->Device);
   if (errnum) 
   {
-    vtkErrorMacro(<< ndiErrorString(errnum));
+    vtkErrorMacro(<< ndiErrorString(errnum) << this->GetSerialNumber() );
     ndiClose(this->Device);
     this->Device = 0;
     return 0;

@@ -72,6 +72,9 @@ public:
   void UpdateToolTransform(int port, int frame, QString status);
   void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm);
   void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm, double effFreq, double quality);
+  // for hardware synch.
+ void SetSlaveTracker (vtkTrackerWidget *slave);
+ void SetMasterTracker (vtkTrackerWidget *master);
 
 public slots:
   virtual void OnConfigureTracker();
@@ -148,6 +151,10 @@ private:
   double m_PivotTime;
   QTimer *m_PrePivotTimer;
   QTimer *m_PivotTimer;
+
+  // for hardware sync.
+  vtkTrackerWidget *m_SlaveTracker;
+  vtkTrackerWidget *m_MasterTracker;
 };
 
 #endif

@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <limits.h>
 #include <float.h>
 #include <math.h>
+#include "vtkCommand.h"
 #include "vtkCharArray.h"
 #include "vtkCriticalSection.h"
 #include "vtkDoubleArray.h"
@@ -377,137 +378,144 @@ void vtkTracker::StartTracking()
   int tracking = this->Tracking;
   // client 
   if(!this->ServerMode && this->RemoteAddress) 
-    {
+  {
     // ask the communication thread to send a message" StartTracking"
     int len = 16;
     const char* msg1 = "StartTracking";
-    
+
     if(this->SocketCommunicator->GetIsConnected()>0 )
-      {
+    {
       if(!this->SocketCommunicator->Send(&len, 1, 1, 11) )
-	{
-	}
-      else
-	{
-	if( !this->SocketCommunicator->Send(msg1, len, 1, 22))
-	  {
-	  vtkErrorMacro(" Could not send the message\n");
-	  exit(0);
-	  }
-	else
-	  {
-	  // wait to receive the Tool Information acknowledgement
-	  const char *msg = "InternalStartTracking";
-	  const int maxMessages = 50;
-	  int messageNum = 0;
-	  for (messageNum = 0; 
-	       messageNum < maxMessages && 
-		 strcmp( msg, "InternalStartTrackingSuccessful" ) ;
-	       messageNum++)
-	    {
-	    int rlen[1] = {0};
-	    if( this->SocketCommunicator->Receive(rlen, 1, 1, 11) )
-	      {
-	      char *rmsg = new char [rlen[0]];
-	      if(!this->SocketCommunicator->Receive(rmsg, rlen[0], 1, 22) )
-		{
-		vtkErrorMacro("Could not ReceiveToolInfo");
-		exit(0);
-		}
-	      else
-		{
-		this->InterpretCommands( rmsg );
-		char *tmsg = new char [rlen[0]];
-		memcpy(tmsg, rmsg, rlen[0]);
-                msg = tmsg;
-		}
-	      }
-	    }
-	  if (messageNum == maxMessages)
-	    {
-	    vtkErrorMacro("Waited to receive \"EndEnabledToolPort\" "
-			  "but it never came");
-	    }
-	  this->Tracking = 1;
-	  }
-	}
+      {
       }
+      else
+      {
+        if( !this->SocketCommunicator->Send(msg1, len, 1, 22))
+        {
+          vtkErrorMacro(" Could not send the message\n");
+          exit(0);
+        }
+        else
+        {
+          // wait to receive the Tool Information acknowledgement
+          const char *msg = "InternalStartTracking";
+          const int maxMessages = 50;
+          int messageNum = 0;
+          for (messageNum = 0; 
+            messageNum < maxMessages && 
+            strcmp( msg, "InternalStartTrackingSuccessful" ) ;
+          messageNum++)
+          {
+            int rlen[1] = {0};
+            if( this->SocketCommunicator->Receive(rlen, 1, 1, 11) )
+            {
+              char *rmsg = new char [rlen[0]];
+              if(!this->SocketCommunicator->Receive(rmsg, rlen[0], 1, 22) )
+              {
+                vtkErrorMacro("Could not ReceiveToolInfo");
+                exit(0);
+              }
+              else
+              {
+                this->InterpretCommands( rmsg );
+                char *tmsg = new char [rlen[0]];
+                memcpy(tmsg, rmsg, rlen[0]);
+                msg = tmsg;
+              }
+            }
+          }
+          if (messageNum == maxMessages)
+          {
+            vtkErrorMacro("Waited to receive \"EndEnabledToolPort\" "
+              "but it never came");
+          }
+          this->Tracking = 1;
+        }
+      }
+    }
     this->UpdateMutex->Lock();
     this->ThreadId = this->Threader->SpawnThread((vtkThreadFunctionType)\
-                                                 &vtkTrackerThread,this);
+      &vtkTrackerThread,this);
     this->LastUpdateTime = this->UpdateTime.GetMTime();
     this->UpdateMutex->Unlock();
-    } //end client
-  
+  } //end client
+
   //server / normal
   else if(this->ServerMode || !this->RemoteAddress) 
-    {
+  {
     this->Tracking = this->InternalStartTracking();
-    
+
     if(this->ServerMode)
-      {
+    {
       if(this->SocketCommunicator->GetIsConnected()>0)
-	{
-	const char *msgText = "InternalStartTrackingSuccessful";
-	int len = strlen(msgText);
-	if( this->SocketCommunicator->Send(&len, 1, 1, 11) )
-	  {
-	  if(!this->SocketCommunicator->Send(msgText, len, 1, 22))
-	    {
-	    vtkErrorMacro(
-	      "Could not send message: InternalStartTrackingSuccessful");
-	    exit(0);
-	    }
-	  }
-	else
-	  {
-	  vtkErrorMacro(
-	    "Could not send length of InternalStartTrackingSuccessful");
-	  exit(0);
-	  }
-	}
-      else
-	{
-	vtkErrorMacro("Client Not Connected.\n");
-	}
+      {
+        const char *msgText = "InternalStartTrackingSuccessful";
+        int len = strlen(msgText);
+        if( this->SocketCommunicator->Send(&len, 1, 1, 11) )
+        {
+          if(!this->SocketCommunicator->Send(msgText, len, 1, 22))
+          {
+            vtkErrorMacro(
+              "Could not send message: InternalStartTrackingSuccessful");
+            exit(0);
+          }
+        }
+        else
+        {
+          vtkErrorMacro(
+            "Could not send length of InternalStartTrackingSuccessful");
+          exit(0);
+        }
       }
-   
+      else
+      {
+        vtkErrorMacro("Client Not Connected.\n");
+      }
+    }
+
     // start the tracking thread
     if (!(this->Tracking && !tracking && this->ThreadId == -1))
-      {
+    {
       return;
-      }
-    
+    }
+
     // this will block the tracking thread until we're ready
     this->UpdateMutex->Lock();
-    
+
     // start the tracking thread
     this->ThreadId = this->Threader->SpawnThread((vtkThreadFunctionType)\
-      						  &vtkTrackerThread,this);
+      &vtkTrackerThread,this);
     this->LastUpdateTime = this->UpdateTime.GetMTime();
-    
+
     // allow the tracking thread to proceed
     this->UpdateMutex->Unlock();
-    }
-    // wait until the first update has occurred before returning
-    int timechanged = 0;
-    
-    while (!timechanged)
-      {
-      this->RequestUpdateMutex->Lock();
-      this->UpdateMutex->Lock();
-      this->RequestUpdateMutex->Unlock();
-      timechanged = (this->LastUpdateTime != this->UpdateTime.GetMTime());
-      this->UpdateMutex->Unlock();
+  }
+  // wait until the first update has occurred before returning
+  int timechanged = 0;
+
+  while (!timechanged)
+  {
+    this->RequestUpdateMutex->Lock();
+    this->UpdateMutex->Lock();
+    this->RequestUpdateMutex->Unlock();
+    timechanged = (this->LastUpdateTime != this->UpdateTime.GetMTime());
+    this->UpdateMutex->Unlock();
 #ifdef _WIN32
-      Sleep((int)(100));
+    Sleep((int)(100));
 #elif defined(__FreeBSD__) || defined(__linux__) || defined(sgi) || defined(__APPLE__)
-      struct timespec sleep_time, dummy;
-      sleep_time.tv_sec = 0;
-      sleep_time.tv_nsec = 100000000;
-      nanosleep(&sleep_time,&dummy);
+    struct timespec sleep_time, dummy;
+    sleep_time.tv_sec = 0;
+    sleep_time.tv_nsec = 100000000;
+    nanosleep(&sleep_time,&dummy);
 #endif
-      }
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkTracker::StartHardwareSyncTracking()
+{
+  fprintf(stderr, "Invoking Hardware Sync Start Tracking for %s\n", this->GetSerialNumber());
+  this->InvokeEvent(vtkCommand::UserEvent+1);
 }
 
 //----------------------------------------------------------------------------

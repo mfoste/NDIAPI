@@ -244,6 +244,17 @@ void vtkTrackerWidget::ConfigureTracker()
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetBaudRate(-1); 
       dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSerialPort(-1);
     }
+    
+    // communication log.
+    if( this->m_TrackerSettingsDialog->getAuroraSettings().logComm )
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->LogCommunication(1);
+    }
+    else
+    {
+      dynamic_cast<vtkNDITracker*>(m_Tracker)->LogCommunication(0);
+    }
+
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getAuroraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 4; i++ )
@@ -290,15 +301,7 @@ void vtkTrackerWidget::ConfigureTracker()
     {
       dynamic_cast<vtkNDITracker*>(m_Tracker)->LogCommunication(0);
     }
-    // hardware sync.
-    if( this->m_TrackerSettingsDialog->getSpectraVicraSettings().hardwareSync )
-    {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetHardwareSync(1);
-    }
-    else
-    {
-      dynamic_cast<vtkNDITracker*>(m_Tracker)->SetHardwareSync(0);
-    }
+    
     this->m_TrackerUpdateFrequency = this->m_TrackerSettingsDialog->getSpectraVicraSettings().updateFrequency;
     // load virtual roms if needed.
     for(int i = 0; i < 12; i++ )
@@ -332,6 +335,8 @@ void vtkTrackerWidget::ConfigureTracker()
     m_xfrmCallbacks[i] = vtkTrackerWidgetXfrmCallback::New(this, i);
     m_Tracker->GetTool(i)->AddObserver(vtkCommand::ModifiedEvent, this->m_xfrmCallbacks[i]);
   }
+  // add the hardware sync call to the first xfrm call back.
+  m_Tracker->AddObserver(vtkCommand::UserEvent+1, this->m_xfrmCallbacks[0]);
   //m_Tracker->GetTool(m_RefPlugPort)->AddObserver(vtkCommand::ModifiedEvent, this->m_RefPlugCallbackObserver);
   //m_Tracker->GetTool(m_TestPlugPort)->AddObserver(vtkCommand::ModifiedEvent, this->m_TestPlugCallbackObserver);
 
@@ -476,6 +481,33 @@ void vtkTrackerWidget::UpdateToolTransform(int port, int frame, ndQuatTransforma
   this->m_quality[port] = quality;
   emit this->ToolQualityNumberUpdated(port, frame, quality);
   emit this->ToolTransformUpdated(port, frame, xfrm, effFreq, quality);
+}
+
+void vtkTrackerWidget::SetSlaveTracker(vtkTrackerWidget *slave)
+{
+  if( slave->getTrackerSystemType() == NDI_SPECTRA || 
+    slave->getTrackerSystemType() == NDI_SPECTRA_HYBRID )
+  {
+    this->m_SlaveTracker = slave;
+    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSlaveTracker(this->m_SlaveTracker->getTracker());
+  }
+  else
+  {
+    this->PopUpError("Only NDI Passive Spectra (with special adapter) and Hybrid Spectra can be used as a hardware slave.");
+  }
+}
+
+void vtkTrackerWidget::SetMasterTracker(vtkTrackerWidget *master)
+{
+  if( master->getTrackerSystemType() == NDI_AURORA )
+  {
+    this->m_MasterTracker = master;
+    dynamic_cast<vtkNDITracker*>(m_Tracker)->SetMasterTracker(this->m_MasterTracker->getTracker());
+  }
+  else
+  {
+    this->PopUpError("Only NDI Aurora can be used as a hardware master.");
+  }
 }
 
 void vtkTrackerWidget::UpdateData ()

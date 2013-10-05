@@ -53,6 +53,7 @@ vtkAuroraTrackerSettingsWidget::vtkAuroraTrackerSettingsWidget( QWidget *parent,
   this->m_AuroraSettings.bUseManual = false;
   this->m_AuroraSettings.baudRate = -1;
   this->m_AuroraSettings.commPort = -1;
+  this->m_AuroraSettings.logComm = false;
 
   this->m_Widget.baudRateComboBox->addItem("Auto", -1);
   this->m_Widget.baudRateComboBox->addItem("9600", 9600);
@@ -96,6 +97,8 @@ void vtkAuroraTrackerSettingsWidget::CreateActions()
   connect(this->m_Widget.useManualParmsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnUseManual(bool)) );
   connect(this->m_Widget.commPortComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnCommPortChanged(int)) );
   connect(this->m_Widget.baudRateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnBaudRateChanged(int)) );
+  // other settings
+  connect(this->m_Widget.logCommunicationsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnLogCommunicationChanged(bool)) );
 }
 
 void vtkAuroraTrackerSettingsWidget::ReadTrackerSettings()
@@ -266,4 +269,9 @@ void vtkAuroraTrackerSettingsWidget::OnCommPortChanged(int index)
 void vtkAuroraTrackerSettingsWidget::OnBaudRateChanged(int index)
 {
   this->m_AuroraSettings.baudRate = this->m_Widget.baudRateComboBox->itemData(index).toInt();
+}
+
+void vtkAuroraTrackerSettingsWidget::OnLogCommunicationChanged(bool bLogComm)
+{
+  this->m_AuroraSettings.logComm = bLogComm;
 }

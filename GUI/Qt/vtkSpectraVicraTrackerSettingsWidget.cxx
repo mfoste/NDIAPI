@@ -55,8 +55,7 @@ vtkSpectraVicraTrackerSettingsWidget::vtkSpectraVicraTrackerSettingsWidget( QWid
   this->m_SpectraVicraSettings.baudRate = -1;
   this->m_SpectraVicraSettings.commPort = -1;
   this->m_SpectraVicraSettings.logComm = false;
-  this->m_SpectraVicraSettings.hardwareSync = false;
-
+  
   this->m_Widget.baudRateComboBox->addItem("Auto", -1);
   this->m_Widget.baudRateComboBox->addItem("9600", 9600);
   this->m_Widget.baudRateComboBox->addItem("14400", 14400);
@@ -109,7 +108,6 @@ void vtkSpectraVicraTrackerSettingsWidget::CreateActions()
   connect(this->m_Widget.baudRateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(OnBaudRateChanged(int)) );
   // other settings
   connect(this->m_Widget.logCommunicationsCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnLogCommunicationChanged(bool)) );
-  connect(this->m_Widget.hardwareSyncCheckBox, SIGNAL(clicked(bool)), this, SLOT(OnHardwareSyncChanged(bool)) );
 }
 
 void vtkSpectraVicraTrackerSettingsWidget::ReadTrackerSettings()
@@ -392,7 +390,3 @@ void vtkSpectraVicraTrackerSettingsWidget::OnLogCommunicationChanged(bool bLogCo
   this->m_SpectraVicraSettings.logComm = bLogComm;
 }
 
-void vtkSpectraVicraTrackerSettingsWidget::OnHardwareSyncChanged(bool bSync)
-{
-  this->m_SpectraVicraSettings.hardwareSync = bSync;
-}
