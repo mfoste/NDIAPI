@@ -56,7 +56,7 @@ public:
   inline Ui::SpectraTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline ndiSpectraVicraSettings GetSpectraVicraSettings() {return this->m_SpectraVicraSettings;}
+  inline ndiSpectraVicraSettings* GetSpectraVicraSettings() {return &this->m_SpectraVicraSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
   void UseSpectraHybrid();

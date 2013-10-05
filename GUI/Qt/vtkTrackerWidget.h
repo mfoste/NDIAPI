@@ -48,10 +48,9 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "ndXfrms.h"
 #include "vtkTrackerSettingsStructures.h"
+#include "QTracker.h"
 
-class vtkTracker;
 class vtkTrackerSettingsDialog;
-class vtkTrackerWidgetXfrmCallback;
 
 class VTKTRACKERWIDGET_EXPORT vtkTrackerWidget : public QWidget
 {
@@ -63,35 +62,39 @@ public:
 
   QSize sizeHint() const;
 
-  void Initialize();
-  void Initialize(QString settingsFile);
-
-  inline vtkTracker* getTracker() {return m_Tracker;}
+  inline void SetSettingsFileName( QString settingsFile ) {this->m_SettingsFileName=settingsFile;};
+  inline QTracker* getTracker() {return m_TrackerObject;}
   int getTrackerSystemType();
-  void UpdateToolInfo(int port);
-  void UpdateToolTransform(int port, int frame, QString status);
-  void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm);
-  void UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm, double effFreq, double quality);
+  
   // for hardware synch.
  void SetSlaveTracker (vtkTrackerWidget *slave);
  void SetMasterTracker (vtkTrackerWidget *master);
 
 public slots:
+  virtual void Initialize();
+  virtual void Initialize(QString settingsFile);
   virtual void OnConfigureTracker();
   virtual void OnConfigureTrackerAccepted();
   virtual void OnConfigureTrackerCanceled();
+  virtual void OnVolumeListUpdated(QStringList volumeList);
   virtual void OnVolumeSelected(int volume);
   virtual void OnStartTracker();
   virtual void OnStopTracker();
-  virtual void UpdateData();
-  // pivot functions.
-  virtual void OnInitializePivot(int port, double preTime, double collectTime );
-  virtual void OnStartPivot();
-  virtual void OnStopPivot();
-
+  //virtual void CloseTrackerWidget();
+  
 signals:
-  void TrackerConfigured(QString SerialNumber);
-  void TrackerStarted();
+  void TrackerWidgetInitialized();
+  void TrackerConfigurationDialogOpened();
+  void ConfigureFakeTracker(int trackerType, vtkFakeTrackerSettings *settings);
+  void ConfigureAuroraTracker(int trackerType, ndiAuroraSettings *settings);
+  void ConfigureSpectraVicraTracker(int trackerType, ndiSpectraVicraSettings *settings);
+#if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
+  void ConfigureAscension3DGTracker(int trackerType, ascension3DGSettings *settings);
+#endif
+  void VolumeSelected(int volume);
+  void StartTracking();
+  void StopTracking();
+  /*void TrackerStarted();
   void TrackerStopped();
   void ToolInfoUpdated(int port);
   void ToolTransformUpdated(int port, int frame, QString status);
@@ -104,6 +107,7 @@ signals:
   void PivotStarted(QString label, int maxtime);
   void ElapsedPivotTime(int elapsedTime);
   void PivotFinished(double error, vtkMatrix4x4 *mat);
+  void finished();*/
   //void PivotError(double error);
   //void PivotCalibrationMatrix(int port, vtkMatrix4x4 *mat);
 
@@ -113,11 +117,13 @@ private:
 	void setupUiLayout();
   void CreateActions();
   void ConfigureTracker();
-  void RemoveTracker();
   void PopUpError(QString str);
 
   // the owner of this widget.
   QWidget *m_Parent;
+
+  // settings file.
+  QString m_SettingsFileName;
   
   // GUI variables.
   //Ui::vtkTrackerWidget m_GUI;
@@ -126,32 +132,14 @@ private:
   QPushButton *m_StartTrackingButton;
   QPushButton *m_StopTrackingButton;
   //QVBoxLayout *m_VerticalLayout;
-
   
   // actual tracker object we are controlling.
-  vtkTracker *m_Tracker;
+  QTracker *m_TrackerObject;
   vtkTrackerSettingsDialog *m_TrackerSettingsDialog;
 
-  // keep track of the tools.
-  std::vector < ndQuatTransformation > m_xfrms;
-  std::vector < double > m_effectiveFrequencies;
-  std::vector < double > m_quality;
-  std::vector < vtkTrackerWidgetXfrmCallback* > m_xfrmCallbacks;
-
-  //timer.
-  QTimer *m_Timer; // need a timer to update the tracker.
-  double m_TrackerUpdateFrequency;
-
-  // pivot.
-  QTime m_PhaseTime;
-  int m_PivotTool;  // tool to pivot.
-  bool m_bPrePivot; // init pivot.
-  double m_PrePivotTime;
-  bool m_bPivot;  // whether we pivot.
-  double m_PivotTime;
-  QTimer *m_PrePivotTimer;
-  QTimer *m_PivotTimer;
-
+  // use a separate thread for the QTracker object.
+  QThread *m_TrackerThread;
+    
   // for hardware sync.
   vtkTrackerWidget *m_SlaveTracker;
   vtkTrackerWidget *m_MasterTracker;

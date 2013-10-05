@@ -56,7 +56,7 @@ public:
   inline Ui::FakeTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline vtkFakeTrackerSettings GetFakeTrackerSettings() {return this->m_FakeTrackerSettings;}
+  inline vtkFakeTrackerSettings* GetFakeTrackerSettings() {return &this->m_FakeTrackerSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
 

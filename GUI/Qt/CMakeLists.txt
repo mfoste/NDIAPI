@@ -62,7 +62,6 @@ set( WIDGET_MOCHDR_FILES
 	vtkAuroraTrackerSettingsWidget.h
 	vtkFakeTrackerSettingsWidget.h
 	vtkSpectraVicraTrackerSettingsWidget.h
-    vtkTrackerWidgetXfrmCallback.h
 	vtkTrackerXfrmCallback.h
     ndXfrms.h
     ./utilities/vtkTrackedObject.h
@@ -76,7 +75,6 @@ set( WIDGET_SRC_FILES
 	vtkAuroraTrackerSettingsWidget.cxx
 	vtkFakeTrackerSettingsWidget.cxx
 	vtkSpectraVicraTrackerSettingsWidget.cxx
-    vtkTrackerWidgetXfrmCallback.cxx
 	vtkTrackerXfrmCallback.cxx
     ndXfrms.cxx
     ./utilities/vtkTrackedObject.cxx

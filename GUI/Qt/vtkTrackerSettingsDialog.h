@@ -67,12 +67,12 @@ public:
   void UpdateAndShow();
   inline int getSystem() {return this->m_System;}
   inline Ui::TrackerSettingsDialog* getGUI() {return m_GUI;}
-  inline vtkFakeTrackerSettings getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
-  inline ndiAuroraSettings getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
+  inline vtkFakeTrackerSettings* getFakeTrackerSettings() {return this->m_FakeTrackerSettingsWidget->GetFakeTrackerSettings();}
+  inline ndiAuroraSettings* getAuroraSettings() {return this->m_AuroraSettingsWidget->GetAuroraSettings();}
 #if defined(Ascension3DG_TrakStar_DriveBay) || defined(Ascension3DG_MedSafe)
   inline ascension3DGSettings* getAscension3DGSettings() {return this->m_Ascension3DGSettingsWidget->GetAscension3DGSettings();}
 #endif
-  inline ndiSpectraVicraSettings getSpectraVicraSettings() {return this->m_SpectraVicraSettingsWidget->GetSpectraVicraSettings();}
+  inline ndiSpectraVicraSettings* getSpectraVicraSettings() {return this->m_SpectraVicraSettingsWidget->GetSpectraVicraSettings();}
 
   void ReadTrackerSettings();
   void WriteTrackerSettings();

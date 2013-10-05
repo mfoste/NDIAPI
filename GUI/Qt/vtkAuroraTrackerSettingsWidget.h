@@ -56,7 +56,7 @@ public:
   inline Ui::AuroraTrackerSettingsWidget getWidget() {return m_Widget;}
 
   inline void SetSettings(QSettings *settings) {m_Settings = settings;}
-  inline ndiAuroraSettings GetAuroraSettings() {return this->m_AuroraSettings;}
+  inline ndiAuroraSettings* GetAuroraSettings() {return &this->m_AuroraSettings;}
   void ReadTrackerSettings();
   void WriteTrackerSettings();
 
