@@ -57,11 +57,13 @@ set( WIDGET_HDR_FILES
 # widget header files that need moc.
 set( WIDGET_MOCHDR_FILES 
 	vtkTrackerWidget.h
+	QTracker.h
     vtkTrackerSettingsDialog.h
 	vtkAuroraTrackerSettingsWidget.h
 	vtkFakeTrackerSettingsWidget.h
 	vtkSpectraVicraTrackerSettingsWidget.h
     vtkTrackerWidgetXfrmCallback.h
+	vtkTrackerXfrmCallback.h
     ndXfrms.h
     ./utilities/vtkTrackedObject.h
 )
@@ -69,11 +71,13 @@ set( WIDGET_MOCHDR_FILES
 # widget source files.
 set( WIDGET_SRC_FILES 
 	vtkTrackerWidget.cxx
+	QTracker.cxx
     vtkTrackerSettingsDialog.cxx
 	vtkAuroraTrackerSettingsWidget.cxx
 	vtkFakeTrackerSettingsWidget.cxx
 	vtkSpectraVicraTrackerSettingsWidget.cxx
     vtkTrackerWidgetXfrmCallback.cxx
+	vtkTrackerXfrmCallback.cxx
     ndXfrms.cxx
     ./utilities/vtkTrackedObject.cxx
 )
