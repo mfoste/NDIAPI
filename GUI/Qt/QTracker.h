@@ -116,6 +116,9 @@ private:
   void SetupObservers();
   void RemoveTracker();
 
+  // mutex
+  QMutex *m_mutex;
+
   // system type id.
   int m_TrackerType;
 

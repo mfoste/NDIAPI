@@ -141,6 +141,9 @@ void QTracker::RemoveTracker()
 
 void QTracker::OnInitialize()
 {
+  // set up the mutex.
+  this->m_mutex = new QMutex();
+
   // set up the timer.
   m_Timer = new QTimer(this);
 
@@ -158,6 +161,9 @@ void QTracker::OnInitialize()
 
 void QTracker::OnConfigureTracker()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   if( this->m_Tracker )
   {
     if( this->m_Tracker->IsTracking() )
@@ -169,6 +175,9 @@ void QTracker::OnConfigureTracker()
 
 void QTracker::OnConfigureFakeTracker(int trackerType, vtkFakeTrackerSettings *settings)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   m_Tracker = vtkFakeTracker::New();
   this->m_TrackerUpdateFrequency = settings->updateFrequency;
 
@@ -178,6 +187,9 @@ void QTracker::OnConfigureFakeTracker(int trackerType, vtkFakeTrackerSettings *s
 
 void QTracker::OnConfigureAuroraTracker(int trackerType, ndiAuroraSettings *settings)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   this->m_TrackerType = trackerType;
 
   m_Tracker = vtkNDITracker::New();
@@ -234,6 +246,9 @@ void QTracker::OnConfigureAuroraTracker(int trackerType, ndiAuroraSettings *sett
 #if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
 void QTracker::OnConfigureAscension3DGTracker(int trackerType, ascension3DGSettings *settings)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   this->m_TrackerType = trackerType;
 
   m_Tracker = vtkAscension3DGTracker::New();
@@ -250,6 +265,9 @@ void QTracker::OnConfigureAscension3DGTracker(int trackerType, ascension3DGSetti
 
 void QTracker::OnConfigureSpectraVicraTracker(int trackerType, ndiSpectraVicraSettings *settings)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   this->m_TrackerType = trackerType;
 
   m_Tracker = vtkNDITracker::New();
@@ -304,6 +322,9 @@ void QTracker::OnConfigureSpectraVicraTracker(int trackerType, ndiSpectraVicraSe
 
 void QTracker::OnVolumeSelected(int volume)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   if( this->m_TrackerType == NDI_AURORA || this->m_TrackerType == NDI_SPECTRA
     || this->m_TrackerType == NDI_SPECTRA_HYBRID )
   {
@@ -313,6 +334,9 @@ void QTracker::OnVolumeSelected(int volume)
 
 void QTracker::OnStartTracker()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
 #if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
   double freq;
   if( this->m_TrackerType == ASCENSION_3DG )
@@ -340,6 +364,9 @@ void QTracker::OnStartTracker()
 
 void QTracker::OnStopTracker()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   m_Timer->stop();
   m_Tracker->StopTracking();
 
@@ -348,6 +375,9 @@ void QTracker::OnStopTracker()
 
 void QTracker::UpdateData()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   if (m_Tracker)
   {
     if (m_Tracker->IsTracking())
@@ -373,6 +403,9 @@ void QTracker::OnCloseTracker()
 
 void QTracker::OnInitializePivot(int port, double preTime, double collectTime )
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   if( port > -1 && port < m_Tracker->GetNumberOfTools() )
   {
     this->m_PivotTool = port;
@@ -397,6 +430,9 @@ void QTracker::OnInitializePivot(int port, double preTime, double collectTime )
 
 void QTracker::OnStartPivot()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   this->m_bPrePivot = false;
   this->m_bPivot = true;
   emit this->PivotStarted("Pivot Now...", (int)this->m_PivotTime);
@@ -407,6 +443,9 @@ void QTracker::OnStartPivot()
 
 void QTracker::OnStopPivot()
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   double error;
   this->m_bPivot = false;
   m_Tracker->GetTool(this->m_PivotTool)->SetCollectToolTipCalibrationData(0);
@@ -420,23 +459,35 @@ void QTracker::OnStopPivot()
 
 void QTracker::UpdateToolInfo(int port)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   emit this->ToolInfoUpdated(port);
 }
 
 void QTracker::UpdateToolTransform(int port, int frame, QString status)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   ndSetXfrmMissing(&this->m_xfrms[port]);
   emit this->ToolTransformUpdated(port, frame, status);
 }
 
 void QTracker::UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   ndCopyTransform(&xfrm, &this->m_xfrms[port]);
   emit this->ToolTransformUpdated(port, frame, xfrm);
 }
 
 void QTracker::UpdateToolTransform(int port, int frame, ndQuatTransformation xfrm, double effFreq, double quality)
 {
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
   this->UpdateToolTransform(port, frame, xfrm);
   this->m_effectiveFrequencies[port] = effFreq;
   emit this->ToolEffectiveFrequencyUpdated(port, frame, effFreq);
