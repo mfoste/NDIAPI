@@ -80,11 +80,7 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
 
 vtkTrackerWidget::~vtkTrackerWidget()
 {
-  // If tracker object exists.
-  if(m_TrackerObject)
-  {
-    this->m_TrackerObject->OnCloseTracker();
-  }
+  
 }
 
 void vtkTrackerWidget::Initialize()
@@ -134,6 +130,12 @@ void vtkTrackerWidget::setupUiLayout()
   setLayout( mainLayout );
 }
 
+void vtkTrackerWidget::closeEvent(QCloseEvent *event)
+{
+  emit this->CloseTrackerWidget();
+  event->accept();
+}
+
 
 void vtkTrackerWidget::CreateActions()
 {
@@ -147,14 +149,16 @@ void vtkTrackerWidget::CreateActions()
 
   // connect this widget to the tracker object.
   connect(this, SIGNAL(TrackerConfigurationDialogOpened()), this->m_TrackerObject, SLOT(OnConfigureTracker()) );
-  connect(this, SIGNAL(ConfigureFakeTracker()), this->m_TrackerObject, SLOT(OnConfigureFakeTracker()) );
-  connect(this, SIGNAL(ConfigureAuroraTracker()), this->m_TrackerObject, SLOT(OnConfigureAuroraTracker()) );
+  connect(this, SIGNAL(ConfigureFakeTracker(int,vtkFakeTrackerSettings*)), this->m_TrackerObject, SLOT(OnConfigureFakeTracker(int,vtkFakeTrackerSettings*)) );
+  connect(this, SIGNAL(ConfigureAuroraTracker(int,ndiAuroraSettings*)), this->m_TrackerObject, SLOT(OnConfigureAuroraTracker(int,ndiAuroraSettings*)) );
 #if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
-  connect(this, SIGNAL(ConfigureAscension3DGTracker()), this->m_TrackerObject, SLOT(OnConfigureAscension3DGTracker()) );
+  connect(this, SIGNAL(ConfigureAscension3DGTracker(int,ascension3DGSettings*)), this->m_TrackerObject, SLOT(OnConfigureAscension3DGTracker(int,ascension3DGSettings*)) );
 #endif
-  connect(this, SIGNAL(ConfigureSpectraVicraTracker()), this->m_TrackerObject, SLOT(OnConfigureSpectraVicraTracker()) );
+  connect(this, SIGNAL(ConfigureSpectraVicraTracker(int,ndiSpectraVicraSettings*)), this->m_TrackerObject, SLOT(OnConfigureSpectraVicraTracker(int,ndiSpectraVicraSettings*)) );
   connect(this, SIGNAL(VolumeSelected(int)), this->m_TrackerObject, SLOT(OnVolumeSelected(int)) );
-  connect(this, SIGNAL(StartTracking()), this->m_TrackerObject, SLOT(OnStartTracking()) );
+  connect(this, SIGNAL(StartTracking()), this->m_TrackerObject, SLOT(OnStartTracker()) );
+  connect(this, SIGNAL(StopTracking()), this->m_TrackerObject, SLOT(OnStopTracker()) );
+  connect(this, SIGNAL(CloseTrackerWidget()), this->m_TrackerObject, SLOT(OnCloseTracker()) );
   // thread connections -- for details see 
   //http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
   connect(this->m_TrackerThread, SIGNAL(started()), this->m_TrackerObject, SLOT(OnInitialize()));

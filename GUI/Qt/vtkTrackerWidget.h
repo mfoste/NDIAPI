@@ -63,7 +63,7 @@ public:
   QSize sizeHint() const;
 
   inline void SetSettingsFileName( QString settingsFile ) {this->m_SettingsFileName=settingsFile;};
-  inline QTracker* getTracker() {return m_TrackerObject;}
+  inline QTracker* GetTrackerObject() {return m_TrackerObject;}
   int getTrackerSystemType();
   
   // for hardware synch.
@@ -80,7 +80,6 @@ public slots:
   virtual void OnVolumeSelected(int volume);
   virtual void OnStartTracker();
   virtual void OnStopTracker();
-  //virtual void CloseTrackerWidget();
   
 signals:
   void TrackerWidgetInitialized();
@@ -94,6 +93,7 @@ signals:
   void VolumeSelected(int volume);
   void StartTracking();
   void StopTracking();
+  void CloseTrackerWidget();
   /*void TrackerStarted();
   void TrackerStopped();
   void ToolInfoUpdated(int port);
@@ -110,6 +110,9 @@ signals:
   void finished();*/
   //void PivotError(double error);
   //void PivotCalibrationMatrix(int port, vtkMatrix4x4 *mat);
+
+protected:
+  virtual void closeEvent(QCloseEvent* event);
 
 private:
   // some helper functions.

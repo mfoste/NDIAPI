@@ -92,3 +92,4 @@ void ndCopyTransform(ndQuatTransformation *fromXfrm, ndQuatTransformation *toXfr
   toXfrm->translation.y = fromXfrm->translation.y;
   toXfrm->translation.z = fromXfrm->translation.z;
 }
+

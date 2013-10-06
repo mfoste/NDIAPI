@@ -150,6 +150,9 @@ void QTracker::OnInitialize()
   this->m_PivotTimer = new QTimer(this);
   this->m_PivotTimer->setSingleShot(true);
 
+  // register ndQuatTransformation
+  qRegisterMetaType<ndQuatTransformation>("ndQuatTransformation");
+
   this->CreateActions();  
 }
 

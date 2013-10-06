@@ -376,12 +376,12 @@ void vtkNDITracker::ParseFGSerialNumber(std::string serialNo)
       serialNumLength=8;
     }
     for(int i=0; i<serialNumLength; i++)
-      {
-        if(reply[loc+28+i] == ' ' || reply[loc+28+i] == '\n' )
-          break;
-        strStream << reply[loc+28+i];
-      }
-      //serialNo = serialNo + "-" + reply.substr(loc+28, serialNumLength);
+    {
+      if(reply[loc+28+i] == ' ' || reply[loc+28+i] == '\n' )
+        break;
+      strStream << reply[loc+28+i];
+    }
+    //serialNo = serialNo + "-" + reply.substr(loc+28, serialNumLength);
   }
   serialNo = strStream.str();
   this->SetSerialNumber(serialNo.c_str());
@@ -464,241 +464,241 @@ int vtkNDITracker::SetVolume(int v)
 
 vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSurface) {
 
-	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 
-	int D1 = this->TrackingVolumeParameters[this->Volume][0];
-	int D2 = this->TrackingVolumeParameters[this->Volume][1];
-	int D3 = this->TrackingVolumeParameters[this->Volume][2];
-	int D4 = this->TrackingVolumeParameters[this->Volume][3];
-	int D5 = this->TrackingVolumeParameters[this->Volume][4];
-	int D6 = this->TrackingVolumeParameters[this->Volume][5];
+  int D1 = this->TrackingVolumeParameters[this->Volume][0];
+  int D2 = this->TrackingVolumeParameters[this->Volume][1];
+  int D3 = this->TrackingVolumeParameters[this->Volume][2];
+  int D4 = this->TrackingVolumeParameters[this->Volume][3];
+  int D5 = this->TrackingVolumeParameters[this->Volume][4];
+  int D6 = this->TrackingVolumeParameters[this->Volume][5];
 
-	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-	vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); //<-- solid surface
-	vtkSmartPointer<vtkCellArray> polyline = vtkSmartPointer<vtkCellArray>::New();
-		
-	if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora CUBE
-		/*
-		D1 = Minimum x value
-		D2 = Maximum x value
-		D3 = Minimum y value
-		D4 = Maximum y value
-		D5 = Minimum z value
-		D6 = Maximum z value
-		*/
-		//D5 *=-1;
-		//D6 *=-1;
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New(); //<-- solid surface
+  vtkSmartPointer<vtkCellArray> polyline = vtkSmartPointer<vtkCellArray>::New();
 
-		points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
-		points->InsertNextPoint(D1,D3,D6); // Point 1 (D1, D3, D6)
-		points->InsertNextPoint(D2,D3,D6); // Point 2 (D2, D3, D6)
-		points->InsertNextPoint(D2,D4,D6); // Point 3 (D2, D4, D6)
-		points->InsertNextPoint(D1,D4,D5); // Point 4 (D1, D4, D5)
-		points->InsertNextPoint(D1,D3,D5); // Point 5 (D1, D3, D5)
-		points->InsertNextPoint(D2,D3,D5); // Point 6 (D2, D3, D5)
-		points->InsertNextPoint(D2,D4,D5); // Point 7 (D2, D4, D5)
+  if (TrackingVolumeShapeTypes[this->Volume] == 0x09) { // Aurora CUBE
+    /*
+    D1 = Minimum x value
+    D2 = Maximum x value
+    D3 = Minimum y value
+    D4 = Maximum y value
+    D5 = Minimum z value
+    D6 = Maximum z value
+    */
+    //D5 *=-1;
+    //D6 *=-1;
 
-		// Close Z plane
-		polyline->InsertNextCell(5);
-		polyline->InsertCellPoint(0);
-		polyline->InsertCellPoint(1);
-		polyline->InsertCellPoint(2);
-		polyline->InsertCellPoint(3);
-		polyline->InsertCellPoint(0);
-		
-		// Far Z plane
-		polyline->InsertNextCell(5);
-		polyline->InsertCellPoint(4);
-		polyline->InsertCellPoint(5);
-		polyline->InsertCellPoint(6);
-		polyline->InsertCellPoint(7);
-		polyline->InsertCellPoint(4);
+    points->InsertNextPoint(D1,D4,D6); // Point 0 (D1, D4, D6)
+    points->InsertNextPoint(D1,D3,D6); // Point 1 (D1, D3, D6)
+    points->InsertNextPoint(D2,D3,D6); // Point 2 (D2, D3, D6)
+    points->InsertNextPoint(D2,D4,D6); // Point 3 (D2, D4, D6)
+    points->InsertNextPoint(D1,D4,D5); // Point 4 (D1, D4, D5)
+    points->InsertNextPoint(D1,D3,D5); // Point 5 (D1, D3, D5)
+    points->InsertNextPoint(D2,D3,D5); // Point 6 (D2, D3, D5)
+    points->InsertNextPoint(D2,D4,D5); // Point 7 (D2, D4, D5)
 
-		// Top
-		polyline->InsertNextCell(5);
-		polyline->InsertCellPoint(0);
-		polyline->InsertCellPoint(1);
-		polyline->InsertCellPoint(5);
-		polyline->InsertCellPoint(4);
-		polyline->InsertCellPoint(0); 
-		
-		// Bottom
-		polyline->InsertNextCell(5);
-		polyline->InsertCellPoint(7);
-		polyline->InsertCellPoint(3);
-		polyline->InsertCellPoint(2);
-		polyline->InsertCellPoint(6);
-		polyline->InsertCellPoint(7);
+    // Close Z plane
+    polyline->InsertNextCell(5);
+    polyline->InsertCellPoint(0);
+    polyline->InsertCellPoint(1);
+    polyline->InsertCellPoint(2);
+    polyline->InsertCellPoint(3);
+    polyline->InsertCellPoint(0);
 
-		// Close Z plane
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(0);
-		cells->InsertCellPoint(1);
-		cells->InsertCellPoint(2);
-		cells->InsertCellPoint(3);
-		cells->InsertCellPoint(0);
-		
-		// Far Z plane
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(4);
-		cells->InsertCellPoint(5);
-		cells->InsertCellPoint(6);
-		cells->InsertCellPoint(7);
-		cells->InsertCellPoint(4);
-		// Top
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(0);
-		cells->InsertCellPoint(1);
-		cells->InsertCellPoint(5);
-		cells->InsertCellPoint(4);
-		cells->InsertCellPoint(0); 
-		// Bottom
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(7);
-		cells->InsertCellPoint(3);
-		cells->InsertCellPoint(2);
-		cells->InsertCellPoint(6);
-		cells->InsertCellPoint(7);
+    // Far Z plane
+    polyline->InsertNextCell(5);
+    polyline->InsertCellPoint(4);
+    polyline->InsertCellPoint(5);
+    polyline->InsertCellPoint(6);
+    polyline->InsertCellPoint(7);
+    polyline->InsertCellPoint(4);
 
-		// Right
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(0);
-		cells->InsertCellPoint(4);
-		cells->InsertCellPoint(7);
-		cells->InsertCellPoint(3);
-		cells->InsertCellPoint(0); 
-		
-		// Left
-		cells->InsertNextCell(5);
-		cells->InsertCellPoint(1);
-		cells->InsertCellPoint(5);
-		cells->InsertCellPoint(6);
-		cells->InsertCellPoint(2);
-		cells->InsertCellPoint(1);
+    // Top
+    polyline->InsertNextCell(5);
+    polyline->InsertCellPoint(0);
+    polyline->InsertCellPoint(1);
+    polyline->InsertCellPoint(5);
+    polyline->InsertCellPoint(4);
+    polyline->InsertCellPoint(0); 
 
-		polyData->SetPoints(points);
-		polyData->SetLines(polyline);
-		if (solidSurface) {
-			polyData->SetPolys(cells);
-		}
+    // Bottom
+    polyline->InsertNextCell(5);
+    polyline->InsertCellPoint(7);
+    polyline->InsertCellPoint(3);
+    polyline->InsertCellPoint(2);
+    polyline->InsertCellPoint(6);
+    polyline->InsertCellPoint(7);
 
-		this->VolumePolyData = polyData;
-		return this->VolumePolyData;
+    // Close Z plane
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(0);
+    cells->InsertCellPoint(1);
+    cells->InsertCellPoint(2);
+    cells->InsertCellPoint(3);
+    cells->InsertCellPoint(0);
 
-	} else if (TrackingVolumeShapeTypes[this->Volume] == 0x0A) { // Aurora Dome
-		/* 
-		D1 = Offset from Field Generator
-		D2 = Cylinder radius along x-axis
-		D3 = Minimum dome radius
-		D4 = Maximum dome radius
-		D5 = Cylinder radius along y-axis 
-			Note: If D5 is equal to 0, the y-axis radius is equal to the x-axis radius (circular cylinder)
-		D6 = Maximum offset from Field Generator
-			Note: If D6 is equal to 0, the maximum offset is equal to D4 (the maximum dome radius)
-		*/
+    // Far Z plane
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(4);
+    cells->InsertCellPoint(5);
+    cells->InsertCellPoint(6);
+    cells->InsertCellPoint(7);
+    cells->InsertCellPoint(4);
+    // Top
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(0);
+    cells->InsertCellPoint(1);
+    cells->InsertCellPoint(5);
+    cells->InsertCellPoint(4);
+    cells->InsertCellPoint(0); 
+    // Bottom
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(7);
+    cells->InsertCellPoint(3);
+    cells->InsertCellPoint(2);
+    cells->InsertCellPoint(6);
+    cells->InsertCellPoint(7);
 
+    // Right
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(0);
+    cells->InsertCellPoint(4);
+    cells->InsertCellPoint(7);
+    cells->InsertCellPoint(3);
+    cells->InsertCellPoint(0); 
 
+    // Left
+    cells->InsertNextCell(5);
+    cells->InsertCellPoint(1);
+    cells->InsertCellPoint(5);
+    cells->InsertCellPoint(6);
+    cells->InsertCellPoint(2);
+    cells->InsertCellPoint(1);
 
-		D5 = D5 == 0? D2 : D5; // see D5 note
-		D6 = D6 == 0? D4 : D6; // see D6 note
+    polyData->SetPoints(points);
+    polyData->SetLines(polyline);
+    if (solidSurface) {
+      polyData->SetPolys(cells);
+    }
 
-		D1 *=-1;
-		D6 *=-1;
+    this->VolumePolyData = polyData;
+    return this->VolumePolyData;
 
-		double majorAxis = D2 >= D5 ? D2 : D5;
-		double minorAxis = D2 < D5 ? D2 : D5;
-
-		double foci = std::sqrt((majorAxis*majorAxis)-(minorAxis*minorAxis));
-
-		double inc =0;
-		int bottomCount = 0;
-
-		double spacingInc = 15.0;
+  } else if (TrackingVolumeShapeTypes[this->Volume] == 0x0A) { // Aurora Dome
+    /* 
+    D1 = Offset from Field Generator
+    D2 = Cylinder radius along x-axis
+    D3 = Minimum dome radius
+    D4 = Maximum dome radius
+    D5 = Cylinder radius along y-axis 
+    Note: If D5 is equal to 0, the y-axis radius is equal to the x-axis radius (circular cylinder)
+    D6 = Maximum offset from Field Generator
+    Note: If D6 is equal to 0, the maximum offset is equal to D4 (the maximum dome radius)
+    */
 
 
-		// Bottom Elipse
-		while (inc <= (2*vtkMath::Pi())) {
-			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
-			inc=inc+(vtkMath::Pi()/spacingInc);
-			bottomCount++;
-		}
 
-		polyline->InsertNextCell(bottomCount+1);
-		cells->InsertNextCell(bottomCount+1);
-		for (unsigned int i = 0; i < bottomCount; i++) {
-			polyline->InsertCellPoint(i);
-			cells->InsertCellPoint(i);
-		}
-		cells->InsertCellPoint(0);
-		polyline->InsertCellPoint(0);
-		
-		// Top Elipse
-		int topCount = 0;
-		inc =0;
-		while (inc <= (2*vtkMath::Pi())) {
-			points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D6);
-			inc=inc+(vtkMath::Pi()/spacingInc);
-			topCount++;
-		}
+    D5 = D5 == 0? D2 : D5; // see D5 note
+    D6 = D6 == 0? D4 : D6; // see D6 note
 
-		cells->InsertNextCell(topCount+1);
-		polyline->InsertNextCell(topCount+1);
-		for (unsigned int i  = 0; i < topCount; i++) {
-			polyline->InsertCellPoint(i+bottomCount);
-			cells->InsertCellPoint(i+bottomCount);
-		}
-		cells->InsertCellPoint(bottomCount);
-		polyline->InsertCellPoint(bottomCount);
-		
-		// connect top and bottom Elipse
-		for (unsigned int i  = 0; i < topCount; i++) {
-			polyline->InsertNextCell(2);
-			polyline->InsertCellPoint(i);
-			polyline->InsertCellPoint(i+topCount);
+    D1 *=-1;
+    D6 *=-1;
 
-			cells->InsertNextCell(5);
-			cells->InsertCellPoint(i);
-			cells->InsertCellPoint(i+topCount);
-			cells->InsertCellPoint(((i+1)%topCount)+topCount);
-			cells->InsertCellPoint(((i+1)%topCount));
-			cells->InsertCellPoint(i);
+    double majorAxis = D2 >= D5 ? D2 : D5;
+    double minorAxis = D2 < D5 ? D2 : D5;
 
-		}
+    double foci = std::sqrt((majorAxis*majorAxis)-(minorAxis*minorAxis));
 
-		int totalPoints = bottomCount+topCount;
+    double inc =0;
+    int bottomCount = 0;
 
-		polyData->SetPoints(points);
-		if (solidSurface) {
-			polyData->SetPolys(cells);
-		}
-		polyData->SetLines(polyline);
+    double spacingInc = 15.0;
 
-		
 
-		// draw top dome. // DOES NOT WORK YET
-		this->VolumePolyData = polyData;
-		/*
-		if (-D6 != D4) {
-			vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
-			sphere->SetRadius(D4);
+    // Bottom Elipse
+    while (inc <= (2*vtkMath::Pi())) {
+      points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
+      inc=inc+(vtkMath::Pi()/spacingInc);
+      bottomCount++;
+    }
 
-			vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
-			clipper->SetInput(polyData);
-			clipper->SetClipFunction(sphere);
-			clipper->SetValue(0);
-			clipper->Update();
+    polyline->InsertNextCell(bottomCount+1);
+    cells->InsertNextCell(bottomCount+1);
+    for (unsigned int i = 0; i < bottomCount; i++) {
+      polyline->InsertCellPoint(i);
+      cells->InsertCellPoint(i);
+    }
+    cells->InsertCellPoint(0);
+    polyline->InsertCellPoint(0);
 
-			this->VolumePolyData = clipper->GetOutput();
-		} else {
-			this->VolumePolyData = polyData;
-		}
-		*/
+    // Top Elipse
+    int topCount = 0;
+    inc =0;
+    while (inc <= (2*vtkMath::Pi())) {
+      points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D6);
+      inc=inc+(vtkMath::Pi()/spacingInc);
+      topCount++;
+    }
 
-		return this->VolumePolyData;
+    cells->InsertNextCell(topCount+1);
+    polyline->InsertNextCell(topCount+1);
+    for (unsigned int i  = 0; i < topCount; i++) {
+      polyline->InsertCellPoint(i+bottomCount);
+      cells->InsertCellPoint(i+bottomCount);
+    }
+    cells->InsertCellPoint(bottomCount);
+    polyline->InsertCellPoint(bottomCount);
 
-	}
+    // connect top and bottom Elipse
+    for (unsigned int i  = 0; i < topCount; i++) {
+      polyline->InsertNextCell(2);
+      polyline->InsertCellPoint(i);
+      polyline->InsertCellPoint(i+topCount);
 
-	return NULL;
+      cells->InsertNextCell(5);
+      cells->InsertCellPoint(i);
+      cells->InsertCellPoint(i+topCount);
+      cells->InsertCellPoint(((i+1)%topCount)+topCount);
+      cells->InsertCellPoint(((i+1)%topCount));
+      cells->InsertCellPoint(i);
+
+    }
+
+    int totalPoints = bottomCount+topCount;
+
+    polyData->SetPoints(points);
+    if (solidSurface) {
+      polyData->SetPolys(cells);
+    }
+    polyData->SetLines(polyline);
+
+
+
+    // draw top dome. // DOES NOT WORK YET
+    this->VolumePolyData = polyData;
+    /*
+    if (-D6 != D4) {
+    vtkSmartPointer<vtkSphere> sphere = vtkSmartPointer<vtkSphere>::New();
+    sphere->SetRadius(D4);
+
+    vtkSmartPointer<vtkClipPolyData> clipper = vtkSmartPointer<vtkClipPolyData>::New();
+    clipper->SetInput(polyData);
+    clipper->SetClipFunction(sphere);
+    clipper->SetValue(0);
+    clipper->Update();
+
+    this->VolumePolyData = clipper->GetOutput();
+    } else {
+    this->VolumePolyData = polyData;
+    }
+    */
+
+    return this->VolumePolyData;
+
+  }
+
+  return NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -734,6 +734,18 @@ int vtkNDITracker::InternalInitSystem()
   }
   // set the communication log frame.
   ndiLogCommunication(this->Device, this->bLogCommunication);
+
+  // let's always start with a reset.
+  ndiRESET(this->Device);
+  errnum = ndiGetError(this->Device);
+  if (errnum) 
+  {
+    vtkErrorMacro(<< ndiErrorString(errnum));
+    ndiClose(this->Device);
+    this->Device = 0;
+    return 0;
+  }
+
   // initialize Device
   ndiCommand(this->Device,"INIT:");
   if (ndiGetError(this->Device))
@@ -764,39 +776,39 @@ int vtkNDITracker::InternalInitSystem()
   //                    at the highest baud rate possible.
   if( baud < 0 )
   {
-	  for( int autoBaud = 6; autoBaud >-1; autoBaud--)
-	  {
-		  ndiCommand(this->Device,"COMM:%d%03d%d",autoBaud,NDI_8N1,NDI_NOHANDSHAKE);
-		  errnum = ndiGetError(this->Device);
-		  if(errnum)
-		  {
-			  vtkWarningMacro(<< "Invalid baud rate, trying the next one");
-			  continue;
-		  }
-		  else
-			  break;
-	  }
+    for( int autoBaud = 6; autoBaud >-1; autoBaud--)
+    {
+      ndiCommand(this->Device,"COMM:%d%03d%d",autoBaud,NDI_8N1,NDI_NOHANDSHAKE);
+      errnum = ndiGetError(this->Device);
+      if(errnum)
+      {
+        vtkWarningMacro(<< "Invalid baud rate, trying the next one");
+        continue;
+      }
+      else
+        break;
+    }
 
-	  if(errnum)
-	  {
-		  vtkErrorMacro(<<"Unable to find a valid baud rate. " << ndiErrorString(errnum));
-		  ndiClose(this->Device);
-		  this->Device = 0;
-		  return 0;
-	  }
+    if(errnum)
+    {
+      vtkErrorMacro(<<"Unable to find a valid baud rate. " << ndiErrorString(errnum));
+      ndiClose(this->Device);
+      this->Device = 0;
+      return 0;
+    }
   }
   // otherwise, use the specified baud rates.
   else
   {
-	  ndiCommand(this->Device,"COMM:%d%03d%d",baud,NDI_8N1,NDI_NOHANDSHAKE);
-	  errnum = ndiGetError(this->Device);
-	  if (errnum) 
-	  {
-		  vtkErrorMacro(<< ndiErrorString(errnum));
-		  ndiClose(this->Device);
-		  this->Device = 0;
-		  return 0;
-	  }
+    ndiCommand(this->Device,"COMM:%d%03d%d",baud,NDI_8N1,NDI_NOHANDSHAKE);
+    errnum = ndiGetError(this->Device);
+    if (errnum) 
+    {
+      vtkErrorMacro(<< ndiErrorString(errnum));
+      ndiClose(this->Device);
+      this->Device = 0;
+      return 0;
+    }
   }
 
   // all good, return true.
@@ -892,7 +904,7 @@ int vtkNDITracker::InternalStartTracking()
 
   if( !this->InternalGetSystemInfo())
   { 
-      return 0;
+    return 0;
   }
 
   // add VSEL command here.
@@ -947,14 +959,14 @@ int vtkNDITracker::InternalStartTracking()
   // hardware sync -- this is the master.
   /*if( this->m_SlaveTracker )
   {
-    vtkWarningMacro(<< "send signal to slave tracker...");
-    this->m_SlaveTracker->StartHardwareSyncTracking();
-    Sleep(1000);
+  vtkWarningMacro(<< "send signal to slave tracker...");
+  this->m_SlaveTracker->StartHardwareSyncTracking();
+  Sleep(1000);
   }*/  
 
   fprintf(stderr, "%s - TSTART\n", this->GetSerialNumber());
   ndiCommand(this->Device,"TSTART:");
-  
+
   errnum = ndiGetError(this->Device);
   if (errnum) 
   {
@@ -1344,7 +1356,7 @@ void vtkNDITracker::EnableToolPorts()
     /* Unnecessary:
     if (tool < 3)
     { // only reset port handle for wired tools
-      this->PortHandle[tool] = 0;
+    this->PortHandle[tool] = 0;
     }*/
     this->PortEnabled[tool] = 0;
   }
@@ -1359,11 +1371,11 @@ void vtkNDITracker::EnableToolPorts()
       vtkErrorMacro(<< ndiErrorString(errnum));
     }    
   }
-  
+
   // free ports that are waiting to be freed
   // create a list of port handles that need to be freed.
   ndiCommand(this->Device,"PHSR:01");
-  
+
   // loop through that list and free the ports needing to be freed.
   ntools = ndiGetPHSRNumberOfHandles(this->Device);
   for (tool = 0; tool < ntools; tool++)
@@ -1390,7 +1402,7 @@ void vtkNDITracker::EnableToolPorts()
   {
     // create a list of port handles that need to be initialized.
     ndiCommand(this->Device,"PHSR:02");
-    
+
     // loop through that list and initialise the ports not initialized.
     ntools = ndiGetPHSRNumberOfHandles(this->Device);
     for (tool = 0; tool < ntools; tool++)

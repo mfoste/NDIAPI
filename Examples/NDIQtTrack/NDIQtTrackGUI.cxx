@@ -181,16 +181,16 @@ void NDIQtTrackGUI::CreateActions()
 {
   connect(m_GUI->actionAboutNDIQtTrack, SIGNAL(triggered()), this, SLOT(About()));
   connect(m_GUI->actionAboutQt, SIGNAL(triggered()), this, SLOT(AboutQt()));
-  connect(m_GUI->TrackerWidget, SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(TrackerStarted()), this, SLOT(OnTrackerStarted()) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolInfoUpdated(int)), this, SLOT(OnToolInfoUpdated(int)) );
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,QString)), this, SLOT(OnToolTransformUpdated(int,int,QString)) );
+  connect(m_GUI->TrackerWidget->GetTrackerObject(), SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
+  connect(m_GUI->TrackerWidget->GetTrackerObject(), SIGNAL(TrackerStarted()), this, SLOT(OnTrackerStarted()) );
+  connect(m_GUI->TrackerWidget->GetTrackerObject(), SIGNAL(ToolInfoUpdated(int)), this, SLOT(OnToolInfoUpdated(int)) );
+  connect(m_GUI->TrackerWidget->GetTrackerObject(), SIGNAL(ToolTransformUpdated(int,int,QString)), this, SLOT(OnToolTransformUpdated(int,int,QString)) );
   /* older versions, link into the single function below now.
   connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,ndQuatTransformation)), this, SLOT(OnToolTransformUpdated(int,int,ndQuatTransformation)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolEffectiveFrequencyUpdated(int,int,double)), this, SLOT(OnToolEffectiveFrequencyUpdated(int,int,double)) );
   connect(m_GUI->TrackerWidget, SIGNAL(ToolQualityNumberUpdated(int,int,double)), this, SLOT(OnToolQualityUpdated(int,int,double)) );
   */
-  connect(m_GUI->TrackerWidget, SIGNAL(ToolTransformUpdated(int,int,ndQuatTransformation,double,double)), this, SLOT(OnToolTransformUpdated(int,int,ndQuatTransformation,double,double)) );
+  connect(m_GUI->TrackerWidget->GetTrackerObject(), SIGNAL(ToolTransformUpdated(int,int,ndQuatTransformation,double,double)), this, SLOT(OnToolTransformUpdated(int,int,ndQuatTransformation,double,double)) );
   // hook up the tracked objects.
   for(int i=0; i<12; i++)
   {
@@ -245,15 +245,6 @@ void NDIQtTrackGUI::AboutQt()
 
 void NDIQtTrackGUI::closeEvent(QCloseEvent *event)
 {
-  // if tracker exists.
-  if( this->m_GUI->TrackerWidget->getTracker() )
-  {
-    // if it is tracking, stop it.
-    if( this->m_GUI->TrackerWidget->getTracker()->IsTracking() )
-    {
-      this->m_GUI->TrackerWidget->getTracker()->StopTracking();
-    }
-  }
   event->accept();
 }
 
@@ -264,7 +255,7 @@ void NDIQtTrackGUI::OnTrackerConfigured(QString systemInfo)
 
 void NDIQtTrackGUI::OnTrackerStarted()
 {  
-  for(int tool=0; tool < this->m_GUI->TrackerWidget->getTracker()->GetNumberOfTools(); tool++)
+  for(int tool=0; tool < this->m_GUI->TrackerWidget->GetTrackerObject()->getTracker()->GetNumberOfTools(); tool++)
   {
     this->OnToolInfoUpdated(tool);    
   }
@@ -274,8 +265,8 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
 {
   QString toolInfo;
   // create the string
-  toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolPartNumber())
-    + "-SN-" + QString(this->m_GUI->TrackerWidget->getTracker()->GetTool(port)->GetToolSerialNumber());
+  toolInfo = "PN-" + QString(this->m_GUI->TrackerWidget->GetTrackerObject()->getTracker()->GetTool(port)->GetToolPartNumber())
+    + "-SN-" + QString(this->m_GUI->TrackerWidget->GetTrackerObject()->getTracker()->GetTool(port)->GetToolSerialNumber());
 
   if( port < MAX_TRACKED_PORTS)
   {
