@@ -46,6 +46,7 @@ or property, arising from the Sample Code or any use thereof.
 
 #include "vtkTracker.h"
 #include "vtkTrackerTool.h"
+#include "vtkTrackerWidget.h"
 
 #include "NDIQtTrackGUI.h"
 #include "ui_NDIQtTrackGUI.h"
@@ -245,6 +246,10 @@ void NDIQtTrackGUI::AboutQt()
 
 void NDIQtTrackGUI::closeEvent(QCloseEvent *event)
 {
+  // clean up the TrackerWidget to make sure the tracker closes properly.
+  this->m_GUI->TrackerWidget->close();
+  
+  QMainWindow::closeEvent(event);
   event->accept();
 }
 

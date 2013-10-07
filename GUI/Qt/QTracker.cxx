@@ -120,6 +120,7 @@ void QTracker::SetupObservers()
     this->RemoveTracker();
     return;
   }
+  emit this->TrackerConfigured(this->m_Tracker->GetSerialNumber());
 }
 
 void QTracker::RemoveTracker()
@@ -332,6 +333,16 @@ void QTracker::OnVolumeSelected(int volume)
   }
 }
 
+void QTracker::OnPreConfigureTracker()
+{
+  // lock while processing.
+  QMutexLocker(this->m_mutex);
+
+  m_Tracker->PreConfigureTracking();
+
+  emit this->TrackerPreConfigured();
+}
+
 void QTracker::OnStartTracker()
 {
   // lock while processing.
@@ -398,6 +409,10 @@ void QTracker::UpdateData()
 
 void QTracker::OnCloseTracker()
 {
+  if( this->m_Tracker->IsTracking() )
+  {
+    this->m_Tracker->StopTracking();
+  }
   emit this->finished();
 }
 

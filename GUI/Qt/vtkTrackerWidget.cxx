@@ -60,6 +60,7 @@ or property, arising from the Sample Code or any use thereof.
 vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
 {
   m_TrackerObject = 0;
+  this->m_bUsePreStart = false;
   
   this->m_TrackerSettingsDialog = vtkTrackerSettingsDialog::New(this);
 
@@ -80,7 +81,10 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
 
 vtkTrackerWidget::~vtkTrackerWidget()
 {
-  
+  if( this->m_TrackerObject )
+  {
+    this->m_TrackerObject->OnCloseTracker();
+  }  
 }
 
 void vtkTrackerWidget::Initialize()
@@ -109,6 +113,11 @@ void vtkTrackerWidget::setupUi()
   this->m_VolumeSelectionComboBox->setEnabled(false);
   this->m_VolumeSelectionComboBox->setVisible(false);
 
+  this->m_PreStartTrackingButton = new QPushButton(this);
+  this->m_PreStartTrackingButton->setText("Pre-Start Configure");
+  this->m_PreStartTrackingButton->setEnabled(false);
+  this->m_PreStartTrackingButton->setVisible(false);
+
   this->m_StartTrackingButton = new QPushButton(this);
   this->m_StartTrackingButton->setText("Start Tracking");
   this->m_StartTrackingButton->setMaximumWidth(110);
@@ -124,6 +133,7 @@ void vtkTrackerWidget::setupUiLayout()
 
   mainLayout->addWidget(this->m_ConfigureTrackerButton);
   mainLayout->addWidget(this->m_VolumeSelectionComboBox);
+  mainLayout->addWidget(this->m_PreStartTrackingButton);
   mainLayout->addWidget(this->m_StartTrackingButton);
   mainLayout->addWidget(this->m_StopTrackingButton);
 
@@ -132,6 +142,7 @@ void vtkTrackerWidget::setupUiLayout()
 
 void vtkTrackerWidget::closeEvent(QCloseEvent *event)
 {
+  QWidget::closeEvent(event);
   emit this->CloseTrackerWidget();
   event->accept();
 }
@@ -144,6 +155,7 @@ void vtkTrackerWidget::CreateActions()
   connect(m_TrackerSettingsDialog, SIGNAL(accepted()), this, SLOT(OnConfigureTrackerAccepted()));
   connect(m_TrackerSettingsDialog, SIGNAL(rejected()), this, SLOT(OnConfigureTrackerCanceled()));
   connect(m_VolumeSelectionComboBox, SIGNAL(activated(int)), this, SLOT(OnVolumeSelected(int)));
+  connect(m_PreStartTrackingButton, SIGNAL(clicked()), this, SLOT(OnPreStartTracker()));
   connect(m_StartTrackingButton, SIGNAL(clicked()), this, SLOT(OnStartTracker()));
   connect(m_StopTrackingButton, SIGNAL(clicked()), this, SLOT(OnStopTracker()));
 
@@ -156,6 +168,7 @@ void vtkTrackerWidget::CreateActions()
 #endif
   connect(this, SIGNAL(ConfigureSpectraVicraTracker(int,ndiSpectraVicraSettings*)), this->m_TrackerObject, SLOT(OnConfigureSpectraVicraTracker(int,ndiSpectraVicraSettings*)) );
   connect(this, SIGNAL(VolumeSelected(int)), this->m_TrackerObject, SLOT(OnVolumeSelected(int)) );
+  connect(this, SIGNAL(PreStartTracking()), this->m_TrackerObject, SLOT(OnPreConfigureTracker()) );
   connect(this, SIGNAL(StartTracking()), this->m_TrackerObject, SLOT(OnStartTracker()) );
   connect(this, SIGNAL(StopTracking()), this->m_TrackerObject, SLOT(OnStopTracker()) );
   connect(this, SIGNAL(CloseTrackerWidget()), this->m_TrackerObject, SLOT(OnCloseTracker()) );
@@ -258,6 +271,12 @@ void vtkTrackerWidget::ConfigureTracker()
     this->PopUpError("Invalid tracker system type given.  Check your tracker settings.");
     return;
   }
+
+  if( this->m_bUsePreStart )
+  {
+    this->m_PreStartTrackingButton->setVisible(true);
+    this->m_PreStartTrackingButton->setEnabled(true);
+  }
      
   m_StartTrackingButton->setEnabled(true);
     
@@ -271,10 +290,16 @@ void vtkTrackerWidget::OnVolumeSelected(int volume)
   emit this->VolumeSelected(volume);
 }
 
+void vtkTrackerWidget::OnPreStartTracker()
+{
+  emit this->PreStartTracking();
+}
+
 void vtkTrackerWidget::OnStartTracker()
 {
   this->m_VolumeSelectionComboBox->setEnabled(false);
   m_StartTrackingButton->setEnabled(false);
+  m_PreStartTrackingButton->setEnabled(false);
   m_StopTrackingButton->setEnabled(true);
 
   emit this->StartTracking();
@@ -286,6 +311,7 @@ void vtkTrackerWidget::OnStopTracker()
 {
   emit this->StopTracking();
 
+  m_PreStartTrackingButton->setEnabled(true);
   m_StartTrackingButton->setEnabled(true);
   m_StopTrackingButton->setEnabled(false);
 

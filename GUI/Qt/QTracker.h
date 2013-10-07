@@ -67,6 +67,7 @@ public slots:
   virtual void OnConfigureAscension3DGTracker(int trackerType, ascension3DGSettings *settings);
 #endif
   virtual void OnVolumeSelected(int volume);
+  virtual void OnPreConfigureTracker();
   virtual void OnStartTracker();
   virtual void OnStopTracker();
   virtual void UpdateData();
@@ -83,6 +84,7 @@ signals:
   void Ascension3DGDefaultFrequencyUsed(double freq);
 #endif
   void TrackerHasNVolumes(QStringList volumeList);
+  void TrackerPreConfigured();
   void TrackerStarted();
   void TrackerStopped();
   void ToolInfoUpdated(int port);

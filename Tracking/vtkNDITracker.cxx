@@ -881,16 +881,9 @@ int vtkNDITracker::InternalInitTools()
 }
 
 //----------------------------------------------------------------------------
-int vtkNDITracker::InternalStartTracking()
+int vtkNDITracker::InternalPreConfigureTracking()
 {
   int errnum, tool;
-
-  if( this->m_MasterTracker )
-  {
-    fprintf(stderr, "Send signal to master from %s\n", this->GetSerialNumber());
-    //vtkWarningMacro(<< "send signal to master tracker...");
-    this->m_MasterTracker->StartHardwareSyncTracking();
-  }
 
   if (this->IsDeviceTracking)
   {
@@ -935,7 +928,7 @@ int vtkNDITracker::InternalStartTracking()
     // set the hardware sync.
     if( this->bHardwareSync )
     {
-
+      fprintf(stdout, "Setting up the hardware sync for: %s\n", this->GetSerialNumber());
       // set the external hardware sync variables.
       ndiCommand(this->Device, "SET:SCU-0.Param.System Ext Sync Mode=1");
       errnum = ndiGetError(this->Device);
@@ -953,6 +946,23 @@ int vtkNDITracker::InternalStartTracking()
           return 0;
         }
       }
+    }
+  }
+
+  this->Configured = 1;
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkNDITracker::InternalStartTracking()
+{
+  int errnum;
+
+  if( !this->Configured )
+  {
+    if( !this->InternalPreConfigureTracking())
+    {
+      return 0;
     }
   }
 
@@ -1011,6 +1021,7 @@ int vtkNDITracker::InternalStopTracking()
   }
 
   this->DisableToolPorts();
+  this->Configured = 0;
 
   // return to default comm settings
   ndiCommand(this->Device,"COMM:00000");

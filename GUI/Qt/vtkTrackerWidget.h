@@ -63,8 +63,11 @@ public:
   QSize sizeHint() const;
 
   inline void SetSettingsFileName( QString settingsFile ) {this->m_SettingsFileName=settingsFile;};
+  inline void SetUsePreStart(bool bUse) {this->m_bUsePreStart = bUse;}
   inline QTracker* GetTrackerObject() {return m_TrackerObject;}
   int getTrackerSystemType();
+  inline QPushButton* GetStartButton() {return this->m_StartTrackingButton;}
+  inline QPushButton* GetStopButton() {return this->m_StopTrackingButton;}
   
   // for hardware synch.
  void SetSlaveTracker (vtkTrackerWidget *slave);
@@ -78,6 +81,7 @@ public slots:
   virtual void OnConfigureTrackerCanceled();
   virtual void OnVolumeListUpdated(QStringList volumeList);
   virtual void OnVolumeSelected(int volume);
+  virtual void OnPreStartTracker();
   virtual void OnStartTracker();
   virtual void OnStopTracker();
   
@@ -91,6 +95,7 @@ signals:
   void ConfigureAscension3DGTracker(int trackerType, ascension3DGSettings *settings);
 #endif
   void VolumeSelected(int volume);
+  void PreStartTracking();
   void StartTracking();
   void StopTracking();
   void CloseTrackerWidget();
@@ -132,6 +137,7 @@ private:
   //Ui::vtkTrackerWidget m_GUI;
   QPushButton *m_ConfigureTrackerButton;
   QComboBox   *m_VolumeSelectionComboBox;
+  QPushButton *m_PreStartTrackingButton;
   QPushButton *m_StartTrackingButton;
   QPushButton *m_StopTrackingButton;
   //QVBoxLayout *m_VerticalLayout;
@@ -142,6 +148,9 @@ private:
 
   // use a separate thread for the QTracker object.
   QThread *m_TrackerThread;
+
+  // for doing a pre start/configure.
+  bool m_bUsePreStart;
     
   // for hardware sync.
   vtkTrackerWidget *m_SlaveTracker;

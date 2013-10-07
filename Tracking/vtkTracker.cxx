@@ -74,6 +74,7 @@ vtkTracker* vtkTracker::New()
 //----------------------------------------------------------------------------
 vtkTracker::vtkTracker()
 {
+  this->Configured = 0;
   this->Tracking = 0;
   this->WorldCalibrationMatrix = vtkMatrix4x4::New();
   this->NumberOfTools = 0;
@@ -370,6 +371,13 @@ int vtkTracker::Probe()
     }
   }
   return 1;
+}
+
+//----------------------------------------------------------------------------
+void vtkTracker::PreConfigureTracking()
+{
+  this->InternalPreConfigureTracking();
+  return;
 }
 
 //----------------------------------------------------------------------------

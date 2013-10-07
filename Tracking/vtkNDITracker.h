@@ -206,6 +206,10 @@ protected:
   int InternalInitTools();
 
   // Description:
+  // Bring the system up to full configuration just before the TSTART.
+  int InternalPreConfigureTracking();
+
+  // Description:
   // Start the tracking system.  The tracking system is brought from
   // its ground state into full tracking mode.  The device will
   // only be reset if communication cannot be established without

@@ -119,11 +119,17 @@ public:
   virtual int Probe();
 
   // Description:
+  // Sometimes you want to pre-configure everything before starting
+  // the tracker.
+  virtual void PreConfigureTracking();
+
+  // Description:
   // Start the tracking system.  The tracking system is brought from
   // its ground state (i.e. on but not necessarily initialized) into
   // full tracking mode.  This method calls InternalStartTracking()
   // after doing a bit of housekeeping.
   virtual void StartTracking();
+  
   // Description:
   // Start the tracking system after a hardware sync signal.  
   // A simple event is invoked which signals to the GUI to start the
@@ -308,6 +314,7 @@ protected:
   // InternalStopTracking() should free all resources associated with
   // the device.  These methods should return 1 if they are successful,
   // or 0 if they are not.
+  virtual int InternalPreConfigureTracking() {return 1;};
   virtual int InternalStartTracking() { return 1; };
   virtual int InternalStopTracking() { return 1; };
   virtual void InternalInterpretCommand(const char *c) { };
@@ -331,6 +338,7 @@ protected:
   vtkTrackerTool **Tools;
   int ReferenceTool;
   int Tracking;
+  int Configured; // used to configure the entire system just up to the start.
   char* SerialNumber;
   
   double UpdateTimeStamp;
