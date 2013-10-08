@@ -598,9 +598,9 @@ int ndiProbe(const char *device)
     return NDI_PROBE_FAIL;
   }
 
-  /* set comm parameters to default, but decrease timeout to 0.1s */
+  /* set comm parameters to default, but decrease timeout to 1.0s */
   if (ndiSerialComm(serial_port, 9600, "8N1", 0) < 0 ||
-      ndiSerialTimeout(serial_port, 100) < 0) {
+      ndiSerialTimeout(serial_port, 1000) < 0) {
     ndiSerialClose(serial_port);
     return NDI_BAD_COMM;
   }
