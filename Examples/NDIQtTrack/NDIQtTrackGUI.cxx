@@ -279,6 +279,8 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
     // TODO: figure out how to determine if tool changes.
     this->m_TrackedObjects[port].object->SetModelVisibility(true);
     this->m_TrackedObjects[port].object->SetAxesVisibility(true);
+    QColor color("lime");
+    this->m_TrackedObjects[port].object->SetModelColor(color.red(), color.green(), color.blue());
 
   }
   else

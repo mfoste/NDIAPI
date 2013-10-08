@@ -13,6 +13,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 #include <vtkAxesActor.h>
+#include <vtkProperty.h>
 
 #include "ndXfrms.h"
 
@@ -32,6 +33,7 @@ public:
   ndQuatTransformation* GetXfrm() {return this->m_Xfrm;}
   vtkActor* GetModelActor() {return this->m_ObjectActor;}
   vtkAxesActor* GetAxesActor() {return this->m_ObjectAxesActor;}
+  void SetModelColor(double r, double g, double b) {this->m_ObjectActor->GetProperty()->SetColor(r,g,b);}
   void SetModelVisibility(bool bVisible) {this->m_ObjectActor->SetVisibility(bVisible);}
   void SetAxesVisibility(bool bVisible) {this->m_ObjectAxesActor->SetVisibility(bVisible);}
 
