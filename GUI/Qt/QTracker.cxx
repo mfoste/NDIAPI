@@ -305,16 +305,24 @@ void QTracker::OnConfigureSpectraVicraTracker(int trackerType, ndiSpectraVicraSe
   }
 
   // get volume names -- send out.
-  QStringList volumeList;
+  
   int nVolumes = tracker->GetNumTrackingVolumes();
-  volumeList.reserve(nVolumes);
-  // read volume shape types.
-  for( int i=0; i < nVolumes; i++ )
+  if (nVolumes > 0)
   {
-    volumeList[i] = QString::fromStdString(tracker->GetTrackingVolumeShapeType(i));
-  }
+    QStringList volumeList;
+    volumeList.reserve(nVolumes);
+    // read volume shape types.
+    for( int i=0; i < nVolumes; i++ )
+    {
+      volumeList[i] = QString::fromStdString(tracker->GetTrackingVolumeShapeType(i));
+    }
 
-  emit this->TrackerHasNVolumes(volumeList);
+    emit this->TrackerHasNVolumes(volumeList);
+  }
+  else
+  {
+    fprintf(stderr, "Problem reading out the volumes from the camera.\n");
+  }
 
   // set-up observer calls.
   this->SetupObservers();

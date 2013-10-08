@@ -81,10 +81,6 @@ vtkTrackerWidget::vtkTrackerWidget(QWidget *parent ) : QWidget(parent)
 
 vtkTrackerWidget::~vtkTrackerWidget()
 {
-  if( this->m_TrackerObject )
-  {
-    this->m_TrackerObject->OnCloseTracker();
-  }  
 }
 
 void vtkTrackerWidget::Initialize()
@@ -207,7 +203,8 @@ void vtkTrackerWidget::OnConfigureTrackerCanceled()
   {
     this->m_StartTrackingButton->setEnabled(true);
     if(this->m_TrackerObject->GetTrackerType() == NDI_AURORA 
-      || this->m_TrackerObject->GetTrackerType() == NDI_SPECTRA )
+      || this->m_TrackerObject->GetTrackerType() == NDI_SPECTRA 
+      || this->m_TrackerObject->GetTrackerType() == NDI_SPECTRA_HYBRID )
     {
       // update the volume information.
       this->m_VolumeSelectionComboBox->setEnabled(true);
@@ -283,8 +280,6 @@ void vtkTrackerWidget::ConfigureTracker()
   //configMessage.hide();
 }
 
-
-
 void vtkTrackerWidget::OnVolumeSelected(int volume)
 {
   emit this->VolumeSelected(volume);
@@ -325,33 +320,6 @@ void vtkTrackerWidget::OnStopTracker()
 int vtkTrackerWidget::getTrackerSystemType()
 {
   return this->m_TrackerObject->GetTrackerType();
-}
-
-void vtkTrackerWidget::SetSlaveTracker(vtkTrackerWidget *slave)
-{
-  if( slave->getTrackerSystemType() == NDI_SPECTRA || 
-    slave->getTrackerSystemType() == NDI_SPECTRA_HYBRID )
-  {
-    this->m_SlaveTracker = slave;
-    //TODO: fix - dynamic_cast<vtkNDITracker*>(m_Tracker)->SetSlaveTracker(this->m_SlaveTracker->getTracker());
-  }
-  else
-  {
-    this->PopUpError("Only NDI Passive Spectra (with special adapter) and Hybrid Spectra can be used as a hardware slave.");
-  }
-}
-
-void vtkTrackerWidget::SetMasterTracker(vtkTrackerWidget *master)
-{
-  if( master->getTrackerSystemType() == NDI_AURORA )
-  {
-    this->m_MasterTracker = master;
-    //TODO: fix - dynamic_cast<vtkNDITracker*>(m_Tracker)->SetMasterTracker(this->m_MasterTracker->getTracker());
-  }
-  else
-  {
-    this->PopUpError("Only NDI Aurora can be used as a hardware master.");
-  }
 }
 
 void vtkTrackerWidget::PopUpError(QString str)

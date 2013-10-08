@@ -94,12 +94,8 @@ vtkNDITracker::vtkNDITracker()
   this->BaudRate = 9600;
   this->SetNumberOfTools(VTK_NDI_NTOOLS);
 
-  // hardware sync -- slave variables.
+  // hardware sync -- mark if this is the slave.
   this->bHardwareSync = 0;
-  this->bHardwareSyncReady = 0;
-  // hardware sync -- master variables.
-  this->m_SlaveTracker = 0;
-  this->m_MasterTracker = 0;
 
   for (int i = 0; i < VTK_NDI_NTOOLS; i++)
   {
@@ -250,6 +246,10 @@ int vtkNDITracker::Probe()
       }
     }
     return 1;
+  }
+  else
+  {
+    fprintf(stderr, "ndiProbe failed with return code: %04X", errnum);
   }
   int success[1] = {0};
   // server
@@ -736,7 +736,7 @@ int vtkNDITracker::InternalInitSystem()
   ndiLogCommunication(this->Device, this->bLogCommunication);
 
   // let's always start with a reset.
-  ndiRESET(this->Device);
+  /*ndiRESET(this->Device);
   errnum = ndiGetError(this->Device);
   if (errnum) 
   {
@@ -744,7 +744,7 @@ int vtkNDITracker::InternalInitSystem()
     ndiClose(this->Device);
     this->Device = 0;
     return 0;
-  }
+  }*/
 
   // initialize Device
   ndiCommand(this->Device,"INIT:");
@@ -965,14 +965,6 @@ int vtkNDITracker::InternalStartTracking()
       return 0;
     }
   }
-
-  // hardware sync -- this is the master.
-  /*if( this->m_SlaveTracker )
-  {
-  vtkWarningMacro(<< "send signal to slave tracker...");
-  this->m_SlaveTracker->StartHardwareSyncTracking();
-  Sleep(1000);
-  }*/  
 
   fprintf(stderr, "%s - TSTART\n", this->GetSerialNumber());
   ndiCommand(this->Device,"TSTART:");

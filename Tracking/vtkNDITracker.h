@@ -89,18 +89,6 @@ public:
   void SetHardwareSync(int bSync) {this->bHardwareSync = bSync;}
 
   // Description:
-  // Tell the slave system that the master is ready.
-  void SetHardwareSyncReady(int bSyncReady) {this->bHardwareSyncReady = bSyncReady;}
-
-  // Description:
-  // If this is the master, tell it which is the slave.
-  void SetSlaveTracker(vtkTracker *tracker) {this->m_SlaveTracker = tracker;}
-
-  // Description:
-  // If this is the slave, tell it which is the master.
-  void SetMasterTracker(vtkTracker *tracker) {this->m_MasterTracker = tracker;}
-  
-  // Description:
   // Probe to see if the tracking system is present on the
   // specified serial port.  If the SerialPort is set to -1,
   // then all serial ports will be checked.
@@ -272,11 +260,6 @@ protected:
 
   // hardware sync -- used if slave.
   int bHardwareSync; // this is Polaris Spectra only where the Spectra must be a slave.
-  int bHardwareSyncReady;
-
-  // hardware sync -- used if master.
-  vtkTracker *m_SlaveTracker;
-  vtkTracker *m_MasterTracker;
 
   int PortEnabled[VTK_NDI_NTOOLS];
   int PortHandle[VTK_NDI_NTOOLS];

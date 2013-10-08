@@ -175,11 +175,4 @@ void vtkTrackerXfrmCallback::Execute(vtkObject *caller, unsigned long eventId, v
       m_parent->UpdateToolTransform(this->m_port, tool->GetFrame(), xfrm, this->m_effectiveFrequency, quality);
     }  
   }
-  else if (eventId == vtkCommand::UserEvent+1)
-  {
-    vtkTracker *tracker = static_cast<vtkTracker*>(caller);
-    // start the tracking due to a hardware sync event call.
-    fprintf(stderr, "Start the hardware sync signal to start tracking system: %s.\n", tracker->GetSerialNumber());
-    m_parent->OnStartTracker();    
-  }
 }

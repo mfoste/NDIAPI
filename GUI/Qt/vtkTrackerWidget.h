@@ -68,10 +68,6 @@ public:
   int getTrackerSystemType();
   inline QPushButton* GetStartButton() {return this->m_StartTrackingButton;}
   inline QPushButton* GetStopButton() {return this->m_StopTrackingButton;}
-  
-  // for hardware synch.
- void SetSlaveTracker (vtkTrackerWidget *slave);
- void SetMasterTracker (vtkTrackerWidget *master);
 
 public slots:
   virtual void Initialize();
@@ -149,12 +145,8 @@ private:
   // use a separate thread for the QTracker object.
   QThread *m_TrackerThread;
 
-  // for doing a pre start/configure.
+  // for doing a pre start/configure when timing is critical during a hardware sync.
   bool m_bUsePreStart;
-    
-  // for hardware sync.
-  vtkTrackerWidget *m_SlaveTracker;
-  vtkTrackerWidget *m_MasterTracker;
 };
 
 #endif
