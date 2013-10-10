@@ -30,10 +30,12 @@ protected:
 
 public:
   void UpdateXfrm(ndQuatTransformation *xfrm);
+  void SetMissing() {this->ChangeModelToMissing();};
   ndQuatTransformation* GetXfrm() {return this->m_Xfrm;}
   vtkActor* GetModelActor() {return this->m_ObjectActor;}
   vtkAxesActor* GetAxesActor() {return this->m_ObjectAxesActor;}
-  void SetModelColor(double r, double g, double b) {this->m_ObjectActor->GetProperty()->SetColor(r,g,b);}
+  void SetModelColor(QString colorName) {this->m_ModelColor = colorName;}; 
+  void SetModelMissingColor(QString colorName) {this->m_ModelMissingColor = colorName;};
   void SetModelVisibility(bool bVisible) {this->m_ObjectActor->SetVisibility(bVisible);}
   void SetAxesVisibility(bool bVisible) {this->m_ObjectAxesActor->SetVisibility(bVisible);}
 
@@ -41,6 +43,10 @@ signals:
   void TrackedObjectUpdated();
 
 private:
+  // helper functions.
+  void ChangeModelToMissing();
+  void ChangeModelToTracking();
+
   ndQuatTransformation *m_Xfrm;
   //vtkSmartPointer<vtkAxes> m_ObjectLocal;
   vtkSmartPointer<vtkSphereSource> m_SphereObject;
@@ -48,6 +54,10 @@ private:
   vtkSmartPointer<vtkTransformPolyDataFilter> m_Object;
   vtkSmartPointer<vtkPolyDataMapper> m_ObjectMapper;
   vtkSmartPointer<vtkActor> m_ObjectActor;
+
+  // colours.
+  QString m_ModelColor;
+  QString m_ModelMissingColor;
 
   // if we use axes instead of a poly data, we can do this here.
   vtkSmartPointer<vtkAxesActor> m_ObjectAxesActor;

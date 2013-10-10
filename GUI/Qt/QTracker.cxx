@@ -120,6 +120,11 @@ void QTracker::SetupObservers()
     this->RemoveTracker();
     return;
   }
+
+  // get the volume info here.
+  this->OnGetVolumeInfo();
+
+  // okay we're configured.
   emit this->TrackerConfigured(this->m_Tracker->GetSerialNumber());
 }
 
@@ -228,18 +233,6 @@ void QTracker::OnConfigureAuroraTracker(int trackerType, ndiAuroraSettings *sett
     }
   }
 
-  // get volume names -- send out.
-  QStringList volumeList;
-  int nVolumes = tracker->GetNumTrackingVolumes();
-  volumeList.reserve(nVolumes);
-  // read volume shape types.
-  for( int i=0; i < nVolumes; i++ )
-  {
-    volumeList[i] = QString::fromStdString(tracker->GetTrackingVolumeShapeType(i));
-  }
-
-  emit this->TrackerHasNVolumes(volumeList);
-
   // set-up observer calls.
   this->SetupObservers();
 }
@@ -304,28 +297,37 @@ void QTracker::OnConfigureSpectraVicraTracker(int trackerType, ndiSpectraVicraSe
     }
   }
 
-  // get volume names -- send out.
-  
-  int nVolumes = tracker->GetNumTrackingVolumes();
-  if (nVolumes > 0)
-  {
-    QStringList volumeList;
-    volumeList.reserve(nVolumes);
-    // read volume shape types.
-    for( int i=0; i < nVolumes; i++ )
-    {
-      volumeList[i] = QString::fromStdString(tracker->GetTrackingVolumeShapeType(i));
-    }
-
-    emit this->TrackerHasNVolumes(volumeList);
-  }
-  else
-  {
-    fprintf(stderr, "Problem reading out the volumes from the camera.\n");
-  }
-
   // set-up observer calls.
   this->SetupObservers();
+}
+
+void QTracker::OnGetVolumeInfo()
+{
+  if( this->m_TrackerType == NDI_AURORA 
+    || this->m_TrackerType == NDI_SPECTRA
+    || this->m_TrackerType == NDI_SPECTRA_HYBRID
+    || this->m_TrackerType == NDI_VICRA )
+  {
+    // get volume names -- send out.
+
+    int nVolumes = dynamic_cast<vtkNDITracker*>(m_Tracker)->GetNumTrackingVolumes();
+    if (nVolumes > 0)
+    {
+      QStringList volumeList;
+      volumeList.reserve(nVolumes);
+      // read volume shape types.
+      for( int i=0; i < nVolumes; i++ )
+      {
+        volumeList.insert(i, QString::fromStdString(dynamic_cast<vtkNDITracker*>(m_Tracker)->GetTrackingVolumeShapeType(i)));
+      }
+
+      emit this->TrackerHasNVolumes(volumeList);
+    }
+    else
+    {
+      fprintf(stderr, "Problem reading out the volumes from the camera.\n");
+    }
+  }
 }
 
 
@@ -417,9 +419,12 @@ void QTracker::UpdateData()
 
 void QTracker::OnCloseTracker()
 {
-  if( this->m_Tracker->IsTracking() )
+  if( this->m_Tracker)
   {
-    this->m_Tracker->StopTracking();
+    if( this->m_Tracker->IsTracking() )
+    {
+      this->m_Tracker->StopTracking();
+    }
   }
   emit this->finished();
 }

@@ -42,8 +42,12 @@ or property, arising from the Sample Code or any use thereof.
 #include <vtkSmartPointer.h>
 #include <vtkAxesActor.h>
 #include <vtkRenderer.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 
 #include "vtkTrackedObject.h"
+
 
 #include "ui_NDIQtTrackGUI.h"
 
@@ -129,6 +133,9 @@ private:
   vtkSmartPointer<vtkRenderer> m_Renderer;
   vtkSmartPointer<vtkAxesActor> m_axesActor;
 
-
+  // create the volume.
+  vtkSmartPointer<vtkPolyData> m_VolumePolyData;
+  vtkSmartPointer<vtkPolyDataMapper> m_VolumeMapper;
+  vtkSmartPointer<vtkActor> m_VolumeActor;
 };
 #endif

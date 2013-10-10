@@ -75,6 +75,8 @@ public slots:
   virtual void OnConfigureTracker();
   virtual void OnConfigureTrackerAccepted();
   virtual void OnConfigureTrackerCanceled();
+  virtual void OnTrackerConfigured(QString systemInfo);
+  virtual void OnTrackerPreStarted();
   virtual void OnVolumeListUpdated(QStringList volumeList);
   virtual void OnVolumeSelected(int volume);
   virtual void OnPreStartTracker();

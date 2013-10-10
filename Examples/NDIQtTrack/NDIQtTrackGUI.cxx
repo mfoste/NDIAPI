@@ -36,11 +36,15 @@ or property, arising from the Sample Code or any use thereof.
 
 #include <QtGui>
 
+#include <vtkSmartPointer.h>
 #include <vtkVersion.h>
 #include <vtkSmartPointer.h>
 #include <vtkAxesActor.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 
 #include "ndXfrms.h"
 
@@ -162,6 +166,15 @@ NDIQtTrackGUI::NDIQtTrackGUI(QWidget *parent)
     this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetModelActor());
     this->m_Renderer->AddActor(this->m_TrackedObjects[i].object->GetAxesActor());
   }
+  
+  // set-up the volume objects.
+  this->m_VolumePolyData = vtkSmartPointer<vtkPolyData>::New();
+  this->m_VolumeMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  this->m_VolumeActor = vtkSmartPointer<vtkActor>::New();
+
+  this->m_VolumeMapper->SetInput(this->m_VolumePolyData);
+  this->m_VolumeActor->SetMapper(this->m_VolumeMapper);
+  this->m_Renderer->AddActor(this->m_VolumeActor);
 
   // set up the connections.
   this->CreateActions();
@@ -264,6 +277,10 @@ void NDIQtTrackGUI::OnTrackerStarted()
   {
     this->OnToolInfoUpdated(tool);    
   }
+
+  // get the tracked volume.
+  this->m_VolumePolyData->DeepCopy(this->m_GUI->TrackerWidget->GetTrackerObject()->getTracker()->GeneratePolydataVolume());
+  this->m_VolumeMapper->Modified();
 }
 
 void NDIQtTrackGUI::OnToolInfoUpdated(int port)
@@ -279,8 +296,7 @@ void NDIQtTrackGUI::OnToolInfoUpdated(int port)
     // TODO: figure out how to determine if tool changes.
     this->m_TrackedObjects[port].object->SetModelVisibility(true);
     this->m_TrackedObjects[port].object->SetAxesVisibility(true);
-    QColor color("lime");
-    this->m_TrackedObjects[port].object->SetModelColor(color.red(), color.green(), color.blue());
+    //this->m_TrackedObjects[port].object->SetModelColor("blue");
 
   }
   else
@@ -296,69 +312,13 @@ void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, QString status)
   {
     this->m_TrackedObjects[port].frameLineEdit->setText(QString("%1").arg(frame));
     this->m_TrackedObjects[port].xfrmlabel->setText( status );
+    this->m_TrackedObjects[port].object->SetMissing();
   }
   else
   {
     // do nothing for now.
   }
 }
-
-/* old versions, link into single function now.
-void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm)
-{
-  if( port < MAX_TRACKED_PORTS)
-  {
-    this->m_TrackedObjects[port].xfrmlabel->setText( this->GetXfrmString(xfrm) );
-    ndCopyTransform(&xfrm, this->m_TrackedObjects[port].xfrm);
-    this->m_TrackedObjects[port].object->UpdateXfrm(&xfrm);
-  }
-  else
-  {
-    // do nothing for now.
-  }
-}
-
-void NDIQtTrackGUI::OnToolEffectiveFrequencyUpdated(int port, int frame, double freq)
-{
-  if( port < MAX_TRACKED_PORTS)
-  {
-    this->m_TrackedObjects[port].effFreqLineEdit->setText(QString("%1").arg(freq, 0, 'f', 0));
-  }
-  else
-  {
-    // do nothing for now.
-  }
-}
-
-
-
-void NDIQtTrackGUI::OnToolQualityUpdated(int port, int frame, double quality)
-{
-  int prec;
-
-  switch(this->m_GUI->TrackerWidget->getTrackerSystemType())
-  {
-  case NDI_AURORA:
-  case NDI_SPECTRA:
-    prec = 4;
-    break;
-  case ASCENSION_3DG:
-    prec = 0;
-    break;
-  default:
-    prec = 4;
-    break;
-  }
-
-  if( port < MAX_TRACKED_PORTS)
-  {
-    this->m_TrackedObjects[port].qualityLineEdit->setText(QString("%1").arg(quality, 1, 'f', prec));
-  }
-  else
-  {
-    // do nothing for now.
-  }
-} */
 
 void NDIQtTrackGUI::OnToolTransformUpdated(int port, int frame, ndQuatTransformation xfrm, double freq, double quality)
 {

@@ -616,7 +616,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
     double spacingInc = 15.0;
 
 
-    // Bottom Elipse
+    // Bottom Ellipse
     while (inc <= (2*vtkMath::Pi())) {
       points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
       inc=inc+(vtkMath::Pi()/spacingInc);
@@ -650,7 +650,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
     cells->InsertCellPoint(bottomCount);
     polyline->InsertCellPoint(bottomCount);
 
-    // connect top and bottom Elipse
+    // connect top and bottom Ellipse
     for (unsigned int i  = 0; i < topCount; i++) {
       polyline->InsertNextCell(2);
       polyline->InsertCellPoint(i);
@@ -967,7 +967,11 @@ int vtkNDITracker::InternalStartTracking()
   }
 
   fprintf(stderr, "%s - TSTART\n", this->GetSerialNumber());
-  ndiCommand(this->Device,"TSTART:");
+  // set the hardware sync.
+  // let's always reset the frame counter.
+  ndiCommand(this->Device,"TSTART:80");
+  //ndiCommand(this->Device,"TSTART:");
+  
 
   errnum = ndiGetError(this->Device);
   if (errnum) 

@@ -58,26 +58,28 @@ set( WIDGET_HDR_FILES
 set( WIDGET_MOCHDR_FILES 
 	vtkTrackerWidget.h
 	QTracker.h
-    vtkTrackerSettingsDialog.h
+  vtkTrackerSettingsDialog.h
 	vtkAuroraTrackerSettingsWidget.h
 	vtkFakeTrackerSettingsWidget.h
 	vtkSpectraVicraTrackerSettingsWidget.h
 	vtkTrackerXfrmCallback.h
-    ndXfrms.h
-    ./utilities/vtkTrackedObject.h
+  ndXfrms.h
+  ./utilities/vtkTrackedObject.h
+  ./utilities/QXfrmDialog.h
 )
 
 # widget source files.
 set( WIDGET_SRC_FILES 
 	vtkTrackerWidget.cxx
 	QTracker.cxx
-    vtkTrackerSettingsDialog.cxx
+  vtkTrackerSettingsDialog.cxx
 	vtkAuroraTrackerSettingsWidget.cxx
 	vtkFakeTrackerSettingsWidget.cxx
 	vtkSpectraVicraTrackerSettingsWidget.cxx
 	vtkTrackerXfrmCallback.cxx
-    ndXfrms.cxx
-    ./utilities/vtkTrackedObject.cxx
+  ndXfrms.cxx
+  ./utilities/vtkTrackedObject.cxx
+  ./utilities/QXfrmDialog.cxx
 )
 
 #widget ui
@@ -85,7 +87,8 @@ set( WIDGET_UI_FILES
 	AuroraTrackerSettingsWidget.ui
 	FakeTrackerSettingsWidget.ui
 	SpectraVicraTrackerSettingsWidget.ui
-    vtkTrackerSettingsDialog.ui
+  vtkTrackerSettingsDialog.ui
+  ./utilities/QXfrmDialog.ui
 )
 
 if(AIGS_USE_3DG)

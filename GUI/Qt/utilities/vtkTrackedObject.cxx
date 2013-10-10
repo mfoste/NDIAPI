@@ -35,6 +35,10 @@ vtkTrackedObject::vtkTrackedObject()
   this->m_ObjectActor = vtkSmartPointer<vtkActor>::New();
   this->m_ObjectAxesActor = vtkSmartPointer<vtkAxesActor>::New();
 
+  // initialize the colours.
+  this->m_ModelColor = "darkviolet";
+  this->m_ModelMissingColor = "red";
+
   // hook them up.
   //this->m_ObjectLocal->SetScaleFactor(50.0);
   this->m_SphereObject->SetRadius(10.0);
@@ -95,6 +99,20 @@ void vtkTrackedObject::UpdateXfrm(ndQuatTransformation *xfrm)
   this->m_Object->Update();
   this->m_ObjectMapper->Update();
   this->m_ObjectAxesActor->SetUserTransform(this->m_ObjectXfrm);
-
+  this->ChangeModelToTracking();
   emit this->TrackedObjectUpdated();
+}
+
+void vtkTrackedObject::ChangeModelToMissing()
+{
+  QColor color(this->m_ModelMissingColor);  
+  this->m_ObjectActor->GetProperty()->SetColor(color.red(),color.green(),color.blue());
+  emit this->TrackedObjectUpdated();
+}
+
+void vtkTrackedObject::ChangeModelToTracking()
+{
+  QColor color(this->m_ModelColor);  
+  this->m_ObjectActor->GetProperty()->SetColor(color.red(),color.green(),color.blue());
+  //emit this->TrackedObjectUpdated();
 }

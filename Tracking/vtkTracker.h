@@ -61,6 +61,8 @@ POSSIBILITY OF SUCH DAMAGES.
 #include <sstream>
 #include "vtkObject.h"
 #include "vtkCriticalSection.h"
+#include "vtkSmartPointer.h"
+#include "vtkPolyData.h"
 
 /*************************************************************************
  * Convenience function to handle string printing.
@@ -161,6 +163,10 @@ public:
   // Get the tool object for the specified port.  The first tool is
   // retrieved by GetTool(0).  See vtkTrackerTool for more information.
   vtkTrackerTool *GetTool(int port);
+
+  // Description:
+  // Return the polydata of the tracking volume if available.
+  virtual vtkSmartPointer<vtkPolyData> GeneratePolydataVolume(bool solidSurface=false) {return 0;};
 
   // Description:
   // Get the number of available tool ports.  This is the maxiumum that a

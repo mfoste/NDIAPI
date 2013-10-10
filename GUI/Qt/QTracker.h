@@ -66,6 +66,7 @@ public slots:
 #if defined (Ascension3DG_TrakStar_DriveBay) || defined (Ascension3DG_MedSafe)
   virtual void OnConfigureAscension3DGTracker(int trackerType, ascension3DGSettings *settings);
 #endif
+  virtual void OnGetVolumeInfo();
   virtual void OnVolumeSelected(int volume);
   virtual void OnPreConfigureTracker();
   virtual void OnStartTracker();

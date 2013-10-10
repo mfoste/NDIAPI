@@ -168,6 +168,10 @@ void vtkTrackerWidget::CreateActions()
   connect(this, SIGNAL(StartTracking()), this->m_TrackerObject, SLOT(OnStartTracker()) );
   connect(this, SIGNAL(StopTracking()), this->m_TrackerObject, SLOT(OnStopTracker()) );
   connect(this, SIGNAL(CloseTrackerWidget()), this->m_TrackerObject, SLOT(OnCloseTracker()) );
+  // connect the signals coming from the the tracker object.
+  connect(this->m_TrackerObject, SIGNAL(TrackerConfigured(QString)), this, SLOT(OnTrackerConfigured(QString)) );
+  connect(this->m_TrackerObject, SIGNAL(TrackerHasNVolumes(QStringList)), this, SLOT(OnVolumeListUpdated(QStringList)) );
+  connect(this->m_TrackerObject, SIGNAL(TrackerPreConfigured()), this, SLOT(OnTrackerPreStarted()) );
   // thread connections -- for details see 
   //http://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
   connect(this->m_TrackerThread, SIGNAL(started()), this->m_TrackerObject, SLOT(OnInitialize()));
@@ -213,22 +217,6 @@ void vtkTrackerWidget::OnConfigureTrackerCanceled()
   }
 }
 
-void vtkTrackerWidget::OnVolumeListUpdated(QStringList volumeList)
-{
-  // update the volume information.
-    this->m_VolumeSelectionComboBox->setEnabled(true);
-    this->m_VolumeSelectionComboBox->setVisible(true);
-    this->m_VolumeSelectionComboBox->clear();
-    // get the volumes list.
-    int nVolumes = volumeList.size();
-    for( int i=0; i < nVolumes; i++ )
-    {
-      this->m_VolumeSelectionComboBox->insertItem(i, volumeList[1]);
-    }
-    this->m_VolumeSelectionComboBox->setCurrentIndex(0);
-    this->OnVolumeSelected(0);
-}
-
 void vtkTrackerWidget::ConfigureTracker()
 {
   QString errorString;
@@ -269,15 +257,43 @@ void vtkTrackerWidget::ConfigureTracker()
     return;
   }
 
+  
+    
+  //configMessage.hide();
+}
+
+void vtkTrackerWidget::OnTrackerConfigured(QString systemInfo)
+{
   if( this->m_bUsePreStart )
   {
     this->m_PreStartTrackingButton->setVisible(true);
     this->m_PreStartTrackingButton->setEnabled(true);
   }
-     
+  else
+  {
+    m_StartTrackingButton->setEnabled(true);
+  }
+}
+
+void vtkTrackerWidget::OnTrackerPreStarted()
+{
   m_StartTrackingButton->setEnabled(true);
-    
-  //configMessage.hide();
+}
+
+void vtkTrackerWidget::OnVolumeListUpdated(QStringList volumeList)
+{
+  // update the volume information.
+    this->m_VolumeSelectionComboBox->setEnabled(true);
+    this->m_VolumeSelectionComboBox->setVisible(true);
+    this->m_VolumeSelectionComboBox->clear();
+    // get the volumes list.
+    int nVolumes = volumeList.size();
+    for( int i=0; i < nVolumes; i++ )
+    {
+      this->m_VolumeSelectionComboBox->insertItem(i, volumeList[i]);
+    }
+    this->m_VolumeSelectionComboBox->setCurrentIndex(0);
+    this->OnVolumeSelected(0);
 }
 
 void vtkTrackerWidget::OnVolumeSelected(int volume)
