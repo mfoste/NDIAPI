@@ -618,7 +618,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
 
     // Bottom Ellipse
     while (inc <= (2*vtkMath::Pi())) {
-      points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D1);
+      points->InsertNextPoint(D2*std::cos(inc), D5*std::sin(inc), D1);
       inc=inc+(vtkMath::Pi()/spacingInc);
       bottomCount++;
     }
@@ -636,7 +636,7 @@ vtkSmartPointer<vtkPolyData> vtkNDITracker::GeneratePolydataVolume(bool solidSur
     int topCount = 0;
     inc =0;
     while (inc <= (2*vtkMath::Pi())) {
-      points->InsertNextPoint(D2*std::cos(inc), D4*std::sin(inc), D6);
+      points->InsertNextPoint(D2*std::cos(inc), D5*std::sin(inc), D6);
       inc=inc+(vtkMath::Pi()/spacingInc);
       topCount++;
     }
