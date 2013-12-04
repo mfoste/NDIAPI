@@ -235,7 +235,7 @@ typedef void (*NDIErrorCallback)(int errnum, char *description, void *userdata);
   The callback can be set to NULL to erase a previous callback.
 */
 void ndiSetErrorCallback(ndicapi *pol, NDIErrorCallback callback,
-                         void *userdata);
+                                void *userdata);
 
 /*=====================================================================*/
 /*! \defgroup NDIMacros Command Macros 
